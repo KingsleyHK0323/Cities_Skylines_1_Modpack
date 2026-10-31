@@ -15,7 +15,8 @@ static class Checks
         Check(basic.Matches.Single().Amount == 6 && basic.Total == 6, "10 supply and 6 demand conserve quantity");
         var competing = P(S(O("s", 10), O("d1", 8, false), O("d2", 8, false)));
         Check(competing.Total == 10 && competing.Matches.Sum(m => m.Amount) == 10, "competing demand shares remaining supply");
-        Check(P(S(O("s", 10), O("d", 6, false, "ore"))).Total == 0, "different goods never match");
+        var differentGoods = P(S(O("s", 10), O("d", 6, false, "ore")));
+        Check(differentGoods.Matches.Count == 0 && differentGoods.Total == null, "different goods never match or share a total");
         Check(P(S(O("s", 10, endpoint: "same"), O("d", 6, false, endpoint: "same"))).Total == 0, "same endpoint never matches");
         Check(P(S(O("s", -1), O("d", 6, false))).Matches.Count == 0, "negative amount rejected");
         foreach (var category in new[] { TaskKind.Rescue, TaskKind.Garbage, TaskKind.Deathcare, TaskKind.Unknown })
