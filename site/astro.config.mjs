@@ -52,6 +52,7 @@ export default defineConfig({
 					{ slug: 'wiki/ai-gaming/overview', label: 'AI Gaming', translations: { 'zh-TW': 'AI Gaming' } },
 				] },
 				{ label: 'Project', translations: { 'zh-TW': '專案' }, items: [
+					{ label: 'Module status and targets (English)', link: '/wiki/project/status/' },
 					{ slug: 'wiki/project/roadmap', label: 'Roadmap', translations: { 'zh-TW': '路線圖' } },
 					{ slug: 'wiki/project/contributing', label: 'Contributing & license', translations: { 'zh-TW': '參與與授權' } },
 				] },

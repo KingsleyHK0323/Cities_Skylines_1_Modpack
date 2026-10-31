@@ -3,6 +3,8 @@ title: Roadmap
 description: "Where each Modpack mod is today and what it is working towards."
 ---
 
+<p lang="en">Status update, 1 November 2026: the project includes 15 modules at different stages and 20 replacement directions. See the <a href="/Cities_Skylines_1_Modpack/wiki/project/status/">complete status index</a>. AI Gaming development is paused. Earlier roadmap entries below are historical context; they do not establish current availability or combined-game acceptance.</p>
+
 > **Development build update, 31 October 2026:** Separate GitHub prereleases are available for AI Gaming, AI Improve, and Automated Public Transport Planning. AI Gaming has a matching Windows x64 Companion asset, while its game runtime remains unverified. Automated Public Transport Planning can attempt selected route creation after confirmation. See [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/).
 
 These are directions, not release dates. Experimental Development builds can damage saves; back up before testing.

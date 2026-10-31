@@ -17,7 +17,7 @@ const labels = {
 };
 ---
 
-<div class="workshop-links">
+<div class="workshop-links" lang="en">
 	<a class="button github-development" href={'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/' + developmentRelease.tag}>Download {developmentRelease.name} Development build <span aria-hidden="true">↗</span></a>
 	{(['release', 'development'] as const).map((edition) => items[edition].public
 		? <a class={edition === 'release' ? 'button' : 'button secondary'} href={workshopUrl(items[edition].id)}>{labels[edition]} <span aria-hidden="true">↗</span></a>

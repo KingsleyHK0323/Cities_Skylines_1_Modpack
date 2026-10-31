@@ -2,6 +2,15 @@
 
 Author: OpenAI-Codex
 
+## 2026-11-01 — Navigation accessibility and dated project status
+
+- Removed the narrow-screen navigation scroll container that clipped the Mods menu, allowed navigation to wrap, and enlarged its interaction targets.
+- Darkened the dark-theme primary button background to exceed 4.5:1 contrast with white text.
+- Replaced homepage compatibility guarantees with acceptance boundaries and linked the 15-module / 20-target status index. Marked AI Gaming development paused and unresolved responsibility assignments as proposals.
+- Updated Vehicle Management to a read-only prototype with a delivered Actions artifact, separate from public Release / Workshop availability.
+- Added English language metadata to the shared download button group.
+- Author: OpenAI-Codex_Responsible: Modpack_Website.
+
 ## 2026-10-31 — Planned vehicle management artwork
 
 - Added the approved Release and Development WebP icons for Automated Public Transport Vehicle Management to a separate planned-project section on both homepages.

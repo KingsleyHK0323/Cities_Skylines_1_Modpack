@@ -9,9 +9,10 @@ const editions = [{ label: 'Release', icon: releaseIcon }, { label: 'Development
 <section class="section" lang="en" aria-labelledby="planned-vehicle-management">
 	<div class="page-wrap">
 		<div class="section-heading">
-			<div><p class="eyebrow">Planned project</p><h2 id="planned-vehicle-management">Automated Public Transport Vehicle Management</h2></div>
+			<div><p class="eyebrow">Read-only prototype</p><h2 id="planned-vehicle-management">Automated Public Transport Vehicle Management</h2></div>
 		</div>
-		<p>In planning. These approved icons show the intended Release and Development editions. No DLL download or Steam Workshop item is available yet.</p>
+		<p>As of 1 November 2026, a read-only bus observation prototype has a compiled DLL and an Actions artifact. Fleet-control features remain proposals. No public Release or Steam Workshop item is available, and subscribed-game acceptance is pending.</p>
+		<p><a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41250632157">Build evidence and Actions artifact</a> · Artifact downloads may require GitHub sign-in and can expire. The reported DLL is 11,776 bytes; an Actions artifact is not a public Release.</p>
 		<div class="planned-icons">
 			{editions.map(({ label, icon }) => <figure><Image src={icon} alt={'Automated Public Transport Vehicle Management ' + label + ' edition icon'} widths={[320, 640]} sizes="(max-width: 640px) 100vw, 320px" format="webp" quality={90} /><figcaption>{label} edition · planned</figcaption></figure>)}
 		</div>

@@ -5,7 +5,8 @@
 	--field: #2d3438;
 	--ink: #f4f5f2;
 	--muted: #bdc6c8;
-	--accent: #d94b54;
+	/* White button text exceeds 4.5:1. OpenAI-Codex_Responsible: Modpack_Website. */
+	--accent: #c43746;
 	--accent-ink: #fff;
 	--feature: #8a1826;
 	--feature-ink: #fff;

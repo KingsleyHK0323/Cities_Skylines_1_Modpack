@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import ProjectStatusSummary from '../components/ProjectStatusSummary.astro';
 import PlannedVehicleManagement from '../components/PlannedVehicleManagement.astro';
 import DevelopmentNotice from '../components/DevelopmentNotice.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
@@ -14,25 +15,27 @@ const recent = changeEntries.slice(0, 5);
 const projects = [
 	{ art: aiImproveArt, name: 'AI Improve', status: 'Available on the Workshop', text: 'Vehicles, services and citizens that react to what is actually happening in your city: jams, crowded platforms, nearby fires and full depots.', page: 'ai-improve/', wiki: 'wiki/ai-improve/overview/' },
 	{ art: transportArt, name: 'Automated Public Transport Planning', status: 'Development prototype · game acceptance pending', text: 'The Development prototype previews proposed bus routes and can attempt creation after confirmation. It may change saves; back up before testing.', page: 'automated-public-transport-planning/', wiki: 'wiki/transport/overview/' },
-	{ art: aiGamingArt, name: 'AI Gaming', status: 'Development preview · runtime unverified', text: 'The GitHub Development build includes a matching Windows x64 Companion for player-confirmed Ollama Local advice. Game runtime remains unverified.', page: 'ai-gaming/', wiki: 'wiki/ai-gaming/overview/' },
+	{ art: aiGamingArt, name: 'AI Gaming', status: 'Development paused · runtime unverified', text: 'The GitHub Development build includes a matching Windows x64 Companion for player-confirmed Ollama Local advice. Game runtime remains unverified.', page: 'ai-gaming/', wiki: 'wiki/ai-gaming/overview/' },
 ];
 ---
 
-<SiteLayout title="Cities: Skylines 1 Modpack" description="Three Cities: Skylines 1 mods by Kingsley: smarter city behaviour, bus planning in development, and an AI advice preview." active="home">
+<SiteLayout title="Cities: Skylines 1 Modpack" description="A 15-module Cities: Skylines 1 project with prototypes, designs and paused work. See dated implementation and acceptance status." active="home">
 	<DevelopmentNotice />
 	<section class="hero page-wrap">
 		<div class="hero-copy">
 			<p class="eyebrow">Cities: Skylines 1 mods by Kingsley</p>
 			<h1>Make the city work better.</h1>
-			<p class="hero-lead">Three mods built to work together: smarter decisions for vehicles and citizens, public transport planning in development, and an AI advice preview.</p>
+			<p class="hero-lead" lang="en">A 15-module project spanning city behavior, transport and utilities, with implementation and acceptance at different stages. AI Gaming development is paused.</p>
 			<div class="hero-actions"><a class="button" href={base + 'wiki/getting-started/'}>Get started</a><a class="button secondary" href={base + 'ai-improve/'}>Explore AI Improve</a></div>
 		</div>
 		<figure class="hero-art"><Image src={cityArt} alt="Illustrated city block crossed by a red transit line" widths={[520, 760]} sizes="(max-width: 640px) 100vw, 45vw" format="webp" quality={78} loading="eager" /><figcaption class="art-note">Illustration · not a gameplay screenshot</figcaption></figure>
 	</section>
 
+	<ProjectStatusSummary />
+
 	<section class="section soft">
 		<div class="page-wrap">
-			<div class="section-heading"><div><p class="eyebrow">The mods</p><h2>Three mods, one city.</h2></div><p>Each mod works on its own, and they are designed not to conflict when you use them together.</p></div>
+			<div class="section-heading" lang="en"><div><p class="eyebrow">Featured project pages</p><h2>Explore three existing previews.</h2></div><p>Independent operation and compatibility are design goals. Combined-mod and subscribed-game acceptance are not established.</p></div>
 			<div class="project-grid">
 				{projects.map((p) => <article class="project-card"><Image src={p.art} alt={p.name + ' artwork'} widths={[420, 640]} sizes="(max-width: 640px) 100vw, 33vw" format="webp" quality={76} /><div class="project-card-copy"><h3>{p.name}</h3><span class="status">{p.status}</span><p>{p.text}</p><div class="card-links"><a href={base + p.page}>Project page →</a><a href={base + p.wiki}>Guide →</a></div></div></article>)}
 			</div>
