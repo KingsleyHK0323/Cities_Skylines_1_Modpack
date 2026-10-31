@@ -30,7 +30,7 @@ static class Program
         long epoch = 1, ushort node = 7, uint revision = 1, int segments = 4)
         => New("JunctionSnapshot", epoch, node, revision, left, segments, geometry, rules,
             E("DataOrigin", origin), incoming ?? Inputs(2), outgoing ?? Exits(3));
-    static dynamic Build(dynamic snapshot) => New("LaneProposalPlanner").Build((object)snapshot);
+    static dynamic Build(dynamic snapshot) => New("LaneProposalPlanner").Build(snapshot);
     static void Check(bool value, string failure) { if (!value) throw new Exception(failure); }
     static void Status(dynamic proposal, string expected) => Check(proposal.Status.ToString() == expected,
         "Expected " + expected + ", got " + proposal.Status + ": " + proposal.Reason);

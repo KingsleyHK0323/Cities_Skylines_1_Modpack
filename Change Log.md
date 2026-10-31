@@ -1,5 +1,14 @@
 # Change Log
 
+## 2026-11-01 — Pure preview model
+
+- Add immutable, provenance-labelled single-approach lane snapshots and bounded lane-connection suggestions validated against explicit legal targets.
+- Refuse unknown sources, unresolved rules, mixed/unsupported lanes and invalid identities without returning partial suggestions.
+- Add preview callback/currentness checks for superseded requests, city changes and topology or lane-generation changes.
+- Add cloud-only .NET 8 model compilation and synthetic behavior checks, with a C# 3 restriction on production sources. No game adapter, in-game UI or game-state writes are implemented.
+
+Signature: OpenAI-Codex_Responsible: Realistic_Vehicle_Traffic_Control
+
 ## 2026-10-31
 
 - Initialize the independent module branch with planning-stage documentation and the official PolyForm Noncommercial 1.0.0 license.
