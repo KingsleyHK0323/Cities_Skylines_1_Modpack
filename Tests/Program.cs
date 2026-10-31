@@ -36,6 +36,13 @@ static class Checks
         var huge = P(S(O("s1", long.MaxValue), O("s2", long.MaxValue), O("d1", long.MaxValue, false), O("d2", long.MaxValue, false)));
         Check(huge.Total == null && huge.Matches.Count == 0 && huge.Messages.Contains("quantity-overflow"), "overflow fails closed");
         Check(!Observation.Disconnected().HasGameData && Observation.Disconnected().Status == "Game data source unavailable", "disconnected observation is explicit");
+        Check(P(S(O("s", 10) with { External = true }, O("d", 6, false))).Matches.Single().Direction == Flow.Import, "external supply classified as import");
+        Check(P(S(O("s", 10), O("d", 6, false) with { External = true })).Matches.Single().Direction == Flow.Export, "external demand classified as export");
+        Check(P(S(O("s", 10) with { External = true }, O("d", 6, false) with { External = true })).Matches.Count == 0, "outside transit excluded from city allocation");
+        Check(P(S(O("s", 10), O("d", 6, false) with { Unit = "other-unit" })).Matches.Count == 0, "units never silently converted");
+        Check(P(S(O("s", 10), O("d", 6, false)) with { Source = "" }).Matches.Count == 0, "unknown source rejected");
+        var mixed = P(S(O("s1", 10), O("d1", 6, false), O("s2", 10, kind: "ore"), O("d2", 6, false, "ore")));
+        Check(mixed.Total == null && mixed.Matches.Count == 2 && mixed.Matches.All(m => m.Unit == "test-units"), "mixed commodities retain units and have no combined total");
         Console.WriteLine($"{count} checks passed; synthetic fixtures only.");
     }
 }

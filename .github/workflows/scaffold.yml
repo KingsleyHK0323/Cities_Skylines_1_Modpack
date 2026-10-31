@@ -18,6 +18,6 @@ jobs:
           test -s README.md
           test -s LICENSE
           test -s "Change Log.md"
-          grep -Fq "Scaffold only." README.md
+          grep -Fq "No game integration" README.md
           grep -Fq "PolyForm Noncommercial License 1.0.0" LICENSE
           git diff --check
