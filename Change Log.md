@@ -6,7 +6,7 @@ Author: OpenAI-Codex
 
 - Replaced the transport illustration's tab semantics with a caption-selection button group, retaining arrow/Home/End navigation, preserving browser modifier shortcuts, and adding a readable polite status message.
 - Marked AI Improve reference headings, descriptions and tuning labels with the language of the bundled translation or English fallback.
-- Raised theme/language targets to a 44px minimum and added visible select focus and an inset Wiki title focus ring.
+- Raised theme/language targets to a 44px minimum and added visible select focus and an inset Wiki title focus ring. Allowed compact roadmap cards and long labels to shrink without overflowing the page.
 - Kept existing favicon, Apple and manifest PNG assets; no suitable existing WebP brand source was identified, so no replacement artwork was introduced.
 - Author: OpenAI-Codex_Responsible: Modpack_Website.
 

@@ -133,8 +133,10 @@ img, svg { display: block; max-width: 100%; }
 .demo-shell h3 { font-size: 23px; }
 .demo-note { margin: 8px 0 20px; color: var(--muted); font-size: 14px; }
 .screenshot-stack { display: grid; gap: 14px; }
-.roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
-.roadmap article { padding: 18px; border-top: 2px solid var(--route); background: var(--surface); }
+/* Let compact roadmap cards shrink without forcing the page wider.
+   OpenAI-Codex_Responsible: Modpack_Website. */
+.roadmap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+.roadmap article { min-width: 0; overflow-wrap: anywhere; padding: 18px; border-top: 2px solid var(--route); background: var(--surface); }
 .roadmap article p { margin-top: 7px; color: var(--muted); font-size: 14px; }
 @media (min-width: 1800px) { body { max-width: 1920px; margin-inline: auto; } }
 @media (max-width: 960px) {
