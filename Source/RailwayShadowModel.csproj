@@ -1,0 +1,15 @@
+<!-- Signature: OpenAI-Codex_Responsible: Realistic_Railway_Traffic_Control -->
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>RailwayShadowModel</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>3</LangVersion>
+    <OutputPath>..\bin\Model\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>..\obj\Model\$(Configuration)\</IntermediateOutputPath>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup><Reference Include="System" /><Compile Include="Model\*.cs" /></ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

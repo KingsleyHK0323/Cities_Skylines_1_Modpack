@@ -2,6 +2,12 @@
 
 This source-available Cities: Skylines 1 module is in initial planning. No game implementation, build project, DLL, or playable release exists yet.
 
+## Pure-data model development
+
+The first approved stage is observation and preview, before any separately approved manual control. The branch is adding immutable snapshot and movement data, a fail-closed validator, and a shadow conflict analyzer. The initial cloud test phase deliberately reports missing behavior until the implementation is complete. These are synthetic model inputs, not live city observations.
+
+The separate `railway-model-checks.yml` workflow compiles a .NET Framework 4.8 pure-data library and console checks on GitHub-hosted Windows. Its source is restricted to C# 3 syntax. This does not establish .NET 3.5 binary compatibility or compile a Cities: Skylines mod. No game references, dependency installation, release publishing, or Workshop upload are involved.
+
 ## Project links
 
 - [Canonical repository](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack)
