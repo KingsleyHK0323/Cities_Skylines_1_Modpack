@@ -4,9 +4,19 @@ Planned Cities: Skylines 1 module for pedestrian crossings, pedestrian signals, 
 
 ## Development status
 
-This branch contains project documentation and a GitHub-hosted baseline check only. The check verifies required files and the absence of unplanned binary deliverables; it does not build or validate game behavior.
+This branch now includes an internal pure C# crossing observation and preview model. It distinguishes crossing rules, geometry, signals (including no signal), marking visibility, source provenance, and endpoint/session revisions. No live game reader or game control is connected.
 
-A future build requires a defined C# project, supported game reference assemblies with a lawful acquisition method, and implementation tests. These dependencies and the release procedure are not configured yet.
+## Pure model checks
+
+GitHub-hosted CI compiles `Source/Pedestrian/CrossingModel.cs` with the dependency-free `Tests/PedestrianChecks.csproj` console checks. The host target is .NET 8 with C# 3 syntax enforced; this does not establish compatibility with the game runtime or produce an installable game mod. No third-party packages or game assemblies are used.
+
+The model rejects missing/unknown sources, invalid states, stale city/endpoint identities, unknown rules and unsupported geometry. Synthetic fixtures remain explicitly labeled synthetic. Unknown counts stay unknown; hidden markings do not prohibit crossing, and red lights do not represent a permanent ban. The optional visibility result is a hypothetical consequence of a confirmed rule, not a render command or proof of applied control.
+
+`CrossingPreview.Evaluate(null, ...)` reports that no game observation source is connected. The model has no live-data source enum value, game hooks, network access, settings migration, persistence, or signal/path writes. It cannot discover whether an existing rule survived another mod's removal; absent data must remain unknown.
+
+The cloud command is `dotnet run --project Tests/PedestrianChecks.csproj --configuration Release`. Local builds/runners/workflows are not authorized by these instructions. The existing baseline check remains a documentation check only.
+
+A future game reader still requires verified game APIs and lawfully acquired reference assemblies. Any artificial-ID or topology revision fixtures are test inputs, not a verified game identity mechanism. Actual control remains a separately approved later phase. No TM:PE dependency, shared DLL, automatic mod disabling, public release, or Workshop upload is introduced.
 
 ## Delivery direction
 

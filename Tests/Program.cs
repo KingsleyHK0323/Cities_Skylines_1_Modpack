@@ -19,6 +19,7 @@ internal static class Program {
             CrossingObservation o = Data(CrossingRule.Deny, CrossingSignal.Red, MarkingState.Visible,
                 ObservationSource.Synthetic, CrossingGeometry.Supported, null);
             CrossingPreview p = Read(o);
+            Assert(p.Source == ObservationSource.Synthetic, "preview retains synthetic provenance");
             Assert(p.Status == PreviewStatus.Observed, "valid synthetic data is inspectable as synthetic");
             Assert(p.WouldHideMarkingAfterConfirmedDeny == true, "deny visual preview is separate from currently visible marking");
             Assert(o.Marking == MarkingState.Visible && o.WaitingCount == null, "preview neither mutates input nor invents waiting counts");
@@ -49,6 +50,24 @@ internal static class Program {
                 ObservationSource.Synthetic,CrossingGeometry.Supported,null)).Status == PreviewStatus.Unavailable, "unknown rule cannot become permission");
             Assert(Read(Data(CrossingRule.Allow,CrossingSignal.Red,MarkingState.Hidden,
                 ObservationSource.Synthetic,CrossingGeometry.Supported,-1)).Status == PreviewStatus.Unavailable, "negative waiting count is invalid");
+            Assert(Read(new CrossingObservation("",0,0,true,-1,-1,CrossingRule.Allow,CrossingGeometry.Supported,
+                CrossingSignal.Green,MarkingState.Visible,ObservationSource.Synthetic,null)).Status == PreviewStatus.Unavailable,
+                "matching invalid identities cannot become valid observations");
+            Assert(CrossingPreview.Evaluate(o,"",0,0,true,-1,-1).Status == PreviewStatus.Unavailable,
+                "invalid expected identity is rejected before comparison");
+            Assert(Read(Data((CrossingRule)999,CrossingSignal.Green,MarkingState.Visible,ObservationSource.Synthetic,
+                CrossingGeometry.Supported,null)).Status == PreviewStatus.Unavailable,"undefined rule rejected");
+            Assert(Read(Data(CrossingRule.Allow,(CrossingSignal)999,MarkingState.Visible,ObservationSource.Synthetic,
+                CrossingGeometry.Supported,null)).Status == PreviewStatus.Unavailable,"undefined signal rejected");
+            Assert(Read(Data(CrossingRule.Allow,CrossingSignal.Green,(MarkingState)999,ObservationSource.Synthetic,
+                CrossingGeometry.Supported,null)).Status == PreviewStatus.Unavailable,"undefined marking rejected");
+            Assert(Read(Data(CrossingRule.Allow,CrossingSignal.Green,MarkingState.Visible,(ObservationSource)999,
+                CrossingGeometry.Supported,null)).Status == PreviewStatus.Unavailable,"undefined source rejected");
+            Assert(Read(Data(CrossingRule.Allow,CrossingSignal.Green,MarkingState.Visible,ObservationSource.Synthetic,
+                (CrossingGeometry)999,null)).Status == PreviewStatus.Unavailable,"undefined geometry rejected");
+            Assert(Read(Data(CrossingRule.Allow,CrossingSignal.Unknown,MarkingState.Unknown,ObservationSource.Synthetic,
+                CrossingGeometry.Supported,null)).Status == PreviewStatus.Observed,"unknown signal/marking remain inspectable without implying permission");
+            Assert(Read(null).Source == ObservationSource.Unknown,"missing input preserves unknown provenance");
             Console.WriteLine("Passed " + checks + " model assertions. Synthetic input only; no game integration.");
             return 0;
         } catch (Exception e) { Console.Error.WriteLine(e.Message); return 1; }
