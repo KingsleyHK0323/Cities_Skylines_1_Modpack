@@ -7,14 +7,16 @@ Repository branch: [Realistic_City_Time](https://github.com/KingsleyHK0323/Citie
 ## Confirmed direction
 
 - At 1x, one minute of real elapsed time corresponds to one minute of game time.
-- The default speed is 1x and the maximum is 10x. Intermediate speeds and continuous or discrete selection remain undecided.
+- The default speed is 1x and the maximum is 10x. Decimal multiplier entry is approved; its input precision remains undecided. Speeds below 1x are not included.
 - Intended replacement targets: [Real Time 2.8 (3059406297)](https://steamcommunity.com/sharedfiles/filedetails/?id=3059406297) and [More Simulation Speed Options 2 (3343115359)](https://steamcommunity.com/sharedfiles/filedetails/?id=3343115359). These are external references, not this module's Workshop IDs or a claim of feature parity.
 
 The scope of citizen schedules, aging, education, population, economy, and building operations remains undecided. Replacement intent does not approve every behavior of either external mod. Clock integration, pause behavior, loading, day transitions, and save compatibility require further design. The 1:1 baseline does not imply synchronization with the computer clock, date, or time zone, or offline catch-up.
 
 ## Validation and distribution
 
-The branch-scoped GitHub-hosted workflow checks foundation documents and licensing only. Passing it does not establish compilation, game integration, performance, or gameplay acceptance. No local runner or workflow is required.
+The foundation workflow checks documentation and licensing. A separate branch-scoped hosted workflow runs dependency-free pure-model checks. These do not establish game integration, performance, or gameplay acceptance. No local runner or workflow is required.
+
+The initial model tests are committed before implementation to observe a failing cloud run. The model project uses the hosted .NET 8 SDK framework without external packages; it is not a game mod project. Decimal precision will be an explicit caller-supplied policy, not a product default. No rounding to integer speeds is permitted.
 
 This foundation has no DLL release, Workshop upload, Workshop ID, icon, or game-reference dependency. Future implementation and distribution require separate approval. Gameplay acceptance requires a Steam Workshop subscribed build.
 

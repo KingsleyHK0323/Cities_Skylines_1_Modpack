@@ -1,0 +1,25 @@
+# Signature: OpenAI-Codex_Responsible: Realistic_City_Time
+name: Realistic City Time pure model
+on:
+  push:
+    branches: [Realistic_City_Time]
+  pull_request:
+    branches: [Realistic_City_Time]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pure-model:
+    if: >-
+      (github.event_name == 'pull_request' && github.base_ref == 'Realistic_City_Time') ||
+      (github.event_name != 'pull_request' && github.ref == 'refs/heads/Realistic_City_Time')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Run dependency-free model checks on hosted SDK
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+        run: dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release
