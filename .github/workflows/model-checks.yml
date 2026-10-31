@@ -1,0 +1,20 @@
+# Signature: OpenAI-Codex_Responsible: Realistic_Pedestrian_Traffic_Control
+name: Pedestrian pure model checks
+on:
+  push:
+    branches: [Realistic_Pedestrian_Traffic_Control]
+  pull_request:
+    branches: [Realistic_Pedestrian_Traffic_Control]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile and check pure pedestrian model (no game)
+        run: dotnet run --project Tests/PedestrianChecks.csproj --configuration Release
