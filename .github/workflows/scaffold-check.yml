@@ -26,4 +26,11 @@ jobs:
           grep -Fq 'no game functionality' README.md
           printf '%s\n' 'Documentation checks passed; no game build or runtime validation performed.'
 
+  model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Compile and check pure model using hosted SDK
+        run: dotnet run --project Tests/BorderChecks.csproj --configuration Release
+
 # Signature: OpenAI-Codex_Responsible: Realistic_Border_Control
