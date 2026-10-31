@@ -20,11 +20,21 @@ namespace RealisticVehicleTrafficControl.Model {
             if (observedIn.Length + observedOut.Length > 32) return Refuse(snapshot, "Capture exceeds the lane bound.");
             List<LaneObservation> incoming = new List<LaneObservation>(), outgoing = new List<LaneObservation>();
             Dictionary<uint, bool> identities = new Dictionary<uint, bool>();
+            Dictionary<ushort, uint> segmentGenerations = new Dictionary<ushort, uint>();
             foreach (LaneObservation[] side in new LaneObservation[][] { observedIn, observedOut }) {
                 foreach (LaneObservation lane in side) {
                     if (lane == null || lane.LaneId == 0 || lane.SegmentId == 0 || identities.ContainsKey(lane.LaneId))
                         return Refuse(snapshot, "Missing or duplicate lane identity.");
                     identities.Add(lane.LaneId, true);
+                    uint generation;
+                    if (segmentGenerations.TryGetValue(lane.SegmentId, out generation)) {
+                        if (generation != lane.SegmentBuildIndex)
+                            return Refuse(snapshot, "Capture mixes generations of the same segment.");
+                    } else {
+                        segmentGenerations.Add(lane.SegmentId, lane.SegmentBuildIndex);
+                        if (segmentGenerations.Count > snapshot.SegmentCount)
+                            return Refuse(snapshot, "Observed segments exceed the declared node topology.");
+                    }
                     if (lane.Kind == LaneKind.Sidewalk) continue;
                     if (lane.Kind != LaneKind.GeneralCar) return Refuse(snapshot, "Mixed or unknown lane type.");
                     if (lane.Turn != TurnKind.Left && lane.Turn != TurnKind.Forward && lane.Turn != TurnKind.Right)

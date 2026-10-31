@@ -5,6 +5,7 @@
 - Add immutable, provenance-labelled single-approach lane snapshots and bounded lane-connection suggestions validated against explicit legal targets.
 - Refuse unknown sources, unresolved rules, mixed/unsupported lanes and invalid identities without returning partial suggestions.
 - Add preview callback/currentness checks for superseded requests, city changes and topology or lane-generation changes.
+- Reject captures that mix generations of the same segment or contradict the declared node segment count; cover these cases with cloud regression checks.
 - Add cloud-only .NET 8 model compilation and synthetic behavior checks, with a C# 3 restriction on production sources. No game adapter, in-game UI or game-state writes are implemented.
 
 Signature: OpenAI-Codex_Responsible: Realistic_Vehicle_Traffic_Control

@@ -23,6 +23,7 @@ The in-memory preview lifecycle rejects superseded, duplicate, cross-city and mi
 - Three- or four-segment node metadata, exactly one general-car approach segment.
 - At most eight approach car lanes, eight exits per turn direction and 32 observed lanes including sidewalks.
 - Explicit left/forward/right exits only; complex geometry, U-turns, rail and bus mixtures are unsupported.
+- All observations of the same segment must have a consistent build index; observed distinct segments cannot exceed the declared node segment count.
 - Direction normalization uses reader-supplied lateral ranks and orientation flags. It does not infer game handedness or `NetSegment.Invert` from an ID.
 - A stable bounded allocation is validated against every incoming lane's allowed target IDs. No alternative search is attempted if that allocation is illegal. A refusal does not prove there is no possible route.
 - No signals, lane buffers, paths, vehicle counts, transfer offers or PathUnits capacity are written. No mod is disabled or unsubscribed.
