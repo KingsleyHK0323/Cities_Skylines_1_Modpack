@@ -19,3 +19,10 @@ Code and original project documentation/content are source-available under PolyF
 
 Maintainer signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
 
+## Pure demand-model development
+
+This branch is adding a standalone policy and city-session model. The first cloud check commit contains deliberately unimplemented contracts to verify the failing tests before implementation. It is not a playable mod or a downloadable game DLL.
+
+The confirmed first-version policy is per-category Native or Fixed Target (0–100), with all categories Native by default. Industrial / Workplace is the temporary third-category name; office coupling is unverified. Slider step, initial edit target, save behavior and automatic activation after load are not selected by this model. Native policies have no numeric target.
+
+Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population

@@ -1,0 +1,15 @@
+<!-- Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>3</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Source/Demand/*.cs" Link="Demand/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

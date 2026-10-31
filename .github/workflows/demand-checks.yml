@@ -1,0 +1,21 @@
+# Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
+name: Urban Population Demand Model
+on:
+  push:
+    branches: [Realistic_Urban_Population]
+  pull_request:
+    branches: [Realistic_Urban_Population]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pure-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check pure policy and session (no game build or release)
+        run: dotnet run --project Checks/DemandChecks.csproj --configuration Release
