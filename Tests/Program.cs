@@ -122,6 +122,25 @@ static class Program
                 var session=New("PreviewLifecycle",1L); var token=session.Begin((ushort)7,(uint)1);
                 Check(session.Accept(token,Snapshot()),"First capture refused");
                 Check(!session.Accept(token,Snapshot()),"Capture accepted twice");
+            }),
+            ("MixedSegmentGenerationRefused", () => {
+                var input=Lanes(Lane(1,0,allowed:new uint[]{100,101,102},build:1),
+                    Lane(2,1,allowed:new uint[]{100,101,102},build:2));
+                Status(Build(Snapshot(input)),"Unsupported");
+            }),
+            ("ObservedSegmentsExceedDeclaredCountRefused", () => {
+                var exits=Lanes(Lane(100,0,segment:20),Lane(101,1,segment:21),Lane(102,2,segment:22));
+                Status(Build(Snapshot(outgoing:exits,segments:3)),"Unsupported");
+            }),
+            ("CrossSessionTokenRefused", () => {
+                var first=New("PreviewLifecycle",1L); var second=New("PreviewLifecycle",1L);
+                var foreign=first.Begin((ushort)7,(uint)1); second.Begin((ushort)7,(uint)1);
+                Check(!second.Accept(foreign,Snapshot()),"Another session's capture was accepted");
+            }),
+            ("InvalidTurnRefused", () => Status(Build(Snapshot(outgoing:Lanes(Lane(100,0,turn:"UTurn",segment:20)))),"Unsupported")),
+            ("UnknownCaptureNotAccepted", () => {
+                var session=New("PreviewLifecycle",1L); var token=session.Begin((ushort)7,(uint)1);
+                Check(!session.Accept(token,Snapshot(origin:"Unknown")),"Unknown data accepted as captured");
             })
         };
         int failures=0;
