@@ -25,6 +25,7 @@ internal static class PlanningEngineChecks
         Run("route edit request ownership rejects stale completion after reset", RouteEditRequestGateChecks.Run);
         // Contributor: OpenAI-Codex_manual_input_tests
         Run("manual route input validates order, road directions and malformed tokens", RouteManualInputChecks.Run);
+        Run("ordinary road classification is independent of placement flag", RouteStreetStopChecks.Run);
         foreach (MethodInfo method in typeof(TransportLine).GetMethods())
         {
             if (method.Name == "MoveStop") { Console.WriteLine("TransportLine API: " + method); }

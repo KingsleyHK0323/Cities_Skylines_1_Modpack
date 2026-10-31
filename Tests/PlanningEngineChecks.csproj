@@ -82,6 +82,8 @@
 
   <ItemGroup>
     <Compile Include="PlanningEngineChecks.cs" />
+    <Compile Include="RouteStreetStopChecks.cs" />
+    <Compile Include="..\Source\Planning\RouteStreetStopRules.cs" />
     <!-- Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning -->
     <Compile Include="RouteEditPlanChecks.cs" />
     <Compile Include="RouteEditExecutionChecks.cs" />
