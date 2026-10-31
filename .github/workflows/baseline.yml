@@ -32,4 +32,16 @@ jobs:
             echo 'Unexpected binary artifact in the planning-stage branch.' >&2
             exit 1
           fi
+  pure-model-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile and check the pure model (no game dependencies)
+        run: dotnet run --project Tests/VehicleTrafficChecks.csproj --configuration Release
 # Signature: OpenAI-Codex_Responsible: Realistic_Vehicle_Traffic_Control
