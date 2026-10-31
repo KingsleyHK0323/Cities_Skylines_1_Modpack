@@ -17,3 +17,12 @@ Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
 - Recorded confirmed Native / Fixed Target 0–100 modes and all-Native defaults; no game adapter, deployment or release is included.
 
 Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
+
+### Pure-model implementation
+
+- Implemented confirmed per-category Native / Fixed Target 0–100 policies and all-Native initial settings, with no implicit numeric edit target.
+- Added synchronized city epochs, readiness and control-permission gates, coherent immutable snapshots, explicit model activation and safe restoration/shutdown.
+- Kept game adapters, field writes, UI step/edit defaults, save persistence and load-time activation policy outside this batch.
+- Added boundary, channel-isolation, stale-event, revocation, ordered-transition and concurrent-snapshot checks. Validation results belong to the exact cloud run and commit, not to this entry alone.
+
+Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population

@@ -7,7 +7,7 @@ internal static class Program
 {
     private static int assertions;
     private static void Check(bool condition, string message)
-    { assertions++; if (!condition) throw new Exception(message); }
+    { Interlocked.Increment(ref assertions); if (!condition) throw new Exception(message); }
     private static void Equal<T>(T expected, T actual, string message)
     { Check(object.Equals(expected, actual), message + ": expected=" + expected + ", actual=" + actual); }
     private static CategoryPolicy Native()
@@ -216,6 +216,54 @@ internal static class Program
             Action revoke = delegate { Check(session.SetControlPermission(epoch, ControlPermission.Conflict), "Revoke"); };
             RunOrdered(applyFirst ? apply : revoke, applyFirst ? revoke : apply);
             Equal(18, session.Evaluate(epoch, DemandChannel.Residential, 18), "No re-arm after conflict");
+        }
+
+        // These races complement the ordered cases; passing cannot prove every possible schedule.
+        foreach (bool closeCity in new bool[] { true, false })
+        {
+            for (int round = 0; round < 100; round++)
+            {
+                DemandSession racing = new DemandSession();
+                long racingEpoch = Ready(racing);
+                DemandSettings candidate = All(80);
+                using (ManualResetEvent startRace = new ManualResetEvent(false))
+                using (ManualResetEvent applyReady = new ManualResetEvent(false))
+                using (ManualResetEvent revokeReady = new ManualResetEvent(false))
+                {
+                    Exception applyError = null;
+                    Exception revokeError = null;
+                    bool revoked = false;
+                    Thread applier = new Thread(delegate()
+                    {
+                        try { applyReady.Set(); startRace.WaitOne(); racing.TryApply(racingEpoch, candidate); }
+                        catch (Exception error) { applyError = error; }
+                    });
+                    Thread revoker = new Thread(delegate()
+                    {
+                        try
+                        {
+                            revokeReady.Set(); startRace.WaitOne();
+                            revoked = closeCity ? racing.EndCity(racingEpoch) :
+                                racing.SetControlPermission(racingEpoch, ControlPermission.Conflict);
+                        }
+                        catch (Exception error) { revokeError = error; }
+                    });
+                    applier.IsBackground = true;
+                    revoker.IsBackground = true;
+                    applier.Start(); revoker.Start();
+                    bool bothReady = applyReady.WaitOne(10000) && revokeReady.WaitOne(10000);
+                    startRace.Set();
+                    bool applyExited = applier.Join(10000);
+                    bool revokeExited = revoker.Join(10000);
+                    Check(bothReady && applyExited && revokeExited, "Both racing operations finish");
+                    if (applyError != null) throw applyError;
+                    if (revokeError != null) throw revokeError;
+                    Check(revoked, "Revocation accepted during race");
+                    Check(!racing.ReadState().Armed, "Race cannot re-arm after revocation");
+                    Check(!racing.TryApply(racingEpoch, candidate), "Post-revocation Apply rejected");
+                    Equal(19, racing.Evaluate(racingEpoch, DemandChannel.Residential, 19), "Racing revocation keeps pass-through");
+                }
+            }
         }
 
         DemandSession concurrent = new DemandSession();
