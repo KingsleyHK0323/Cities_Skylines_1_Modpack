@@ -24,3 +24,7 @@ Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Manageme
 - Retain only the verified DLL and source/run/attempt/hash provenance as an immutable Actions artifact; no reference assemblies or Workshop upload.
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management
+
+- Preserve a reusable settings binding across city unload; invalidate capture state and clear bindings when the threading extension is released.
+
+Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management

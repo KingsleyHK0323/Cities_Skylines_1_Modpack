@@ -25,7 +25,7 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
         {
             lock (Gate) { session++; active = enabled; requested = false; capture = null; display = enabled ? "Ready. Select Refresh to capture a read-only census." : "No playable city loaded."; }
         }
-        internal static void Unload() { Load(false); ObservationPanel.Release(); }
+        internal static void Unload() { Load(false); }
         internal static void Request()
         {
             lock (Gate) { if (!active) { display = "No playable city loaded."; return; } requested = true; display = "Capture requested; waiting for simulation frames."; }
@@ -80,6 +80,7 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
     }
     public sealed class ObservationThreadingExtension : ThreadingExtensionBase
     {
+        public override void OnReleased() { CitySession.Unload(); ObservationPanel.Release(); base.OnReleased(); }
         public override void OnAfterSimulationFrame() { CitySession.Step(); }
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) { ObservationPanel.Update(); }
     }
