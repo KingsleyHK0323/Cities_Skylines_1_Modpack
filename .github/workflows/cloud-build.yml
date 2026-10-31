@@ -68,3 +68,22 @@ jobs:
           if ($identity.Name -cne 'AutomatedPublicTransportVehicleManagement' -or $identity.Version.ToString() -ne '0.1.0.0') { throw 'Unexpected assembly identity.' }
           Get-FileHash $dll.FullName -Algorithm SHA256 | Format-List
           'Release DLL compiled and checked. Gameplay and Workshop remain unverified.' >> $env:GITHUB_STEP_SUMMARY
+      - name: Write build provenance
+        shell: pwsh
+        run: |
+          $dll = Get-Item bin/Release/AutomatedPublicTransportVehicleManagement.dll
+          @{ schemaVersion=1; commit=$env:GITHUB_SHA; runId=$env:GITHUB_RUN_ID; attempt=$env:GITHUB_RUN_ATTEMPT; assembly='AutomatedPublicTransportVehicleManagement'; version='0.1.0.0'; sha256=(Get-FileHash $dll.FullName -Algorithm SHA256).Hash; gameplayVerified=$false } | ConvertTo-Json | Set-Content bin/Release/build-provenance.json -Encoding utf8
+      - name: Preserve verified DLL only
+        id: module-artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: vehicle-management-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            bin/Release/AutomatedPublicTransportVehicleManagement.dll
+            bin/Release/build-provenance.json
+      - name: Record immutable artifact identity
+        shell: pwsh
+        run: |
+          'Artifact ID: ${{ steps.module-artifact.outputs.artifact-id }}; attempt: ${{ github.run_attempt }}' >> $env:GITHUB_STEP_SUMMARY

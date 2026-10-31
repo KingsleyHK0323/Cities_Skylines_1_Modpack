@@ -20,3 +20,7 @@ Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Manageme
 - Keep Workshop creation, subscription acceptance, releases and upload automation pending.
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management
+
+- Retain only the verified DLL and source/run/attempt/hash provenance as an immutable Actions artifact; no reference assemblies or Workshop upload.
+
+Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management

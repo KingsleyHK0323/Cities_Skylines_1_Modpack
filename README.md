@@ -25,3 +25,7 @@ Copyright Kingsley. Source-available code: PolyForm Noncommercial 1.0.0 (LICENSE
 https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/tree/Automated_Public_Transport_Vehicle_Management
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management
+
+Verified DLLs are retained for 14 days as Actions artifacts named vehicle-management-<run ID>-<attempt>, with build-provenance.json. This is a build handoff, not a GitHub Release or gameplay acceptance. Use the artifact ID for an exact download. Actions transport may wrap files in an archive; no ZIP is published as a module Release asset.
+
+Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management
