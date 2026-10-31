@@ -8,6 +8,7 @@ internal static class RouteEditExecutionChecks
 {
     public static void Run()
     {
+        Check("ordinary placement flag survives failure recovery", PlacementFlagRecovery);
         Check("normal edit", NormalEdit);
         Check("unchanged edit performs no moves", UnchangedEdit);
         Check("false result after mutation recovers observed positions", FalseAfterMutation);
@@ -29,6 +30,19 @@ internal static class RouteEditExecutionChecks
         Check("UpdateLine invalidation prevents every subsequent write", InvalidateDuringUpdate);
     }
 
+    private static void PlacementFlagRecovery()
+    {
+        RouteEditPlan baseline = Plan(false);
+        ExistingRouteStop[] original = new ExistingRouteStop[3];
+        for (int i = 0; i < 3; i++) { original[i] = new ExistingRouteStop(baseline.Original.Stops[i].NodeId, baseline.Original.Stops[i].Position, true); }
+        RouteEditPlan plan; string reason;
+        Require(RouteEditPlan.TryCreate(new ExistingRouteSnapshot(17, 23, "Bus", original), RouteEditMode.Manual, baseline.Stops, out plan, out reason), reason);
+        Require(!plan.Original.Matches(17, 23, "Bus", baseline.Original.Stops), "placement argument changes invalidate snapshot");
+        FakeSurface surface = new FakeSurface();
+        surface.OnMove = delegate(int index, Vector3 position) { surface.Positions[index] = position; return position.x < 100; };
+        Result(RouteEditExecutionOutcome.PositionsRestored, RouteEditExecutor.Execute(plan, surface));
+        Require(surface.PlacementFlags.Count == 2 && !surface.PlacementFlags[0] && surface.PlacementFlags[1], "recovery must forward original true argument");
+    }
     private static void NormalEdit()
     {
         FakeSurface surface = new FakeSurface();
@@ -297,6 +311,7 @@ internal static class RouteEditExecutionChecks
     {
         internal readonly Vector3[] Positions = { new Vector3(0, 0, 0), new Vector3(20, 0, 0), new Vector3(40, 0, 0) };
         internal readonly List<int> Moves = new List<int>();
+        internal readonly List<bool> PlacementFlags = new List<bool>();
         internal bool Current = true, Identity = true, IsComplete = true;
         internal int Count = 3, UpdateCalls, WritesAfterInvalidation;
         internal Func<int, Vector3, bool> OnMove;
@@ -310,6 +325,7 @@ internal static class RouteEditExecutionChecks
         {
             if (!Current) { WritesAfterInvalidation++; }
             Moves.Add(index);
+            PlacementFlags.Add(fixedPlatform);
             if (OnMove != null) { return OnMove(index, position); }
             Positions[index] = position;
             return true;

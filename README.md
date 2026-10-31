@@ -95,3 +95,9 @@ Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
 Manual lists are limited to 128 characters and must contain exactly one comma-separated token per existing stop. Whitespace around tokens is allowed. Original indices must be positive and within the current stop count; `f`/`b` segment IDs must be 1–65535. Empty, signed, overflowing and normalized duplicate tokens (such as `f1,f001,3`) are refused before stop resolution. Opposite directions on one segment are separate tokens; the later physical-site validation may still reject overlapping stops. A road direction must have a captured anchorable lane. These syntax checks do not replace live-road, snapshot or confirmation safeguards.
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
+
+### Ordinary street stop eligibility correction
+
+The placement API's fixedPlatform argument is not an asset classification: ordinary vehicle-stop resolution also returns true. Existing-route editing now classifies both originals and targets using the exact RoadAI type, existing segment eligibility and successful placement resolution, and preserves the original resolved argument for manual targets and recovery. Bridges, tunnels, station-owned roads and unknown/custom AI subclasses are conservatively refused. Earlier references to rejecting a true placement argument describe the previous bug, not the current policy. This does not enable elevated/shared stops or prove runtime/save compatibility.
+
+Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning

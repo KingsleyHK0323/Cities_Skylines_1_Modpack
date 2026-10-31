@@ -68,3 +68,9 @@ Close the game and remove this Development copy from the Mods folder. Removing t
 Copyright Kingsley. LICENSE contains the unchanged PolyForm Noncommercial License 1.0.0. No game references, PDBs or public ZIP assets are distributed. The mod requires a compatible Cities: Skylines installation. Workshop links are source records, not a live Steam visibility check. Use SHA256SUMS to verify downloaded files, for example `Get-FileHash AutomatedPublicTransportPlanning.dll -Algorithm SHA256` in PowerShell, and compare the exact digest.
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
+
+### Ordinary street stop eligibility correction
+
+The placement API's fixedPlatform argument is not an asset classification: ordinary vehicle-stop resolution also returns true. Existing-route editing now classifies both originals and targets using the exact RoadAI type, existing segment eligibility and successful placement resolution, and preserves the original resolved argument for manual targets and recovery. Bridges, tunnels, station-owned roads and unknown/custom AI subclasses are conservatively refused. Earlier references to rejecting a true placement argument describe the previous bug, not the current policy. This does not enable elevated/shared stops or prove runtime/save compatibility.
+
+Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning

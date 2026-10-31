@@ -81,3 +81,11 @@ Copyright © Kingsley.
 - Reject captured road directions that cannot anchor a stop, rather than accepting an open direction with no usable stop lane.
 - Added cloud checks for valid mixed tokens, supported counts, malformed/oversized input, bounds and normalized duplicates. Live road and stale-route checks remain mandatory.
 - Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
+
+## 2026-11-01 — Ordinary bus stop placement flag correction
+
+- Fixed a reachable rejection: successful vehicle-stop resolution sets fixedPlatform=true, which was incorrectly treated as proof of an unsupported station asset.
+- Classify original and target stops by exact ordinary RoadAI type plus existing segment eligibility and successful placement resolution. Bridges, tunnels, station-owned/unusable roads and unknown/custom AI types remain refused.
+- Preserve the resolved placement argument in original stop snapshots, stale matching, manual original-site targets and position recovery instead of forcing false. This argument is not an asset category or a persisted-node flag.
+- Added cloud red/green classification and recovery-argument regression checks. No shared-stop or cross-mode capability is introduced; in-game behavior remains unverified.
+- Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning

@@ -259,13 +259,16 @@ namespace AutomatedPublicTransportPlanning.Planning
                 if (node == 0) { throw new InvalidOperationException("The line has a missing stop."); }
                 stops.Add(new ExistingRouteStop(node, Singleton<NetManager>.instance.m_nodes.m_buffer[node].m_position));
             }
-            // Fixed platforms need a separate recovery design; this prototype only edits street stops.
-            foreach (ExistingRouteStop stop in stops)
+            // Classify road support independently of the placement API argument.
+            for (int i = 0; i < stops.Count; i++)
             {
+                ExistingRouteStop stop = stops[i];
                 RouteStopSite site = ExistingSite(stop);
                 Vector3 position; bool fixedPlatform;
-                if (!StopPlacement.TryGetStopPosition(site.SegmentId, stop.Position, info, out position, out fixedPlatform) || fixedPlatform)
-                { throw new InvalidOperationException("This prototype only edits ordinary street stops, not fixed platforms."); }
+                bool resolved = StopPlacement.TryGetStopPosition(site.SegmentId, stop.Position, info, out position, out fixedPlatform);
+                if (!SupportsStreet(site.SegmentId, info, resolved, fixedPlatform))
+                { throw new InvalidOperationException("Only usable ordinary RoadAI street stops are supported; bridges, tunnels and station-owned roads are refused."); }
+                stops[i] = new ExistingRouteStop(stop.NodeId, stop.Position, fixedPlatform);
             }
             return new ExistingRouteSnapshot(line, Singleton<SimulationManager>.instance.m_currentBuildIndex, info.name, stops);
         }
@@ -280,7 +283,7 @@ namespace AutomatedPublicTransportPlanning.Planning
             uint cursor = net.m_segments.m_buffer[segment].m_lanes;
             for (int index = 0; cursor != 0 && index < 256; index++, cursor = net.m_lanes.m_buffer[cursor].m_nextLane)
             {
-                if (cursor == lane) { return new RouteStopSite(segment, net.m_segments.m_buffer[segment].m_buildIndex, true, index, stop.Position, false); }
+                if (cursor == lane) { return new RouteStopSite(segment, net.m_segments.m_buffer[segment].m_buildIndex, true, index, stop.Position, stop.FixedPlatform); }
             }
             throw new InvalidOperationException("An existing stop lane could not be identified.");
         }
@@ -291,6 +294,14 @@ namespace AutomatedPublicTransportPlanning.Planning
                 planning.Snapshot.BuildIndexAtEnd != original.BuildIndex || planning.Snapshot.BusPrefabName != original.PrefabName) { throw new InvalidOperationException("Generate a fresh planning preview for the same bus prefab first."); }
         }
 
+        // Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
+        private static bool SupportsStreet(ushort segmentId, TransportInfo info, bool resolved, bool fixedPlatform)
+        {
+            NetInfo road = Singleton<NetManager>.instance.m_segments.m_buffer[segmentId].Info;
+            string ai = road == null || road.m_netAI == null ? null : road.m_netAI.GetType().FullName;
+            return RouteStreetStopRules.Supports(ai, StopPlacement.IsSegmentUsableForStops(segmentId, info), resolved, fixedPlatform);
+        }
+
         private static void ValidateTargets(RouteEditPlan plan)
         {
             NetManager net = Singleton<NetManager>.instance;
@@ -298,6 +309,7 @@ namespace AutomatedPublicTransportPlanning.Planning
             foreach (RouteStopSite target in plan.Stops)
             {
                 if (target.SegmentId == 0 || target.SegmentId >= net.m_segments.m_buffer.Length) { throw new InvalidOperationException("A target road disappeared."); }
+                if (!SupportsStreet(target.SegmentId, info, true, target.FixedPlatform)) { throw new InvalidOperationException("A target is not a supported ordinary street stop."); }
                 NetSegment segment = net.m_segments.m_buffer[target.SegmentId];
                 if ((segment.m_flags & NetSegment.Flags.Created) == 0 || segment.m_buildIndex != target.SegmentBuildIndex ||
                     !StopPlacement.IsSegmentUsableForStops(target.SegmentId, info) || !StopPlacement.CanAnchorStop(target.Position, info)) { throw new InvalidOperationException("A target road or anchor no longer matches."); }

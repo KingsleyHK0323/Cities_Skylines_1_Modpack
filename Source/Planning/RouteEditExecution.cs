@@ -99,7 +99,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                     if (!surface.IsCurrent) { return Invalidated(); }
                     if (!CanAccess(surface, count)) { return Incomplete(failure + " The line changed before recovery."); }
                     // Do not classify recovery by this return value: verify observed positions below.
-                    surface.MoveStop(i, original, false);
+                    surface.MoveStop(i, original, plan.Original.Stops[i].FixedPlatform);
                 }
                 catch { /* Continue to the next recoverable position, rechecking ownership first. */ }
             }

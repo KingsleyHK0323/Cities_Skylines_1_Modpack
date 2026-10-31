@@ -5,7 +5,7 @@ namespace AutomatedPublicTransportPlanning.Planning
     {
         public static bool Supports(string netAiType, bool usable, bool resolved, bool fixedPlatform)
         {
-            return netAiType == "RoadAI" && usable && resolved && !fixedPlatform;
+            return netAiType == "RoadAI" && usable && resolved;
         }
     }
 }

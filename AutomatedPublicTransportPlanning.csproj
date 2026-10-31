@@ -160,6 +160,7 @@
     <Compile Include="Source\Planning\RouteCreation.cs" Condition=" '$(DevTools)' == 'true' " />
     <!-- Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning -->
     <Compile Include="Source\Planning\RouteEditPlan.cs" Condition=" '$(DevTools)' == 'true' " />
+    <Compile Include="Source\Planning\RouteStreetStopRules.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\RouteManualInput.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\RouteEditing.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\RouteEditExecution.cs" Condition=" '$(DevTools)' == 'true' " />

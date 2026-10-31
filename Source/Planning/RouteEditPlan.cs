@@ -12,11 +12,15 @@ namespace AutomatedPublicTransportPlanning.Planning
     {
         public readonly ushort NodeId;
         public readonly Vector3 Position;
+        public readonly bool FixedPlatform; // Placement API argument, not a road asset classification.
 
-        public ExistingRouteStop(ushort nodeId, Vector3 position)
+        public ExistingRouteStop(ushort nodeId, Vector3 position) : this(nodeId, position, false) { }
+
+        public ExistingRouteStop(ushort nodeId, Vector3 position, bool fixedPlatform)
         {
             NodeId = nodeId;
             Position = position;
+            FixedPlatform = fixedPlatform;
         }
     }
 
@@ -47,7 +51,7 @@ namespace AutomatedPublicTransportPlanning.Planning
             {
                 Vector3 expected = Stops[i].Position;
                 Vector3 actual = stops[i].Position;
-                if (stops[i].NodeId != Stops[i].NodeId ||
+                if (stops[i].NodeId != Stops[i].NodeId || stops[i].FixedPlatform != Stops[i].FixedPlatform ||
                     actual.x != expected.x || actual.y != expected.y || actual.z != expected.z)
                 {
                     return false;
