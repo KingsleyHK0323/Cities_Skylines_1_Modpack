@@ -62,7 +62,11 @@
 .sl-markdown-content .tip { padding: 14px 18px; border-left: 3px solid var(--route); background: var(--surface); }
 .docs-actions { display: flex; align-items: center; gap: 11px; }
 .docs-actions > starlight-social-icons { display: none; }
-starlight-theme-select select, starlight-lang-select select { border-radius: 0; background-color: var(--surface); }
+/* Preserve native select behavior and give the clipped title an inset focus ring.
+   OpenAI-Codex_Responsible: Modpack_Website. */
+starlight-theme-select select, starlight-lang-select select { min-height: 44px; border-radius: 0; background-color: var(--surface); }
+starlight-theme-select select:focus-visible, starlight-lang-select select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.docs-title .site-title:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
 starlight-theme-select, starlight-lang-select { --sl-select-bg: var(--surface); }
 .sl-markdown-content h1, .sl-markdown-content h2, .sl-markdown-content h3 { font-family: var(--display); letter-spacing: -.035em; }
 .sl-markdown-content a { color: var(--route); }

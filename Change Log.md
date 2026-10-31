@@ -2,6 +2,14 @@
 
 Author: OpenAI-Codex
 
+## 2026-11-01 — Illustration semantics and preference controls
+
+- Replaced the transport illustration's tab semantics with a caption-selection button group, retaining arrow/Home/End navigation and adding a readable polite status message.
+- Marked AI Improve reference headings, descriptions and tuning labels with the language of the bundled translation or English fallback.
+- Raised theme/language targets to a 44px minimum and added visible select focus and an inset Wiki title focus ring.
+- Kept existing favicon, Apple and manifest PNG assets; no suitable existing WebP brand source was identified, so no replacement artwork was introduced.
+- Author: OpenAI-Codex_Responsible: Modpack_Website.
+
 ## 2026-11-01 — Navigation accessibility and dated project status
 
 - Removed the narrow-screen navigation scroll container that clipped the Mods menu, allowed navigation to wrap, and enlarged its interaction targets.

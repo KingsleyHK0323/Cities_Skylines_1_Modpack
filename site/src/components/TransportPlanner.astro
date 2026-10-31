@@ -2,6 +2,7 @@
 interface Props { locale?: 'en' | 'zh-tw'; }
 const { locale = 'en' } = Astro.props;
 const zh = locale === 'zh-tw';
+const captionId = 'planner-stage-caption-' + locale;
 const stages = zh
 	? [{ id: 'survey', label: '調查', caption: '讀取道路與交通資料' }, { id: 'demand', label: '需求', caption: '估算乘客需求熱區' }, { id: 'stops', label: '站點', caption: '提出候選站點' }, { id: 'route', label: '路線', caption: '預覽候選路線' }, { id: 'review', label: '確認', caption: '由玩家檢視與決定' }]
 	: [{ id: 'survey', label: 'Survey', caption: 'Read road and transport data' }, { id: 'demand', label: 'Demand', caption: 'Estimate passenger demand areas' }, { id: 'stops', label: 'Stops', caption: 'Suggest candidate stops' }, { id: 'route', label: 'Route', caption: 'Preview a candidate line' }, { id: 'review', label: 'Review', caption: 'Player reviews and decides' }];
@@ -10,8 +11,8 @@ const stages = zh
 <section class="transport-planner" data-transport-planner data-ready="false">
 	<p class="planned-label" lang="en">Planning concept illustration</p>
 	<p lang="en">This browser diagram illustrates a planning concept; it is not an in-game screenshot. The GitHub Development prototype can preview routes and attempt creation after confirmation. It may change saves, and game acceptance remains pending.</p>
-	<div class="planner-flow" role="tablist" aria-label={zh ? '規劃流程示意' : 'Illustrated planning steps'}>
-		{stages.map((stage, index) => <button type="button" role="tab" data-stage-tab={stage.id} aria-selected={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1}>{index + 1}. {stage.label}</button>)}
+	<div class="planner-flow" role="group" aria-describedby={captionId} aria-label={zh ? '規劃流程示意' : 'Illustrated planning steps'}>
+		{stages.map((stage, index) => <button type="button" data-stage-button={stage.id} aria-pressed={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1}>{index + 1}. {stage.label}</button>)}
 	</div>
 	<div class="city-map">
 		<svg viewBox="0 0 720 310" role="img" aria-label={zh ? '城市網格、需求熱區、候選站點和公車路線示意圖' : 'Illustration of a city grid, demand areas, candidate stops and bus route'}>
@@ -20,9 +21,10 @@ const stages = zh
 			<circle cx="202" cy="106" r="40" fill="#d94b5480" /><circle cx="516" cy="201" r="52" fill="#d94b5470" />
 			<path d="M80 154h126v-48h126v140h126V154h126v92h56" fill="none" stroke="var(--route)" stroke-width="8" stroke-linejoin="round" />
 			<g fill="var(--ink)" stroke="var(--route)" stroke-width="5"><circle cx="80" cy="154" r="9" /><circle cx="206" cy="106" r="9" /><circle cx="332" cy="246" r="9" /><circle cx="458" cy="201" r="9" /><circle cx="584" cy="154" r="9" /></g>
-			<text x="24" y="292" fill="var(--ink)" font-size="14" data-map-caption>{stages[0].caption}</text>
+			<text x="24" y="292" fill="var(--ink)" font-size="14" data-map-caption aria-hidden="true">{stages[0].caption}</text>
 		</svg>
 	</div>
+	<p id={captionId} class="planner-caption" role="status" aria-live="polite" aria-atomic="true" data-stage-status>{stages[0].label}: {stages[0].caption}</p>
 	<ol class="planner-static">{stages.map((stage) => <li><strong>{stage.label}:</strong> {stage.caption}</li>)}</ol>
 	<noscript><p class="notice">{zh ? 'JavaScript 已關閉：流程各步驟仍列於上方。' : 'JavaScript is off: all proposed workflow steps are listed above.'}</p></noscript>
 </section>
@@ -31,22 +33,26 @@ const stages = zh
 	const root = document.querySelector<HTMLElement>('[data-transport-planner]');
 	if (root) {
 		root.dataset.ready = 'true';
-		const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-stage-tab]')];
+		// The controls select a diagram caption, not separate tab panels.
+		// OpenAI-Codex_Responsible: Modpack_Website.
+		const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-stage-button]')];
 		const captions = [...root.querySelectorAll<HTMLElement>('.planner-static li')].map((item) => item.textContent || '');
 		const mapCaption = root.querySelector<SVGTextElement>('[data-map-caption]');
+		const status = root.querySelector<HTMLElement>('[data-stage-status]');
 		function select(index: number, focus = false) {
-			tabs.forEach((tab, i) => { tab.setAttribute('aria-selected', String(i === index)); tab.tabIndex = i === index ? 0 : -1; });
+			buttons.forEach((button, i) => { button.setAttribute('aria-pressed', String(i === index)); button.tabIndex = i === index ? 0 : -1; });
 			if (mapCaption) mapCaption.textContent = captions[index];
-			if (focus) tabs[index].focus();
+			if (status) status.textContent = captions[index];
+			if (focus) buttons[index].focus();
 		}
-		tabs.forEach((tab, index) => {
-			tab.addEventListener('click', () => select(index));
-			tab.addEventListener('keydown', (event) => {
+		buttons.forEach((button, index) => {
+			button.addEventListener('click', () => select(index));
+			button.addEventListener('keydown', (event) => {
 				let next = index;
-				if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
-				else if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+				if (event.key === 'ArrowRight') next = (index + 1) % buttons.length;
+				else if (event.key === 'ArrowLeft') next = (index - 1 + buttons.length) % buttons.length;
 				else if (event.key === 'Home') next = 0;
-				else if (event.key === 'End') next = tabs.length - 1;
+				else if (event.key === 'End') next = buttons.length - 1;
 				else return;
 				event.preventDefault(); select(next, true);
 			});
@@ -60,8 +66,8 @@ const stages = zh
 	.transport-planner > p:not(.planned-label) { max-width: 68ch; color: var(--muted); font-size: 14px; }
 	.planner-flow { display: none; flex-wrap: wrap; gap: 7px; margin: 18px 0; }
 	[data-ready='true'] .planner-flow { display: flex; }
-	.planner-flow button { min-height: 42px; padding: 8px 12px; border: 0; background: var(--ground); }
-	.planner-flow button[aria-selected='true'] { background: var(--ink); color: var(--ground); }
+	.planner-flow button { min-height: 44px; padding: 8px 12px; border: 0; background: var(--ground); }
+	.planner-flow button[aria-pressed='true'] { background: var(--ink); color: var(--ground); }
 	.city-map { margin-top: 18px; overflow: hidden; background: var(--city-ground); }
 	.city-map svg { width: 100%; }
 	.planner-static { display: flex; flex-wrap: wrap; gap: 8px 25px; margin: 17px 0 0; padding-left: 1.2rem; color: var(--muted); font-size: 13px; }

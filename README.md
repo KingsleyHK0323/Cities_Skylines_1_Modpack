@@ -19,3 +19,5 @@ This is a source-available, noncommercial project.
 The English and Traditional Chinese homepages use a compact, localized Development notice with a shared download guide link. <!-- OpenAI-Codex_Responsible: Modpack_Website -->
 
 Module artwork is served as WebP. The planned Automated Public Transport Vehicle Management project displays the approved Release and Development WebP icons without download or Workshop links. Original resource images are preserved; Steam Workshop artwork uses JPG. <!-- OpenAI-Codex_Responsible: Modpack_Website -->
+
+The transport-planning illustration uses a labelled group of pressed-state buttons to select its caption, with arrow/Home/End keyboard navigation and a polite status message. AI Improve reference text carries language metadata for English fallbacks. Theme/language controls use a 44px minimum target and visible keyboard focus; existing browser icon PNGs are retained. <!-- OpenAI-Codex_Responsible: Modpack_Website -->
