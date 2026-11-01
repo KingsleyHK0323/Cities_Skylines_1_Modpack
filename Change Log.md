@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Wire the developer boundary validator and unittest discovery into an independent
+  GitHub-hosted source-check job with Python 3.12, full baseline history and explicit
+  prerequisite diagnostics, and the same required pre-compilation validation job
+  in the Development compile/publish dependency chain. Extend BOM/CRLF, nested-duplicate and changed-source
+  cases. Existing compile/publish protections and gameplay are unchanged.
+  Signature: OpenAI-Codex_AI_Improve.
+
+- Add a developer-only fire-dispatch/transit-dwell boundary inventory and read-only
+  source validator with contract tests. Record confirmed capacity, multimodal,
+  garbage/deceased, temporary aircraft/ship and four handover responsibilities
+  without moving or disabling gameplay. No build or release workflow is changed.
+  Signature: OpenAI-Codex_AI_Improve.
+
 - Fixed failed-publisher retries to use the successful compile job's immutable artifact ID and build attempt instead of the current publish attempt. Full reruns retain distinct immutable artifacts. Preserved source/reference provenance and checksum checks. Signature: OpenAI-Codex_release_format_audit.
 
 

@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "sourceBaseline": "75ef94407962817051cef4aa74ec6fbc1831fd02",
+  "signature": "OpenAI-Codex_AI_Improve",
+  "responsibilityNotes": [
+    "Confirmed responsibility is not implementation or migration acceptance. Existing behavior and settings remain intact.",
+    "AI Improve owns PathUnits and CitizenUnits capacity and integrity; these are distinct pools, not CitizenInstances or a population limit. Expansion, save compatibility and safe removal remain unimplemented or unverified.",
+    "AI Improve coordinates complete multimodal paths and final submission. Vehicle, Pedestrian and Railway safety vetoes remain binding; request identity, generation, cancellation and retry contracts require design.",
+    "AI Improve owns garbage and deceased service matching. Other service reasons require explicit domain assignment; no global fallback ownership is implied.",
+    "AI Improve temporarily owns aircraft, helicopter and ship paths and unique gate/dock allocation. Border and Import Export provide policies, not duplicate slot writers.",
+    "Confirmed handover target: fire dispatch including caps and idle reassignment -> Realistic City First Response.",
+    "Confirmed handover target: road rerouting -> Realistic Vehicle Traffic Control; multimodal final submission remains AI Improve.",
+    "Confirmed handover target: train rerouting and platform assignment -> Realistic Railway Traffic Control.",
+    "Confirmed handover target: dwell shortening and unbunching -> Automated Public Transport Vehicle Management; road and rail safety vetoes remain binding.",
+    "New owners must be ready and validated before any existing function is moved, disabled or removed. No forced shared DLL or mandatory dependency is introduced.",
+    "Source registration intent is visible; runtime patch attachment, current player setting values and actual event writes are unknown."
+  ],
+  "sources": [
+    {
+      "path": "FireResponseCapPatch.cs",
+      "sha256": "a034b2b33bcf5c49f128da05018ebe5aeacde56cfb0f4cb26676eb39053c4dd9"
+    },
+    {
+      "path": "FireResponseTracker.cs",
+      "sha256": "fea7d19fe576cd74362a420de227a04cdfb769fdf50403086eab0d866abaccc4"
+    },
+    {
+      "path": "TransitDwellShortenPatch.cs",
+      "sha256": "85cc4ee94f1148081ff603be1fa6ae96cab25317e909abdbef8723dbb484ec2a"
+    },
+    {
+      "path": "ModSettings.cs",
+      "sha256": "397f13a5ef4e78ed6f0001e9361d42f2c92b06d898fd38b4fa83b414aed7d366"
+    },
+    {
+      "path": "Patcher.cs",
+      "sha256": "6fdfcdb3fdbb9fb3329e9970c7a08dfe288105801569ae14735261cd4d8097df"
+    },
+    {
+      "path": "CompanionModCompat.cs",
+      "sha256": "49c0fe5e22ab5c90a5819298200f4de80c9e1d63aa87eff4143ee3a3676a0b0c"
+    }
+  ],
+  "features": [
+    {
+      "featureId": "fire-dispatch",
+      "sourceHook": [
+        "FireTruckAI.SetTarget",
+        "FireCopterAI.SetTarget"
+      ],
+      "signature": "SetTarget(ushort, ref Vehicle, ushort)",
+      "patchKind": "Prefix",
+      "declaredSettings": [
+        "FireResponseCapEnabled",
+        "FireIdleSeekEnabled",
+        "FireMaxRespondersPerBuilding",
+        "FireUncapAfterMinutes"
+      ],
+      "branchConditions": [
+        "Both switches off returns immediately; they are independent gates.",
+        "Zero target: cap can clear assignment; idle seeking may still TryAssign with cap off. TMCE active dispatch suppresses local idle target selection.",
+        "Nonzero target: cap off returns; cap enforcement retains TMCE punt/starvation branches and local alternate search."
+      ],
+      "simulationWriteTargets": [
+        "ref targetBuilding: alternate burning building or zero when capped without a valid alternate"
+      ],
+      "privateCleanup": [
+        "FireResponseTracker assignment bookkeeping, including zero-target cleanup and idle assignment",
+        "TmcePuntStreak resets, increments and extinguished-building sweep"
+      ],
+      "candidateOwner": "Realistic City First Response",
+      "ownerStatus": "target-confirmed-not-migrated",
+      "fallbackSemantics": "Wrapper continues original SetTarget. Disabled branches preserve target input, but cap-off alone does not suppress idle assignment bookkeeping. Over-cap rejection can set zero; TMCE starvation may restore local alternate search. Preserve both switches and current counting semantics.",
+      "evidencePath": "FireResponseCapPatch.cs"
+    },
+    {
+      "featureId": "transit-dwell",
+      "sourceHook": [
+        "BusAI.CanLeave",
+        "TrolleybusAI.CanLeave",
+        "PassengerTrainAI.CanLeave"
+      ],
+      "signature": "CanLeave(ushort, ref Vehicle)",
+      "patchKind": "Prefix",
+      "declaredSettings": [
+        "TransitDwellShortenEnabled",
+        "TransitUnbunchEnabled"
+      ],
+      "branchConditions": [
+        "Trailing vehicles return without intervention; Tram is not registered here.",
+        "Cached IPT3/EBS presence stands down for the session. Both switches off, no line or no target may clear this vehicle private HoldSteps.",
+        "Unbunching precedes shortening and is bounded by MaxHoldSteps. Shortening requires MinimumDwell and no waiting demand."
+      ],
+      "simulationWriteTargets": [
+        "Vehicle.m_waitCounter: decrease for bounded hold or increase for shortened dwell"
+      ],
+      "privateCleanup": [
+        "Own HoldSteps removal on disabled/ineligible/stand-down paths and ReleaseVehicle",
+        "Own hold and diagnostic counters reset on level reset"
+      ],
+      "candidateOwner": "Automated Public Transport Vehicle Management",
+      "ownerStatus": "target-confirmed-not-migrated",
+      "fallbackSemantics": "Prefix always returns true so original CanLeave evaluates boarding and safety conditions. Timer adjustment is not forced departure. Off can clean own HoldSteps and must not be described as no private state writes.",
+      "evidencePath": "TransitDwellShortenPatch.cs"
+    }
+  ]
+}

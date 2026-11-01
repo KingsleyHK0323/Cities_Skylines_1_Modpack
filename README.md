@@ -1,5 +1,55 @@
 # AI Improve
 
+## Developer boundary inventory
+
+`tools/migration/feature-boundaries.json` records the fire-dispatch and transit-dwell
+handover pilot and the confirmed module responsibilities. Confirmed target ownership
+does not mean that code has migrated or capacity expansion has been implemented.
+Existing gameplay, hooks and saved settings are unchanged by this inventory.
+
+With Python 3.8+ and Git available in an authorized check environment, run:
+
+```sh
+python -B tools/migration/check_feature_boundaries.py
+python -B -m unittest discover -s tools/migration -p 'test_feature_boundaries.py' -v
+```
+
+The standard-library validator is read-only: it rejects duplicate JSON properties,
+unknown fields, invalid settings, unresolved or escaping source paths (including
+resolved link targets), and stale source evidence. SHA-256 covers UTF-8 source bytes
+with an optional BOM removed and CRLF normalized to LF, checked against both the full local Git baseline commit
+and current files. A shallow checkout must contain that commit; checks never fetch it.
+Do not refresh hashes merely to silence a failure: review changed evidence first.
+Metadata-only commits can advance HEAD while the pinned source content stays valid.
+Hook locators and setting extraction are lexical checks, not C# control-flow analysis.
+Runtime patch attachment, player values, safety, migration and replacement coverage
+still require separate evidence. Link escape tests model resolved targets; they do
+not certify every Windows reparse-point configuration.
+
+The `migration-boundaries` job in `ai-improve-source-checks.yml` runs the validator
+and unittest discovery on existing AI_Improve push/pull-request events. It uses the
+GitHub-hosted Ubuntu 24.04 image's Python 3.12 and Git, verifies that Python version,
+checks out full history (`fetch-depth: 0`), and checks baseline availability before
+running either command. Missing infrastructure is reported separately from test
+failures. It installs no Python packages, receives no secrets, retains no checkout
+credentials, and requires only `contents: read`. Tests cover BOM/CRLF equivalence,
+substantive source changes, duplicate properties (including nested objects), invalid
+contracts, resolved path escapes and stale evidence. The modeled link test is not
+a real Windows junction test.
+
+This source-check job does not compile or publish the mod. The compile/publish workflow
+also runs the same migration-validation job, with `compile` requiring its success;
+`publish` still requires `compile`. A migration-validation failure in that dependency
+chain therefore blocks compilation and publication. Other independent source-check
+failures (for example localization) are not added to that chain by this change.
+A later authorized push still triggers the workflow and, when its required jobs pass,
+can create a public Development prerelease. The compile job's existing .NET SDK and verified
+encrypted game-reference acquisition, artifact-ID/build-attempt binding, release
+allowlist and checksum protections are unchanged. No local or cloud test result is
+implied by this wiring; execution requires separate authorization.
+
+Signature: OpenAI-Codex_AI_Improve.
+
 Visit the [AI Improve website page](https://kingsleyhk0323.github.io/Cities_Skylines_1_Modpack/ai-improve/) for project information, documentation, and updates.
 
 Author: Kingsley

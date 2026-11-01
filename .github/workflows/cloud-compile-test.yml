@@ -6,7 +6,53 @@ on:
 permissions:
   contents: read
 jobs:
+  migration-boundaries:
+    name: Validate migration inventory and negative cases
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/AI_Improve'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source and baseline history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify hosted Python and baseline prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version
+          python3 -B - <<'PY'
+          import json
+          import re
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          if sys.version_info[:2] != (3, 12):
+              raise SystemExit("Infrastructure prerequisite: expected hosted Python 3.12; no tests ran.")
+          data = json.loads(Path("tools/migration/feature-boundaries.json").read_text(encoding="utf-8-sig"))
+          baseline = data.get("sourceBaseline", "")
+          if not isinstance(baseline, str) or not re.fullmatch(r"[0-9a-f]{40}", baseline):
+              raise SystemExit("Inventory sourceBaseline is not a full commit SHA.")
+          result = subprocess.run(["git", "cat-file", "-e", baseline + "^{commit}"])
+          if result.returncode:
+              raise SystemExit("Infrastructure prerequisite: baseline history unavailable; no tests ran.")
+          print("Hosted Python and full baseline history available.")
+          PY
+
+      - name: Validate current source inventory
+        shell: bash
+        run: python3 -B tools/migration/check_feature_boundaries.py
+
+      - name: Run boundary contract and negative tests
+        shell: bash
+        run: python3 -B -m unittest discover -s tools/migration -p 'test_feature_boundaries.py' -v
+
   compile:
+    needs: migration-boundaries
     # Signature: OpenAI-Codex_release_format_audit
     outputs:
       artifact-id: ${{ steps.public-assets.outputs.artifact-id }}
@@ -97,3 +143,4 @@ jobs:
           RELEASE_BUILD_ATTEMPT: ${{ needs.compile.outputs.build-attempt }}
         run: ./tools/Publish-DevelopmentRelease.ps1 -AssetDirectory '${{ runner.temp }}/ai-improve-release'
 # Signature: OpenAI-Codex_Responsible: AI_Improve
+# Migration validation gate: OpenAI-Codex_AI_Improve.
