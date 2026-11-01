@@ -1,5 +1,5 @@
-# Signature: OpenAI-Codex_Responsible: Full_Map_Unlock_And_Expansion
-name: Module baseline
+# Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+name: Module baseline and pure preview checks
 on:
   push:
     branches: [Full_Map_Unlock_And_Expansion]
@@ -9,15 +9,39 @@ on:
 permissions:
   contents: read
 jobs:
-  documentation:
-    runs-on: ubuntu-latest
+  preview:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/Full_Map_Unlock_And_Expansion'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - name: Verify planning baseline
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # Existing project pin: v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify documentation
         shell: bash
         run: |
+          set -euo pipefail
           test -s README.md
           test -s LICENSE
           test -s 'Change Log.md'
           grep -q 'PolyForm Noncommercial License 1.0.0' LICENSE
-          grep -q 'No game functionality' README.md
+          test -s docs/AreaObservationEvidence.md
+      - name: Require hosted .NET 8 SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v dotnet
+          dotnet --list-sdks
+          sdk=$(dotnet --list-sdks | awk '$1 ~ /^8\./ {print $1}' | sort -V | tail -n 1)
+          if [ -z "$sdk" ]; then
+            echo 'Environment failure: hosted image lacks .NET 8 SDK.' >&2
+            exit 1
+          fi
+          printf '{"sdk":{"version":"%s","rollForward":"disable"}}\n' "$sdk" > global.json
+          dotnet --version
+      - name: Restore pure checks without package feeds
+        run: dotnet restore Tests/PreviewChecks.csproj --configfile Tests/NuGet.Config
+      - name: Compile pure checks
+        run: dotnet build Tests/PreviewChecks.csproj --configuration Release --no-restore
+      - name: Execute 14 pure preview assertions
+        run: dotnet Tests/bin/Release/net8.0/PreviewChecks.dll
