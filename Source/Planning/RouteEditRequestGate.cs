@@ -48,6 +48,24 @@ namespace AutomatedPublicTransportPlanning.Planning
             }
         }
 
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+        // Work may call native APIs; only short error/cleanup publications hold the lock.
+        public void RunOwned(RouteEditRequestTicket ticket, Action work, Action<Exception> failed, Action finished)
+        {
+            try
+            {
+                if (IsOwner(ticket)) { work(); }
+            }
+            catch (Exception error)
+            {
+                TryPublish(ticket, delegate { failed(error); });
+            }
+            finally
+            {
+                TryPublish(ticket, finished);
+            }
+        }
+
         public void Reset(Action clearState)
         {
             lock (m_sync) { m_active = null; clearState(); }

@@ -101,3 +101,29 @@ Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
 The placement API's fixedPlatform argument is not an asset classification: ordinary vehicle-stop resolution also returns true. Existing-route editing now classifies both originals and targets using the exact RoadAI type, existing segment eligibility and successful placement resolution, and preserves the original resolved argument for manual targets and recovery. Bridges, tunnels, station-owned roads and unknown/custom AI subclasses are conservatively refused. Earlier references to rejecting a true placement argument describe the previous bug, not the current policy. This does not enable elevated/shared stops or prove runtime/save compatibility.
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
+
+### Prepared acceptance coverage
+
+See [route editing acceptance](docs/Route-Editing-Acceptance.md) for cloud-ready placement-rule regressions and separate subscribed-build creation, recovery and reload cases. The expanded placement-argument matrix is prepared but unexecuted in this local batch. It does not establish native or save compatibility. Publication requires the applicable authorization and visibility review.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+### Prepared lifecycle ownership repair (2026-11-01)
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+Planning preview workers and queued route creation now use the existing request-ticket gate through `RunOwned`. Obsolete work cannot publish an exception or release a newer request from its finally callback. Creation's pending validation stores the owning ticket and manager instances; reset clears them together. No native game calls run under the ownership lock. This does not make native route mutation atomic with unloading.
+
+Deferred-callback regressions are prepared in `RouteEditRequestGateChecks`, including reset during work followed by an exception, stale queued work, reused numeric line IDs, and current-owner error/cleanup. Tests and builds have NOT RUN in this local batch. See the acceptance checklist for the separate cloud and game approval gates.
+
+### Compiled lifecycle verification wiring (prepared, 2026-11-01)
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+`CompiledLifecycleChecks` is included in the existing test executable and loads the Development DLL built earlier by the cloud workflow. It exercises that DLL's actual request gate (obsolete queued work, replacement during work followed by an exception, current error/finally), then inspects compiled controller call sites for `RunOwned`. The call-site inspection is structural evidence, not an execution of native game callbacks. No additional workflow or permissions are introduced. A successful branch push or manual dispatch still naturally publishes a public prerelease after all existing gates pass; publication requires separate approval. All new checks remain NOT RUN.
+
+### Prepared immutable artifact handoff (2026-11-01)
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+The local cloud-workflow candidate now exports the upload artifact ID and producing build attempt, downloads that exact ID from the same run, and checks artifact API identity against build-info before creating any release. The artifact name includes run/attempt; release tags use the producing build attempt even when only publication is retried. Contract tests include the actual publisher with a fake API and assert mismatches stop before draft/upload/edit. Existing six-file/hash/draft verification remains. This supersedes the earlier name-only handoff limitation for the local candidate; no remote update or test execution is claimed.

@@ -89,3 +89,33 @@ Copyright © Kingsley.
 - Preserve the resolved placement argument in original stop snapshots, stale matching, manual original-site targets and position recovery instead of forcing false. This argument is not an asset category or a persisted-node flag.
 - Added cloud red/green classification and recovery-argument regression checks. No shared-stop or cross-mode capability is introduced; in-game behavior remains unverified.
 - Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
+
+## 2026-11-01 — Prepared placement and lifecycle acceptance coverage
+
+- Expanded cloud-ready street-stop regression coverage to both placement arguments and all failed eligibility/resolution combinations; bridges, tunnels and unknown/custom AI types remain refused.
+- Added docs/Route-Editing-Acceptance.md with separate candidate creation, edit recovery and subscribed-build reload checks, plus a concrete cloud/publication review list.
+- This local batch performed static review only. The new checks were not executed and no commit, push, build, game operation or release was performed.
+- Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+## 2026-11-01 - Prepared lifecycle ownership repair
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+- Reuse request-ticket ownership for PlanningCapture worker success/error/finally and RouteCreation queued work/error/finally. Reset invalidates obsolete callbacks before they can publish or clear newer state.
+- Bind creation post-check state to its ticket and manager instances, and publish pending-state cleanup only for the current owner. Preserve existing placement rules and route behavior.
+- Prepare deferred callback checks against the production RunOwned seam, including session replacement during work followed by failure. This is a static control-flow repair; no in-game race reproduction, test execution, build, commit or publication is claimed.
+
+## 2026-11-01 - Prepared compiled lifecycle verification
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+- Include CompiledLifecycleChecks in PlanningEngineChecks and invoke it from the existing failure-counting entry point. Exercise the freshly built Development DLL's actual gate through reflection; separately verify compiled preview/creation call sites target RunOwned.
+- Keep the existing branch-scoped DLL build, test build/execution and six-asset publication chain unchanged. Document cumulative source publication scope and automatic public prerelease effects. No tests, workflow, commit or push were executed.
+
+## 2026-11-01 - Prepared immutable artifact provenance handoff
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+- Export upload artifact ID and producing attempt from compile; use a run/attempt-specific artifact name and exact-ID download within the same run. Validate required outputs before download and constrain both jobs to the APTP repository/branch.
+- Add repository/ref to build-info. Verify artifact API ID/name/expiry/workflow run/source against the compile output and strict build-info fields before any release mutation. Release tags use the original producing attempt on publication-only retry.
+- Add pure provenance and actual-publisher fake-API negative contracts to the cloud compile gate. Preserve the existing whitelist, hashes, draft/release-ID digest checks and English release format. All new checks remain unexecuted; no local or remote workflow was run.

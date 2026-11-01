@@ -18,10 +18,14 @@ namespace AutomatedPublicTransportPlanning.Planning
         private static readonly object s_statusLock = new object();
         private static string s_statusKey = Strings.RouteStatusIdle;
         private static ushort s_statusLineId;
-        private static int s_requestPending;
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+        private static readonly RouteEditRequestGate s_requestGate = new RouteEditRequestGate();
+        private static RouteEditRequestTicket s_pendingTicket;
         private static ushort s_pendingLineId;
         private static int s_pendingStopCount;
         private static int s_pendingFrames;
+        private static TransportManager s_pendingTransport;
+        private static NetManager s_pendingNet;
 
         public static string StatusText
         {
@@ -37,7 +41,7 @@ namespace AutomatedPublicTransportPlanning.Planning
 
         public static bool IsBusy
         {
-            get { return Interlocked.CompareExchange(ref s_requestPending, 0, 0) != 0; }
+            get { return s_requestGate.IsBusy; }
         }
 
         public static void RequestCreate(PlanningPreviewResult preview, int proposalIndex)
@@ -53,7 +57,8 @@ namespace AutomatedPublicTransportPlanning.Planning
                 return;
             }
 
-            if (Interlocked.CompareExchange(ref s_requestPending, 1, 0) != 0)
+            RouteEditRequestTicket ticket;
+            if (!s_requestGate.TryBegin(out ticket))
             {
                 SetStatus(Strings.RouteStatusRefused, 0);
                 Log.Warning("Refused route creation request because another creation or validation is pending.");
@@ -62,83 +67,109 @@ namespace AutomatedPublicTransportPlanning.Planning
 
             if (!Singleton<SimulationManager>.exists)
             {
-                Interlocked.Exchange(ref s_requestPending, 0);
-                SetStatus(Strings.RouteStatusRefused, 0);
+                SetStatus(ticket, Strings.RouteStatusRefused, 0);
+                s_requestGate.Complete(ticket);
                 Log.Warning("Refused route creation request because no city is loaded.");
                 return;
             }
 
-            SetStatus(Strings.RouteStatusQueued, 0);
+            SetStatus(ticket, Strings.RouteStatusQueued, 0);
             PlanningPreviewResult frozenPreview = preview;
             int frozenProposalIndex = proposalIndex;
             try
             {
                 Singleton<SimulationManager>.instance.AddAction(delegate
                 {
-                    try
+                    s_requestGate.RunOwned(ticket, delegate
                     {
-                        CreateOnSimulationThread(frozenPreview, frozenProposalIndex);
-                    }
-                    catch (Exception e)
+                        if (!s_requestGate.IsOwner(ticket)) { return; }
+                        CreateOnSimulationThread(ticket, frozenPreview, frozenProposalIndex);
+                    }, delegate(Exception e)
                     {
-                        SetStatus(Strings.RouteStatusFailed, 0);
+                        SetStatus(ticket, Strings.RouteStatusFailed, 0);
                         Log.Exception("Confirmed proposal creation failed", e);
-                    }
-                    finally
+                    }, delegate
                     {
-                        if (s_pendingLineId == 0) { Interlocked.Exchange(ref s_requestPending, 0); }
-                    }
+                        s_requestGate.TryPublish(ticket, delegate
+                        {
+                            if (!object.ReferenceEquals(s_pendingTicket, ticket)) { s_requestGate.Complete(ticket); }
+                        });
+                    });
                 });
             }
             catch (Exception e)
             {
-                Interlocked.Exchange(ref s_requestPending, 0);
-                SetStatus(Strings.RouteStatusFailed, 0);
+                SetStatus(ticket, Strings.RouteStatusFailed, 0);
+                s_requestGate.Complete(ticket);
                 Log.Exception("Queueing confirmed route creation failed", e);
             }
         }
 
         public static void ResetForLevelChange()
         {
-            Interlocked.Exchange(ref s_requestPending, 0);
-            s_pendingLineId = 0;
-            s_pendingStopCount = 0;
-            s_pendingFrames = 0;
-            SetStatus(Strings.RouteStatusIdle, 0);
+            s_requestGate.Reset(delegate
+            {
+                s_pendingTicket = null;
+                s_pendingLineId = 0;
+                s_pendingStopCount = 0;
+                s_pendingFrames = 0;
+                s_pendingTransport = null;
+                s_pendingNet = null;
+                SetStatus(Strings.RouteStatusIdle, 0);
+            });
         }
-
         public static void OnAfterSimulationFrame()
         {
-            if (s_pendingLineId == 0) { return; }
+            RouteEditRequestTicket ticket = s_pendingTicket;
+            if (!s_requestGate.IsOwner(ticket) || s_pendingLineId == 0) { return; }
             try
             {
-                ValidatePendingLine();
+                ValidatePendingLine(ticket);
             }
             catch (Exception e)
             {
                 ushort lineId = s_pendingLineId;
-                FinishPending(Strings.RouteStatusWarning);
+                FinishPending(ticket, Strings.RouteStatusWarning);
                 Log.Exception("Asynchronous validation could not inspect line " + lineId, e);
             }
         }
 
-        private static void ValidatePendingLine()
+        private static void ValidatePendingLine(RouteEditRequestTicket ticket)
         {
-            s_pendingFrames++;
-            if (s_pendingFrames < 60) { return; }
+            ushort lineId = 0;
+            int expectedStopCount = 0;
+            int frames = 0;
+            TransportManager expectedTransport = null;
+            NetManager expectedNet = null;
+            bool ready = false;
+            if (!s_requestGate.TryPublish(ticket, delegate
+            {
+                s_pendingFrames++;
+                frames = s_pendingFrames;
+                ready = frames >= 60;
+                lineId = s_pendingLineId;
+                expectedStopCount = s_pendingStopCount;
+                expectedTransport = s_pendingTransport;
+                expectedNet = s_pendingNet;
+            }) || !ready) { return; }
 
             if (!Singleton<TransportManager>.exists || !Singleton<NetManager>.exists)
             {
-                FinishPending(Strings.RouteStatusWarning);
+                FinishPending(ticket, Strings.RouteStatusWarning);
                 return;
             }
 
             TransportManager tm = Singleton<TransportManager>.instance;
             NetManager net = Singleton<NetManager>.instance;
-            ushort lineId = s_pendingLineId;
+            if (!s_requestGate.IsOwner(ticket) || !object.ReferenceEquals(tm, expectedTransport) ||
+                !object.ReferenceEquals(net, expectedNet))
+            {
+                FinishPending(ticket, Strings.RouteStatusWarning);
+                return;
+            }
             if ((tm.m_lines.m_buffer[lineId].m_flags & TransportLine.Flags.Created) == TransportLine.Flags.None)
             {
-                FinishPending(Strings.RouteStatusWarning);
+                FinishPending(ticket, Strings.RouteStatusWarning);
                 Log.Warning("Created route " + lineId + " was no longer present during asynchronous validation.");
                 return;
             }
@@ -169,38 +200,38 @@ namespace AutomatedPublicTransportPlanning.Planning
             }
 
             bool lineShapeValid = tm.m_lines.m_buffer[lineId].Complete &&
-                                  stopCount == s_pendingStopCount;
+                                  stopCount == expectedStopCount;
             if (lineShapeValid && noLane == 0 && notConnected == 0 && pathFailed == 0)
             {
-                FinishPending(Strings.RouteStatusCreated);
+                FinishPending(ticket, Strings.RouteStatusCreated);
                 Log.Info("Asynchronous validation found all " + stopCount +
                     " stop lanes connected and no PathFailed flags on adjacent segments for line " + lineId + ".");
                 return;
             }
 
-            if (lineShapeValid && s_pendingFrames < 300 && pathFailed == 0 &&
+            if (lineShapeValid && frames < 300 && pathFailed == 0 &&
                 (noLane > 0 || notConnected > 0))
             {
                 return;
             }
 
-            FinishPending(Strings.RouteStatusWarning);
+            FinishPending(ticket, Strings.RouteStatusWarning);
             Log.Warning("Asynchronous validation warning for line " + lineId + ": stops=" + stopCount +
-                ", expected=" + s_pendingStopCount + ", complete=" + tm.m_lines.m_buffer[lineId].Complete +
+                ", expected=" + expectedStopCount + ", complete=" + tm.m_lines.m_buffer[lineId].Complete +
                 ", noLane=" + noLane + ", notConnected=" + notConnected + ", pathFailed=" + pathFailed + ".");
         }
 
-        private static void CreateOnSimulationThread(PlanningPreviewResult preview, int proposalIndex)
+        private static void CreateOnSimulationThread(RouteEditRequestTicket ticket, PlanningPreviewResult preview, int proposalIndex)
         {
             if (!Singleton<SimulationManager>.exists || !Singleton<NetManager>.exists ||
                 !Singleton<TransportManager>.exists)
             {
-                Refuse("a required city manager is unavailable");
+                Refuse(ticket, "a required city manager is unavailable");
                 return;
             }
             if (!object.ReferenceEquals(PlanningCapture.LatestPreview, preview))
             {
-                Refuse("the selected preview was replaced before the simulation action ran");
+                Refuse(ticket, "the selected preview was replaced before the simulation action ran");
                 return;
             }
 
@@ -227,20 +258,20 @@ namespace AutomatedPublicTransportPlanning.Planning
                 {
                     // A diagnostic failure must not prevent the existing refusal.
                 }
-                Refuse("the preview is stale or its stop list is outside the 3-6 distinct-stop limit");
+                Refuse(ticket, "the preview is stale or its stop list is outside the 3-6 distinct-stop limit");
                 return;
             }
 
             TransportInfo busInfo = BusPrefabResolver.ResolveCityBus();
             if (busInfo == null)
             {
-                Refuse("no city bus prefab is available");
+                Refuse(ticket, "no city bus prefab is available");
                 return;
             }
             if (string.IsNullOrEmpty(snapshot.BusPrefabName) ||
                 !string.Equals(busInfo.name, snapshot.BusPrefabName, StringComparison.Ordinal))
             {
-                Refuse("the resolved city bus prefab differs from the captured prefab");
+                Refuse(ticket, "the resolved city bus prefab differs from the captured prefab");
                 return;
             }
 
@@ -248,7 +279,7 @@ namespace AutomatedPublicTransportPlanning.Planning
             TransportManager tm = Singleton<TransportManager>.instance;
             if (!net.CheckLimits() || !tm.CheckLimits())
             {
-                Refuse("the network or transport line limit has been reached");
+                Refuse(ticket, "the network or transport line limit has been reached");
                 return;
             }
 
@@ -257,7 +288,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                 RouteStopSite stop = proposal.StopSites[i];
                 if (stop.SegmentId == 0 || stop.SegmentId >= net.m_segments.m_buffer.Length)
                 {
-                    Refuse("stop " + i + " references an invalid segment id");
+                    Refuse(ticket, "stop " + i + " references an invalid segment id");
                     return;
                 }
 
@@ -266,7 +297,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                     segment.m_buildIndex != stop.SegmentBuildIndex ||
                     !StopPlacement.IsSegmentUsableForStops(stop.SegmentId, busInfo))
                 {
-                    Refuse("stop " + i + " no longer matches its captured segment or bus lane");
+                    Refuse(ticket, "stop " + i + " no longer matches its captured segment or bus lane");
                     return;
                 }
 
@@ -284,7 +315,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                     (livePosition - stop.Position).sqrMagnitude > 0.25f ||
                     !StopPlacement.CanAnchorStop(livePosition, busInfo))
                 {
-                    Refuse("stop " + i + " no longer resolves to the captured lane and position");
+                    Refuse(ticket, "stop " + i + " no longer resolves to the captured lane and position");
                     return;
                 }
             }
@@ -293,7 +324,7 @@ namespace AutomatedPublicTransportPlanning.Planning
             if (!tm.CreateLine(out lineId, ref Singleton<SimulationManager>.instance.m_randomizer, busInfo, true) ||
                 lineId == 0)
             {
-                Refuse("CreateLine returned false");
+                Refuse(ticket, "CreateLine returned false");
                 return;
             }
 
@@ -305,7 +336,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                     if (!tm.m_lines.m_buffer[lineId].AddStop(lineId, -1, stop.Position, stop.FixedPlatform))
                     {
                         tm.ReleaseLine(lineId);
-                        SetStatus(Strings.RouteStatusFailed, 0);
+                        SetStatus(ticket, Strings.RouteStatusFailed, 0);
                         Log.Error("AddStop rejected planned stop " + i + " on segment " + stop.SegmentId +
                             "; released line " + lineId + ".");
                         return;
@@ -315,7 +346,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                 if (tm.m_lines.m_buffer[lineId].CountStops(lineId) != proposal.StopSites.Count)
                 {
                     tm.ReleaseLine(lineId);
-                    SetStatus(Strings.RouteStatusFailed, 0);
+                    SetStatus(ticket, Strings.RouteStatusFailed, 0);
                     Log.Error("The game did not retain all planned stop sites on line " + lineId + "; released it.");
                     return;
                 }
@@ -324,7 +355,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                 if (firstStop == 0)
                 {
                     tm.ReleaseLine(lineId);
-                    SetStatus(Strings.RouteStatusFailed, 0);
+                    SetStatus(ticket, Strings.RouteStatusFailed, 0);
                     Log.Error("Created line " + lineId + " has no first stop; released it.");
                     return;
                 }
@@ -334,7 +365,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                         proposal.StopSites[0].FixedPlatform) || !tm.m_lines.m_buffer[lineId].Complete)
                 {
                     tm.ReleaseLine(lineId);
-                    SetStatus(Strings.RouteStatusFailed, 0);
+                    SetStatus(ticket, Strings.RouteStatusFailed, 0);
                     Log.Error("Could not close planned line " + lineId + "; released it.");
                     return;
                 }
@@ -346,16 +377,22 @@ namespace AutomatedPublicTransportPlanning.Planning
                 if (!renamed)
                 {
                     tm.ReleaseLine(lineId);
-                    SetStatus(Strings.RouteStatusFailed, 0);
+                    SetStatus(ticket, Strings.RouteStatusFailed, 0);
                     Log.Error("SetLineName failed for planned line " + lineId + "; released it.");
                     return;
                 }
 
                 tm.UpdateLine(lineId);
-                s_pendingLineId = lineId;
-                s_pendingStopCount = proposal.StopSites.Count;
-                s_pendingFrames = 0;
-                SetStatus(Strings.RouteStatusChecking, lineId);
+                s_requestGate.TryPublish(ticket, delegate
+                {
+                    s_pendingTicket = ticket;
+                    s_pendingLineId = lineId;
+                    s_pendingStopCount = proposal.StopSites.Count;
+                    s_pendingFrames = 0;
+                    s_pendingTransport = tm;
+                    s_pendingNet = net;
+                    SetStatus(Strings.RouteStatusChecking, lineId);
+                });
                 Log.Info("Created planned line " + lineId + " with " + proposal.StopSites.Count +
                     " distinct stops; asynchronous connection/path checks are pending.");
             }
@@ -373,33 +410,49 @@ namespace AutomatedPublicTransportPlanning.Planning
                 {
                     Log.Exception("Rolling back incomplete planned line " + lineId + " failed", rollbackException);
                 }
-                if (s_pendingLineId == lineId)
+                s_requestGate.TryPublish(ticket, delegate
                 {
-                    s_pendingLineId = 0;
-                    s_pendingStopCount = 0;
-                    s_pendingFrames = 0;
-                }
-                SetStatus(Strings.RouteStatusFailed, 0);
+                    if (object.ReferenceEquals(s_pendingTicket, ticket) && s_pendingLineId == lineId)
+                    {
+                        s_pendingTicket = null;
+                        s_pendingLineId = 0;
+                        s_pendingStopCount = 0;
+                        s_pendingFrames = 0;
+                        s_pendingTransport = null;
+                        s_pendingNet = null;
+                    }
+                });
+                SetStatus(ticket, Strings.RouteStatusFailed, 0);
                 throw;
             }
         }
 
-        private static void Refuse(string reason)
+        private static void Refuse(RouteEditRequestTicket ticket, string reason)
         {
-            SetStatus(Strings.RouteStatusRefused, 0);
+            SetStatus(ticket, Strings.RouteStatusRefused, 0);
             Log.Warning("Refused planned route creation: " + reason + ".");
         }
 
-        private static void FinishPending(string statusKey)
+        private static void FinishPending(RouteEditRequestTicket ticket, string statusKey)
         {
-            ushort lineId = s_pendingLineId;
-            s_pendingLineId = 0;
-            s_pendingStopCount = 0;
-            s_pendingFrames = 0;
-            Interlocked.Exchange(ref s_requestPending, 0);
-            SetStatus(statusKey, lineId);
+            s_requestGate.TryPublish(ticket, delegate
+            {
+                ushort lineId = s_pendingLineId;
+                s_pendingTicket = null;
+                s_pendingLineId = 0;
+                s_pendingStopCount = 0;
+                s_pendingFrames = 0;
+                s_pendingTransport = null;
+                s_pendingNet = null;
+                SetStatus(statusKey, lineId);
+                s_requestGate.Complete(ticket);
+            });
         }
 
+        private static void SetStatus(RouteEditRequestTicket ticket, string key, ushort lineId)
+        {
+            s_requestGate.TryPublish(ticket, delegate { SetStatus(key, lineId); });
+        }
         private static void SetStatus(string key, ushort lineId)
         {
             lock (s_statusLock)

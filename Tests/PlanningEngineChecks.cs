@@ -23,6 +23,8 @@ internal static class PlanningEngineChecks
         Run("route edit plans retain identity, isolate inputs and reject unsafe or stale edits", RouteEditPlanChecks.Run);
         Run("route execution verifies observed recovery and refuses invalidated writes", RouteEditExecutionChecks.Run);
         Run("route edit request ownership rejects stale completion after reset", RouteEditRequestGateChecks.Run);
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+        Run("compiled Development DLL owns lifecycle callbacks", CompiledLifecycleChecks.Run);
         // Contributor: OpenAI-Codex_manual_input_tests
         Run("manual route input validates order, road directions and malformed tokens", RouteManualInputChecks.Run);
         Run("ordinary road classification is independent of placement flag", RouteStreetStopChecks.Run);

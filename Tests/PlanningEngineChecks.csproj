@@ -89,6 +89,8 @@
     <Compile Include="RouteEditExecutionChecks.cs" />
     <Compile Include="..\Source\Planning\RouteEditExecution.cs"><Link>Production\RouteEditExecution.cs</Link></Compile>
     <Compile Include="RouteEditRequestGateChecks.cs" />
+    <!-- Signature: OpenAI-Codex_Automated_Public_Transport_Planning -->
+    <Compile Include="CompiledLifecycleChecks.cs" />
     <!-- Contributor: OpenAI-Codex_manual_input_tests -->
     <Compile Include="RouteManualInputChecks.cs" />
     <Compile Include="..\Source\Planning\RouteManualInput.cs"><Link>Production\RouteManualInput.cs</Link></Compile>

@@ -25,6 +25,9 @@ namespace AutomatedPublicTransportPlanning.Planning
         private static readonly object s_displayLock = new object();
         // OpenAI-Codex: publish immutable previews safely to the Development settings UI.
         private static readonly object s_previewLock = new object();
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+        private static readonly RouteEditRequestGate s_workerGate = new RouteEditRequestGate();
+        private static RouteEditRequestTicket s_captureTicket;
         private static string s_display = "No planning preview has been generated in this city session.";
         private static PlanningPreviewResult s_latestPreview;
         private static int s_previewGeneration;
@@ -88,8 +91,14 @@ namespace AutomatedPublicTransportPlanning.Planning
 
         public static void ClearLatestPreview()
         {
-            Interlocked.Increment(ref s_previewGeneration);
-            lock (s_previewLock) { s_latestPreview = null; }
+            s_workerGate.Reset(delegate
+            {
+                lock (s_previewLock)
+                {
+                    Interlocked.Increment(ref s_previewGeneration);
+                    s_latestPreview = null;
+                }
+            });
         }
 
         public static bool RequestPreview()
@@ -105,6 +114,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                 s_display = "Waiting for the next simulation frame to start a read-only capture.";
             }
             ClearLatestPreview();
+            if (!s_workerGate.TryBegin(out s_captureTicket)) { return false; }
             s_captureGeneration = Interlocked.CompareExchange(ref s_previewGeneration, 0, 0);
             Log.Info("Planning preview requested; the city will be read in simulation-frame slices.");
             return true;
@@ -505,6 +515,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                 elapsed, sliceWork, s_totalRequestMaxSliceMillis, s_busPrefabName);
             s_busy = true;
             int previewGeneration = s_captureGeneration;
+            RouteEditRequestTicket workerTicket = s_captureTicket;
             UpdateDisplay("Capture validated; computing demand and route proposals on copied data. Retries=" +
                           (s_attempt - 1) + ".");
             Log.Info("Planning capture validated; attempts=" + s_attempt + ", retries=" + (s_attempt - 1) +
@@ -522,20 +533,23 @@ namespace AutomatedPublicTransportPlanning.Planning
 
             ThreadPool.QueueUserWorkItem(delegate(object state)
             {
-                try
+                s_workerGate.RunOwned(workerTicket, delegate
                 {
                     PlanningPreviewResult result = PlanningEngine.CreatePreview((PlanningSnapshot)state);
                     string description = result.Describe();
                     bool published = false;
-                    lock (s_previewLock)
+                    s_workerGate.TryPublish(workerTicket, delegate
                     {
-                        if (previewGeneration == Interlocked.CompareExchange(ref s_previewGeneration, 0, 0))
+                        lock (s_previewLock)
                         {
-                            s_latestPreview = result;
-                            UpdateDisplay(description);
-                            published = true;
+                            if (previewGeneration == Interlocked.CompareExchange(ref s_previewGeneration, 0, 0))
+                            {
+                                s_latestPreview = result;
+                                UpdateDisplay(description);
+                                published = true;
+                            }
                         }
-                    }
+                    });
 
                     if (published)
                     {
@@ -545,16 +559,18 @@ namespace AutomatedPublicTransportPlanning.Planning
                     {
                         Log.Info("Discarded a planning preview completed after its city session changed.");
                     }
-                }
-                catch (Exception e)
+                }, delegate(Exception e)
                 {
                     Log.Exception("Planning preview worker failed", e);
-                    UpdateDisplay("Planning preview failed during pure-data calculation: " + e.GetType().Name + ": " + e.Message);
-                }
-                finally
+                    s_workerGate.TryPublish(workerTicket, delegate
+                    {
+                        UpdateDisplay("Planning preview failed during pure-data calculation: " + e.GetType().Name + ": " + e.Message);
+                    });
+                }, delegate
                 {
-                    s_busy = false;
-                }
+                    s_workerGate.TryPublish(workerTicket, delegate { s_busy = false; });
+                    s_workerGate.Complete(workerTicket);
+                });
             }, snapshot);
         }
 

@@ -8,12 +8,28 @@ permissions:
   contents: read
 jobs:
   compile:
-    if: github.ref == 'refs/heads/Automated_Public_Transport_Planning'
+    # Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+    outputs:
+      artifact-id: ${{ steps.public-assets.outputs.artifact-id }}
+      build-attempt: ${{ steps.build-identity.outputs.attempt }}
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Automated_Public_Transport_Planning'
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
       - name: Check out module
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Record compile attempt
+        id: build-identity
+        shell: pwsh
+        run: '"attempt=$env:GITHUB_RUN_ATTEMPT" >> $env:GITHUB_OUTPUT'
+      - name: Check release provenance contracts
+        shell: pwsh
+        run: |
+          python -B -m unittest discover -s Tests -p test_release_provenance.py -v
+          exit $LASTEXITCODE
       - name: Check out pinned encrypted references and restore helper
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -74,13 +90,15 @@ jobs:
         run: ./.github/scripts/Prepare-Release.ps1
       - name: Transfer only public assets
         uses: actions/upload-artifact@v4
+        id: public-assets
         with:
-          name: aptp-public-assets
+          name: aptp-public-assets-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/aptp-release-assets/*
           if-no-files-found: error
           retention-days: 1
   publish:
     needs: compile
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Automated_Public_Transport_Planning'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -88,12 +106,26 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Validate compile identity before download
+        shell: bash
+        env:
+          RELEASE_ARTIFACT_ID: ${{ needs.compile.outputs.artifact-id }}
+          RELEASE_BUILD_ATTEMPT: ${{ needs.compile.outputs.build-attempt }}
+        run: |
+          [[ "$RELEASE_ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]] || exit 1
+          [[ "$RELEASE_BUILD_ATTEMPT" =~ ^[1-9][0-9]*$ ]] || exit 1
       - uses: actions/download-artifact@v4
         with:
-          name: aptp-public-assets
+          artifact-ids: ${{ needs.compile.outputs.artifact-id }}
+          github-token: ${{ github.token }}
+          run-id: ${{ github.run_id }}
+          merge-multiple: true
           path: release-assets
       - name: Create draft, verify uploaded assets, then publish prerelease
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_ARTIFACT_ID: ${{ needs.compile.outputs.artifact-id }}
+          RELEASE_BUILD_ATTEMPT: ${{ needs.compile.outputs.build-attempt }}
         run: python3 .github/scripts/Publish-Release.py
