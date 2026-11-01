@@ -1,4 +1,5 @@
 # Signature: OpenAI-Codex_Responsible: Realistic_City_Time
+# Cloud build/run wiring: OpenAI-Codex_Realistic_City_Time
 name: Realistic City Time pure model
 on:
   push:
@@ -15,11 +16,30 @@ jobs:
       (github.event_name != 'pull_request' && github.ref == 'refs/heads/Realistic_City_Time')
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - name: Run dependency-free model checks on hosted SDK
-        env:
-          DOTNET_CLI_TELEMETRY_OPTOUT: '1'
-        run: dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release
+      - name: Verify preinstalled stable .NET 8 SDK (infrastructure prerequisite)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! sdk_version="$(dotnet --version)"; then
+            echo 'SDK selection failed; infrastructure prerequisite, not a model RED result.' >&2
+            exit 1
+          fi
+          if [[ ! "$sdk_version" =~ ^8\.0\.[0-9]+$ ]]; then
+            echo 'Required preinstalled stable .NET 8 SDK is unavailable; this is not a model RED result.' >&2
+            exit 1
+          fi
+          printf 'Selected hosted SDK: %s\n' "$sdk_version"
+      - name: Restore framework-only test project (infrastructure prerequisite)
+        run: dotnet restore tests/ClockModel.Tests/ClockModel.Tests.csproj --configfile tests/ClockModel.Tests/NuGet.Config
+      - name: Compile arithmetic model and observation contract checks
+        run: dotnet build tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-restore
+      - name: Execute both check suites without implicit build or restore
+        run: dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-build --no-restore

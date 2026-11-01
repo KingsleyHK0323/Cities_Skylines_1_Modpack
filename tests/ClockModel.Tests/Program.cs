@@ -1,4 +1,5 @@
 // Signature: OpenAI-Codex_Responsible: Realistic_City_Time
+// Local implementation review: OpenAI-Codex_Realistic_City_Time
 using System;
 using System.Reflection;
 
@@ -38,7 +39,7 @@ internal static class Program
         try
         {
             if (Model == null) throw new Exception("Missing ClockModel: decimal multiplier behavior is not implemented");
-            Test("default multiplier is one", () => Equal(1m, Model.GetField("DefaultMultiplier").GetRawConstantValue()));
+            Test("default multiplier is one", () => Equal(1m, Model.GetField("DefaultMultiplier").GetValue(null)));
             foreach (var pair in new[] { ("1", 1m), ("10", 10m), ("1.25", 1.25m), ("9.999", 9.999m) })
                 Test("parse " + pair.Item1, () => Equal(pair.Item2, Call(New(3), "ParseMultiplier", pair.Item1)));
             foreach (string input in new[] { "", "abc", "NaN", "Infinity", "-Infinity", "0.5", "0", "10.001", "1,25", "1e0", " 1.25 ", "+1.25" })
@@ -60,7 +61,14 @@ internal static class Program
             Test("invalid multiplier preserves remainder", () => {var m=New(3); Advance(m,1,1.5m); Reject<ArgumentException>(()=>Advance(m,1,11m)); Equal(2L,Advance(m,1,1.5m)); });
             Test("explicit reset clears fractional remainder", () => {var m=New(3); Advance(m,1,1.5m); Call(m,"Reset"); Equal(1L,Advance(m,1,1.5m)); });
             Test("zero elapsed does not advance", () => {var m=New(3); Advance(m,1,1.5m); Equal(0L,Advance(m,0,1m)); Equal(2L,Advance(m,1,1.5m)); });
-            Console.WriteLine($"Passed {count} model checks; no game adapter or gameplay tested.");
+            Test("precision cannot be negative", () => Reject<ArgumentOutOfRangeException>(() => New(-1)));
+            Test("no decimal parser rounding past policy", () => Reject<ArgumentException>(() => Call(New(28),"ParseMultiplier","1.00000000000000000000000000001")));
+            Test("no silent rounding of in-policy significant digits", () => Reject<ArgumentException>(() => Call(New(28),"ParseMultiplier","9." + new string('9',28))));
+            Test("maximum precision remains exact for large elapsed values", () => {var m=New(28); decimal rate=1.0000000000000000000000000001m; Equal(long.MaxValue,Advance(m,long.MaxValue,rate)); Equal(1L,Advance(m,1,1m)); });
+            Test("stored trailing zeros remain exact", () => Equal(5L,Advance(New(2),4,1.2500m)));
+            Test("decimal syntax rejects multiple points and punctuation", () => {var m=New(3); foreach(var s in new[]{".","1..2","1/2","--1","１.２"}) Reject<ArgumentException>(()=>Call(m,"ParseMultiplier",s)); });
+            ClockInputTests.Run();
+            Console.WriteLine($"Passed {count} model checks plus observation contract checks; no live game reader or gameplay tested.");
             return 0;
         }
         catch(Exception ex) { Console.Error.WriteLine(ex); return 1; }
