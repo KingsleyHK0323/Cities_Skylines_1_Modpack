@@ -35,9 +35,9 @@ export default defineConfig({
 				{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
 			],
 			sidebar: [
-				// Always use the English guide, including from translated navigation.
+				// Localize download and status destinations through matching content slugs.
 				// OpenAI-Codex_Responsible: Modpack_Website.
-				{ label: 'Downloads', items: [{ label: 'Development downloads', link: '/wiki/development-downloads/' }] },
+				{ label: 'Downloads', translations: { 'zh-TW': '下載' }, items: [{ label: 'Development downloads', translations: { 'zh-TW': '開發版下載' }, slug: 'wiki/development-downloads' }] },
 				{ label: 'Start here', translations: { 'zh-TW': '從這裡開始' }, items: [{ slug: 'wiki', label: 'Wiki home', translations: { 'zh-TW': 'Wiki 首頁' } }, { slug: 'wiki/getting-started', label: 'Getting started', translations: { 'zh-TW': '開始使用' } }] },
 				{ label: 'AI Improve', translations: { 'zh-TW': 'AI Improve' }, items: [
 					{ slug: 'wiki/ai-improve/overview', label: 'Overview', translations: { 'zh-TW': '總覽' } },
@@ -52,7 +52,7 @@ export default defineConfig({
 					{ slug: 'wiki/ai-gaming/overview', label: 'AI Gaming', translations: { 'zh-TW': 'AI Gaming' } },
 				] },
 				{ label: 'Project', translations: { 'zh-TW': '專案' }, items: [
-					{ label: 'Module status and targets (English)', link: '/wiki/project/status/' },
+					{ label: 'Module status and targets', translations: { 'zh-TW': '模組狀態與替代目標' }, slug: 'wiki/project/status' },
 					{ slug: 'wiki/project/roadmap', label: 'Roadmap', translations: { 'zh-TW': '路線圖' } },
 					{ slug: 'wiki/project/contributing', label: 'Contributing & license', translations: { 'zh-TW': '參與與授權' } },
 				] },
@@ -60,3 +60,5 @@ export default defineConfig({
 		}),
 	],
 });
+
+// Author: OpenAI-Codex.

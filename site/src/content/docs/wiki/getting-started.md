@@ -14,7 +14,7 @@ Automated Public Transport Planning and AI Gaming need no other mods.
 
 ## 2. Choose Release or Development
 
-Stable editions use Steam Workshop. Experimental GitHub Development builds are downloaded and installed separately; older Development Workshop items may contain different versions.
+Stable editions use Steam Workshop. Experimental GitHub Development builds are downloaded and installed separately; Development editions have been removed from Steam Workshop.
 
 | | Stable Release | GitHub Development build |
 | --- | --- | --- |
@@ -37,3 +37,5 @@ Open an issue with the [issue forms](https://github.com/KingsleyHK0323/Cities_Sk
 <!-- Updated by OpenAI-Codex on 2026-10-26. -->
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Author: OpenAI-Codex. -->

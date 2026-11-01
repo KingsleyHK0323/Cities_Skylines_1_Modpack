@@ -1,15 +1,15 @@
 ---
 title: Automated Public Transport Planning
-description: "Survey diagnostics, Development route proposals and the limits of confirmed route-creation attempts."
+description: "城市調查診斷、開發版路線提案，以及確認後嘗試建立路線的限制。"
 ---
 
-> **Development build update, 31 October 2026:** The GitHub Development prototype can attempt to create a selected route after arming and confirmation; it can change a save and is not read-only. Successful route creation and save/reload have not been established in subscribed-game acceptance. See [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/).
+> **開發版更新，2026 年 10 月 31 日：**GitHub 開發原型可在解鎖功能並確認後，嘗試建立所選路線；它可能修改存檔，並非唯讀工具。成功建立路線及儲存／重新載入尚未通過工作坊訂閱版本的遊戲驗收。請見[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)。
 
-Automated Public Transport Planning's Development prototype estimates city-bus routes and can attempt to create a selected proposal after arming and confirmation. The prototype may change saves and does not guarantee runnable routes. Other transport types remain a future direction.
+Automated Public Transport Planning 的開發原型會估算市內公車路線，並可在解鎖功能及確認後，嘗試建立所選提案。原型可能修改存檔，不保證路線能夠運行。其他交通類型仍屬未來方向。
 
-## Survey diagnostics
+## 城市調查與診斷
 
-- **City survey.** The mod reads roads, stops and the transit network in the background. This survey is read-only; the separate Development creation prototype can change a save.
+- **城市調查。**模組在背景讀取道路、站點與公共運輸網絡。調查本身只讀取資料；另一項開發版路線建立原型則可能修改存檔。
 - **模組選項中的診斷工具。**每個按鈕都會把結果寫入遊戲記錄：
 
 | 按鈕 | 回報內容 |
@@ -24,17 +24,19 @@ Automated Public Transport Planning's Development prototype estimates city-bus r
 
 ## 目前還不能做什麼
 
-The older 0.2.0 Release preview does not create, change or suggest bus lines. The Development prototype focuses on city buses; additional transport types remain future directions. See the [roadmap](/Cities_Skylines_1_Modpack/zh-tw/wiki/project/roadmap/).
+較早的 0.2.0 正式預覽版不會建立、修改或建議公車路線。開發原型專注於市內公車；其他交通類型仍屬未來方向。請見[路線圖](/Cities_Skylines_1_Modpack/zh-tw/wiki/project/roadmap/)。
 
-## Development 版
+## 開發版
 
-Development 版是公開測試版，使用前請先備份存檔。
+GitHub 開發版是公開測試版，使用前請先備份存檔。Steam 工作坊開發版已下架。
 
-- **規劃預覽（測試中）。**按「Generate a read-only planning preview」，會依城市需求估算市內公車路線，並列出評分。不會建立或修改任何路線。這些估算尚未經遊戲本身的尋路驗證。
-- **Route-creation prototype.** A selected proposal can be submitted for creation after the feature is armed and each attempt is confirmed. Proposals do not guarantee connected or runnable routes. Successful creation and save/reload remain unverified in subscribed-game acceptance; use a backup and a separate test city.
+- **規劃預覽（測試中）。**按「Generate a read-only planning preview」（產生唯讀規劃預覽），會依城市需求估算市內公車路線，並列出評分。不會建立或修改任何路線。這些估算尚未經遊戲本身的尋路驗證。
+- **路線建立原型。**解鎖功能並逐次確認後，可提交所選提案嘗試建立路線。提案不保證路線連通或能夠運行。成功建立路線及儲存／重新載入尚未通過工作坊訂閱版本的遊戲驗收；請備份存檔並使用獨立測試城市。
 
 ## 協助測試
 
 在不同規模的城市上執行診斷工具，並在[回報結果或問題](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/issues/new/choose)時附上記錄內容。這能幫助規劃器在推出前調整得更好。
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Author: OpenAI-Codex_zh_docs. -->

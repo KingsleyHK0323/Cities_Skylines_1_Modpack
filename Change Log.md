@@ -2,6 +2,13 @@
 
 Author: OpenAI-Codex
 
+## 2026-11-01 — Workshop Development removal and complete Chinese navigation
+
+- Marked Steam Workshop Development editions as removed while retaining separate GitHub prerelease downloads.
+- Localized shared notices, project summaries, documentation destinations and Chinese page content, including the change log.
+- Added Traditional Chinese installation and module-status guides and localized sidebar labels.
+- Author: OpenAI-Codex.
+
 ## 2026-11-01 — Illustration semantics and preference controls
 
 - Replaced the transport illustration's tab semantics with a caption-selection button group, retaining arrow/Home/End navigation, preserving browser modifier shortcuts, and adding a readable polite status message.

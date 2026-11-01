@@ -9,13 +9,13 @@ description: "如何回報問題、提出建議，以及在哪裡找到 Modpack 
 
 請不要在 Issue 中張貼 Steam 密碼、Steam Guard 驗證碼、API key 或其他私人資料。
 
-## 測試 Development 版
+## 測試 開發版
 
-AI Gaming, AI Improve, and Automated Public Transport Planning have experimental GitHub Development prereleases. Back up your saves and use a separate test city. Enable only one copy of each mod, and read the [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/) guide before reporting results.
+AI Gaming、AI Improve 及 Automated Public Transport Planning 提供實驗性 GitHub 開發預覽版本。請備份存檔、使用獨立測試城市，並只啟用每個模組的一個版本。回報結果前，請閱讀[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)指南。
 
 ## 原始碼
 
-每個模組都放在 [Modpack repository](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack) 的獨立分支：
+每個模組都放在 [Modpack 原始碼儲存庫](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack) 的獨立分支：
 
 | 模組 | 分支 |
 | --- | --- |
@@ -31,3 +31,5 @@ Modpack 為原始碼可得的非商業專案。模組與網站程式碼採用 [*
 <!-- Updated by OpenAI-Codex on 2026-10-27. -->
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Author: OpenAI-Codex_zh_docs. -->

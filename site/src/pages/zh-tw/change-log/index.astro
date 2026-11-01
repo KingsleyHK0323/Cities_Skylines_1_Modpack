@@ -1,9 +1,12 @@
 ---
 import SiteLayout from '../../../layouts/SiteLayout.astro';
 import { changeEntries } from '../../../lib/changelog';
+import { getLocalizedChangeEntries } from '../../../data/changelog-zh-tw';
+const localizedEntries = getLocalizedChangeEntries(changeEntries);
 ---
 
 <SiteLayout title="更新紀錄" description="從網站分支 Change Log.md 讀取的專案更新。" locale="zh-tw" path="change-log/" active="change-log">
 	<section class="page-hero page-wrap"><p class="eyebrow">專案記錄</p><h1>更新紀錄</h1><p>此頁於建置時讀取網站分支的 <code>Change Log.md</code>，並按日期排序。</p></section>
-	<section class="section soft"><div class="page-wrap changelog-list">{changeEntries.map((entry) => <article class="changelog-entry"><h2>{entry.date} — {entry.title}</h2>{entry.bullets.length > 0 && <ul>{entry.bullets.map((bullet) => <li>{bullet}</li>)}</ul>}</article>)}</div></section>
+	<section class="section soft"><div class="page-wrap changelog-list">{localizedEntries.map((entry) => <article class="changelog-entry"><h2>{entry.date} — {entry.title}</h2>{entry.bullets.length > 0 && <ul>{entry.bullets.map((bullet) => <li>{bullet}</li>)}</ul>}</article>)}</div></section>
 </SiteLayout>
+<!-- Author: OpenAI-Codex_header_review. -->

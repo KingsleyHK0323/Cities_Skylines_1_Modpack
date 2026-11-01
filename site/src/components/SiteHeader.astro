@@ -23,7 +23,7 @@ const text = locale === 'zh-tw';
 				<a href={href('ai-gaming/')}>AI Gaming</a>
 			</div>
 		</details>
-		<a href={base + 'wiki/project/status/'} lang="en">Status</a>
+		<a href={href('wiki/project/status/')}>{text ? '專案狀態' : 'Status'}</a>
 		<a class:list={{ current: active === 'wiki' }} href={href('wiki/')}>Wiki</a>
 		<a class:list={{ current: active === 'change-log' }} href={href('change-log/')}>{text ? '更新紀錄' : 'Change Log'}</a>
 		<a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>

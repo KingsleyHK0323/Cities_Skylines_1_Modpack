@@ -9,8 +9,8 @@ const stages = zh
 ---
 
 <section class="transport-planner" data-transport-planner data-ready="false">
-	<p class="planned-label" lang="en">Planning concept illustration</p>
-	<p lang="en">This browser diagram illustrates a planning concept; it is not an in-game screenshot. The GitHub Development prototype can preview routes and attempt creation after confirmation. It may change saves, and game acceptance remains pending.</p>
+	<p class="planned-label">{zh ? '規劃概念示意圖' : 'Planning concept illustration'}</p>
+	<p>{zh ? '此瀏覽器圖表展示規劃概念，並非遊戲截圖。GitHub 開發原型可預覽路線，並在確認後嘗試建立路線；可能改動存檔，遊戲驗收仍未完成。' : 'This browser diagram illustrates a planning concept; it is not an in-game screenshot. The GitHub Development prototype can preview routes and attempt creation after confirmation. It may change saves, and game acceptance remains pending.'}</p>
 	<div class="planner-flow" role="group" aria-describedby={captionId} aria-label={zh ? '規劃流程示意' : 'Illustrated planning steps'}>
 		{stages.map((stage, index) => <button type="button" data-stage-button={stage.id} aria-pressed={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1}>{index + 1}. {stage.label}</button>)}
 	</div>
@@ -76,3 +76,5 @@ const stages = zh
 	@media(max-width: 640px) { .planner-static { display: grid; } }
 </style>
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Author: OpenAI-Codex. -->

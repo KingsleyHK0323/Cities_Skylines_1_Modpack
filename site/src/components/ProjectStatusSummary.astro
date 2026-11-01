@@ -1,12 +1,15 @@
 ---
+interface Props { locale?: 'en' | 'zh-tw'; }
+const { locale = 'en' } = Astro.props;
+const zh = locale === 'zh-tw';
 const base = import.meta.env.BASE_URL;
 ---
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
-<aside class="project-status-summary" lang="en" aria-label="Project status">
+<aside class="project-status-summary" lang={zh ? 'zh-TW' : 'en'} aria-label={zh ? '專案狀態' : 'Project status'}>
 	<div class="page-wrap">
-		<p><strong>15 modules at different stages; 20 replacement targets.</strong> Targets are intentions, not completed replacements. AI Gaming development is paused. Combined-mod compatibility and subscribed-game acceptance are not established.</p>
-		<a href={base + 'wiki/project/status/'}>Module status and replacement targets (English)</a>
+		<p><strong>{zh ? '15 個模組處於不同階段；20 個替代目標。' : '15 modules at different stages; 20 replacement targets.'}</strong> {zh ? '目標代表方向，並非已完成替代。AI Gaming 開發已暫停。模組組合相容性及工作坊訂閱版本的遊戲驗收尚未確立。' : 'Targets are intentions, not completed replacements. AI Gaming development is paused. Combined-mod compatibility and subscribed-game acceptance are not established.'}</p>
+		<a href={base + (zh ? 'zh-tw/' : '') + 'wiki/project/status/'}>{zh ? '模組狀態與替代目標' : 'Module status and replacement targets'}</a>
 	</div>
 </aside>
 
@@ -15,3 +18,5 @@ const base = import.meta.env.BASE_URL;
 	p { max-width: 85ch; font-size: 15px; }
 	a { display: inline-flex; align-items: center; min-height: 44px; margin-top: 8px; overflow-wrap: anywhere; }
 </style>
+
+<!-- Author: OpenAI-Codex. -->

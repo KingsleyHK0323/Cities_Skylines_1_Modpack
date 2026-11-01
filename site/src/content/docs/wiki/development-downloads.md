@@ -3,7 +3,7 @@ title: Development downloads
 description: "Download and install the experimental Development builds of the three Cities: Skylines 1 Modpack mods."
 ---
 
-The three Development builds below are public GitHub prereleases. Download the individual release assets and follow the full instructions on the corresponding release page. Stable versions remain distributed through Steam Workshop. GitHub's automatically generated source archives are source snapshots, not installation packages.
+The three Development builds below are public GitHub prereleases. Download the individual release assets and follow the full instructions on the corresponding release page. Stable versions remain distributed through Steam Workshop. Development editions have been removed from Steam Workshop; GitHub prereleases remain a separate distribution. GitHub's automatically generated source archives are source snapshots, not installation packages.
 
 > **Save warning:** Development builds contain experimental tools and can damage saves. Back up your saves and use a separate test city. Disable other local and Workshop copies of the same mod so only one edition is enabled. Cloud builds and file checks do not establish in-game acceptance.
 
@@ -39,3 +39,5 @@ This applies to editions of the same mod; unrelated mods do not need to be disab
 To return to a stable version, exit the game and follow the individual release's uninstall instructions before enabling that mod's Steam Workshop edition. Removing a Development build does not undo changes already saved to a city.
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Author: OpenAI-Codex. -->

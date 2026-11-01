@@ -28,7 +28,7 @@ The older 0.2.0 Release preview does not create, change or suggest bus lines. Th
 
 ## Development Version
 
-The Development Version is a public test build. Back up your save before using it.
+The Development edition has been removed from Steam Workshop. Experimental builds are distributed separately through the [GitHub Development installation guide](/Cities_Skylines_1_Modpack/wiki/development-downloads/). Back up your save before using them.
 
 - **Planning preview (being tested).** The *Generate a read-only planning preview* button estimates city-bus lines from your city's demand and lists them with their scores. It does not create or change any line. The estimates are not yet checked against the game's own pathfinding.
 - **Route-creation prototype.** A selected proposal can be submitted for creation after the feature is armed and each attempt is confirmed. Proposals do not guarantee connected or runnable routes. Successful creation and save/reload remain unverified in subscribed-game acceptance; use a backup and a separate test city.
@@ -38,3 +38,5 @@ The Development Version is a public test build. Back up your save before using i
 Run the diagnostics on cities of different sizes and include the log output when you [report results or problems](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/issues/new/choose). This helps tune the planner before it arrives.
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Author: OpenAI-Codex. -->

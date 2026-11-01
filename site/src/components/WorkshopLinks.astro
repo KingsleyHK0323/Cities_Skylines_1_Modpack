@@ -11,22 +11,29 @@ const developmentReleases = {
 	transport: { name: 'Automated Public Transport Planning', tag: 'aptp-dev-41185686621-1', status: 'The GitHub Development prototype can attempt to create a selected route after confirmation and may change a save; it is not read-only.' },
 } as const;
 const developmentRelease = developmentReleases[mod];
+const translatedStatus = {
+ 'ai-gaming': 'GitHub 開發版包含配套的 Windows x64 輔助程式；遊戲內行為仍未驗證。',
+ 'ai-improve': 'GitHub 開發版需要同一版本的 CitiesHarmony.API.dll，以及 Harmony 工作坊模組。',
+ transport: 'GitHub 開發原型可在確認後嘗試建立所選路線，可能改動存檔，並非唯讀工具。',
+};
+const downloadLabel = zh ? '下載 ' + developmentRelease.name + ' 開發版' : 'Download ' + developmentRelease.name + ' Development build';
+const guide = import.meta.env.BASE_URL + (zh ? 'zh-tw/' : '') + 'wiki/development-downloads/';
 const labels = {
-	release: 'Steam Workshop Stable',
-	development: 'Steam Workshop Development',
+	release: zh ? 'Steam 工作坊穩定版' : 'Steam Workshop Stable',
+	development: zh ? 'Steam 工作坊開發版' : 'Steam Workshop Development',
 };
 ---
 
-<div class="workshop-links" lang="en">
-	<a class="button github-development" href={'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/' + developmentRelease.tag}>Download {developmentRelease.name} Development build <span aria-hidden="true">↗</span></a>
+<div class="workshop-links" lang={zh ? 'zh-TW' : 'en'}>
+	<a class="button github-development" href={'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/' + developmentRelease.tag}>{downloadLabel} <span aria-hidden="true">↗</span></a>
 	{(['release', 'development'] as const).map((edition) => items[edition].public
 		? <a class={edition === 'release' ? 'button' : 'button secondary'} href={workshopUrl(items[edition].id)}>{labels[edition]} <span aria-hidden="true">↗</span></a>
-		: <span class="button pending" aria-disabled="true">{labels[edition]} · {zh ? '尚未公開' : 'not yet public'}</span>)}
+		: <span class="button pending" aria-disabled="true">{labels[edition]} · {items[edition].removed ? (zh ? '已下架' : 'removed') : (zh ? '尚未公開' : 'not yet public')}</span>)}
 </div>
-<p class="workshop-note" lang="en">Workshop and GitHub Development editions are separate and may differ. Enable only one copy of each mod.</p>
-<div class="development-notice" lang="en">
-	<p><strong>GitHub Development prerelease:</strong> {developmentRelease.status}</p>
-	<p>Back up saves and test on a separate city. Do not enable this build alongside another copy. <a href={'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/' + developmentRelease.tag}>Download {developmentRelease.name} Development build</a> · <a href={import.meta.env.BASE_URL + 'wiki/development-downloads/'}>Installation and risks</a></p>
+<p class="workshop-note" lang={zh ? 'zh-TW' : 'en'}>{zh ? 'Steam 工作坊開發版已下架；GitHub 開發預覽版獨立提供。每個模組僅啟用一個版本。' : 'Steam Workshop Development editions have been removed; GitHub Development prereleases are separate. Enable only one copy of each mod.'}</p>
+<div class="development-notice" lang={zh ? 'zh-TW' : 'en'}>
+	<p><strong>{zh ? 'GitHub 開發預覽版：' : 'GitHub Development prerelease:'}</strong> {zh ? translatedStatus[mod] : developmentRelease.status}</p>
+	<p>{zh ? '請備份存檔，並使用獨立測試城市。不要同時啟用此模組的其他版本。' : 'Back up saves and test on a separate city. Do not enable this build alongside another copy.'} <a href={'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/' + developmentRelease.tag}>{downloadLabel}</a> · <a href={guide}>{zh ? '安裝與風險' : 'Installation and risks'}</a></p>
 </div>
 <style>
 	/* Prioritize the current GitHub build while preserving Workshop access.
@@ -38,3 +45,5 @@ const labels = {
 	.development-notice p:last-child { margin-bottom: 0; }
 </style>
 <!-- Updated by OpenAI-Codex on 2026-10-26. -->
+
+<!-- Author: OpenAI-Codex. -->

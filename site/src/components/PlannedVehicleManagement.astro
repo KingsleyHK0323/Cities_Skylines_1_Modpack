@@ -2,19 +2,22 @@
 import { Image } from 'astro:assets';
 import releaseIcon from '../assets/projects/Cities_Skylines_1_Automated_Public_Transport_Vehicle_Management_Release_Version.webp';
 import developmentIcon from '../assets/projects/Cities_Skylines_1_Automated_Public_Transport_Vehicle_Management_Development_Version.webp';
+interface Props { locale?: 'en' | 'zh-tw'; }
+const { locale = 'en' } = Astro.props;
+const zh = locale === 'zh-tw';
 const editions = [{ label: 'Release', icon: releaseIcon }, { label: 'Development', icon: developmentIcon }];
 ---
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
-<section class="section" lang="en" aria-labelledby="planned-vehicle-management">
+<section class="section" lang={zh ? 'zh-TW' : 'en'} aria-labelledby="planned-vehicle-management">
 	<div class="page-wrap">
 		<div class="section-heading">
-			<div><p class="eyebrow">Read-only prototype</p><h2 id="planned-vehicle-management">Automated Public Transport Vehicle Management</h2></div>
+			<div><p class="eyebrow">{zh ? '唯讀原型' : 'Read-only prototype'}</p><h2 id="planned-vehicle-management">Automated Public Transport Vehicle Management</h2></div>
 		</div>
-		<p>As of 1 November 2026, a read-only bus observation prototype has a compiled DLL and an Actions artifact. Fleet-control features remain proposals. No public Release or Steam Workshop item is available, and subscribed-game acceptance is pending.</p>
-		<p><a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41250632157">Build evidence and Actions artifact</a> · Artifact downloads may require GitHub sign-in and can expire. The reported DLL is 11,776 bytes; an Actions artifact is not a public Release.</p>
+		<p>{zh ? '截至 2026 年 11 月 1 日，唯讀巴士觀察原型已有編譯完成的 DLL 及 Actions 產物。車隊控制功能仍屬提案。目前沒有公開正式版本或 Steam 工作坊項目，訂閱版本的遊戲驗收仍未完成。' : 'As of 1 November 2026, a read-only bus observation prototype has a compiled DLL and an Actions artifact. Fleet-control features remain proposals. No public Release or Steam Workshop item is available, and subscribed-game acceptance is pending.'}</p>
+		<p><a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41250632157">{zh ? '建置證據與 Actions 產物' : 'Build evidence and Actions artifact'}</a> {zh ? '· 下載產物可能需要登入 GitHub，產物亦可能到期。已核對的 DLL 為 11,776 位元組；Actions 產物並非公開正式版本。' : '· Artifact downloads may require GitHub sign-in and can expire. The reported DLL is 11,776 bytes; an Actions artifact is not a public Release.'}</p>
 		<div class="planned-icons">
-			{editions.map(({ label, icon }) => <figure><Image src={icon} alt={'Automated Public Transport Vehicle Management ' + label + ' edition icon'} widths={[320, 640]} sizes="(max-width: 640px) 100vw, 320px" format="webp" quality={90} /><figcaption>{label} edition · planned</figcaption></figure>)}
+			{editions.map(({ label, icon }) => <figure><Image src={icon} alt={zh ? 'Automated Public Transport Vehicle Management ' + (label === 'Release' ? '正式版' : '開發版') + '圖示' : 'Automated Public Transport Vehicle Management ' + label + ' edition icon'} widths={[320, 640]} sizes="(max-width: 640px) 100vw, 320px" format="webp" quality={90} /><figcaption>{zh ? (label === 'Release' ? '正式版 · 規劃中' : '開發版 · 規劃中') : label + ' edition · planned'}</figcaption></figure>)}
 		</div>
 	</div>
 </section>
@@ -26,3 +29,5 @@ const editions = [{ label: 'Release', icon: releaseIcon }, { label: 'Development
 	figcaption { margin-top: 8px; color: var(--muted); font-size: 14px; }
 	@media (max-width: 640px) { .planned-icons { grid-template-columns: minmax(0, 320px); } }
 </style>
+
+<!-- Author: OpenAI-Codex. -->
