@@ -1,0 +1,4 @@
+# Traditional Chinese overrides for untranslated framework strings. Author: OpenAI-Codex.
+heading.anchorLabel: '章節「{{title}}」'
+page.draft: '此內容為草稿，不會包含在正式網站中。'
+builtWithStarlight.label: '使用 Starlight 製作'

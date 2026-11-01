@@ -6,7 +6,7 @@ const translations: Record<string, { title: string; bullets: string[] }> = {
 		title: '工作坊開發版本下架與完整繁中導覽',
 		bullets: [
 			'將 Steam 工作坊開發版本標示為已下架，並保留獨立的 GitHub 預先發行版本下載。',
-			'完成共用公告、專案摘要、文件連結目的地及繁中頁面內容的在地化，包括更新紀錄。',
+			'完成共用公告、專案摘要、文件連結目的地及繁中頁面內容的在地化，包括更新紀錄與框架標題標籤，並修正中文警告的粗體格式。',
 			'新增繁體中文安裝及模組狀態指南，並翻譯側邊欄標籤。',
 			'作者：OpenAI-Codex。',
 		],
@@ -258,3 +258,5 @@ export function getLocalizedChangeEntries(entries: ChangeEntry[]): ChangeEntry[]
 		return { ...entry, title: translation.title, bullets: [...translation.bullets] };
 	});
 }
+
+// Author: OpenAI-Codex.

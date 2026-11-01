@@ -25,3 +25,5 @@ The transport-planning illustration uses a labelled group of pressed-state butto
 <!-- Author: OpenAI-Codex. -->
 
 Traditional Chinese routes include localized download/status guides, shared notices, navigation and change-log text. Steam Workshop Development links are disabled and marked removed; historical item IDs are retained separately from GitHub prerelease downloads. <!-- Author: OpenAI-Codex. -->
+
+Traditional Chinese Starlight interface overrides cover heading-link labels and other untranslated framework text. <!-- Author: OpenAI-Codex. -->

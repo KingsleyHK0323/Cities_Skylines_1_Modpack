@@ -3,7 +3,7 @@ title: AI Gaming
 description: "0.4.0 開發版原始碼的功能、逐次確認流程，以及套件和執行限制。"
 ---
 
-> **開發版更新，2026 年 10 月 31 日：**GitHub 發布檔案包括 Windows x64 輔助程式及配對 DLL。遊戲內執行行為尚未驗證。請見[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)。
+> **開發版更新，2026 年 10 月 31 日：** GitHub 發布檔案包括 Windows x64 輔助程式及配對 DLL。遊戲內執行行為尚未驗證。請見[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)。
 
 **0.4.0 開發版原始碼**加入可選的 Windows 輔助程式，讓玩家透過 Ollama Local 取得建議。它不會操控模擬。其他玩法仍屬規劃中。
 
