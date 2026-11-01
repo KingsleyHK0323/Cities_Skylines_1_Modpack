@@ -1,3 +1,4 @@
+// Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
 // Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management
 using System;
 using System.Text;
@@ -5,6 +6,7 @@ using ICities;
 using ColossalFramework;
 using AutomatedPublicTransportVehicleManagement.Game;
 using AutomatedPublicTransportVehicleManagement.Model;
+using AutomatedPublicTransportVehicleManagement.State;
 using AutomatedPublicTransportVehicleManagement.Ui;
 
 namespace AutomatedPublicTransportVehicleManagement.Lifecycle
@@ -28,7 +30,7 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
         internal static void Unload() { Load(false); }
         internal static void Request()
         {
-            lock (Gate) { if (!active) { display = "No playable city loaded."; return; } requested = true; display = "Capture requested; waiting for simulation frames."; }
+            lock (Gate) { if (!active) { display = "No playable city loaded."; return; } requested = true; capture = null; display = "Capture requested; waiting for simulation frames."; }
         }
         internal static void Step()
         {
@@ -49,7 +51,8 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
                     for (; cursor < end; cursor++)
                     {
                         LineObservation observation;
-                        if (LineReader.TryCapture((ushort)cursor, session, sequence, out observation))
+                        if (LineReader.TryCapture((ushort)cursor, captureSession, sequence, out observation) &&
+                            ObservationGate.CanDisplay(observation, new LineKey(captureSession, (ushort)cursor, sequence)))
                         {
                             // Cap presentation size independently of the number of scanned slots.
                             if (capture.Length < 24000)
@@ -60,7 +63,7 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
                     }
                     if (cursor >= size)
                     {
-                        display = capture.ToString() + (capture.Length >= 24000 ? "\nDisplay truncated; refresh to recapture." : "\nCapture complete. Values are a historical census, not live dispatch state.");
+                        display = "City session " + captureSession + "; observation " + sequence + ".\n" + capture.ToString() + (capture.Length >= 24000 ? "\nDisplay truncated; refresh to recapture." : "\nCapture complete. Values are a historical census, not live dispatch state.");
                         capture = null;
                     }
                 }
@@ -80,8 +83,28 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
     }
     public sealed class ObservationThreadingExtension : ThreadingExtensionBase
     {
-        public override void OnReleased() { CitySession.Unload(); ObservationPanel.Release(); base.OnReleased(); }
-        public override void OnAfterSimulationFrame() { CitySession.Step(); }
-        public override void OnUpdate(float realTimeDelta, float simulationTimeDelta) { ObservationPanel.Update(); }
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+        // Serialize release with this instance's callbacks; a retired instance cannot touch a later city.
+        private readonly object callbackGate = new object();
+        private bool released;
+        public override void OnReleased()
+        {
+            lock (callbackGate)
+            {
+                if (released) return;
+                released = true;
+                CitySession.Unload();
+                ObservationPanel.Release();
+                base.OnReleased();
+            }
+        }
+        public override void OnAfterSimulationFrame()
+        {
+            lock (callbackGate) { if (!released) CitySession.Step(); }
+        }
+        public override void OnUpdate(float realTimeDelta, float simulationTimeDelta)
+        {
+            lock (callbackGate) { if (!released) ObservationPanel.Update(); }
+        }
     }
 }

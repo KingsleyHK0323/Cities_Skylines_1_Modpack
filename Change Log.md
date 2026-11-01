@@ -28,3 +28,21 @@ Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Manageme
 - Preserve a reusable settings binding across city unload; invalidate capture state and clear bindings when the threading extension is released.
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management
+
+## Unreleased - Local observation validity
+
+- Reject stale or mismatched observation identities and negative counts before rendering captured rows.
+- Cancel an in-progress census immediately on refresh and label completed historical captures with session and sequence.
+- Add eight model check cases; execution and cloud compilation remain pending authorization.
+- Preserve the existing first-Workshop candidate unchanged; no new DLL has been built.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+
+- Serialize threading-extension callbacks with one-time release; ignore callbacks from an already retired instance. Source inspection only; cloud and game validation pending.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+
+- Add a cloud-only harness linking the production threading extension and city-session implementation; nine wiring assertions block artifact upload on failure.
+- Keep the existing 21 model cases, real game-reference compilation and artifact/provenance safeguards. Harness execution remains pending authorization.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management

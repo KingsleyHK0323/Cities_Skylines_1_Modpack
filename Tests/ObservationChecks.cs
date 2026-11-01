@@ -1,3 +1,4 @@
+// Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
 // Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Vehicle_Management
 using System;
 using AutomatedPublicTransportVehicleManagement.Model;
@@ -39,6 +40,14 @@ internal static class ObservationChecks
                 "PartialObservation_DoesNotInventTarget");
             Check(partial.Key.SessionId == 1 && partial.Key.LineId == 7 &&
                 partial.Key.ObservationSequence == 10, "SnapshotIdentity_Preserved");
+            Check(ObservationGate.CanDisplay(partial, key), "PartialCurrentObservation_CanDisplay");
+            Check(!ObservationGate.CanDisplay(null, key), "NullObservation_Rejected");
+            Check(!ObservationGate.CanDisplay(partial, new LineKey(2, 7, 10)), "OtherCityObservation_Rejected");
+            Check(!ObservationGate.CanDisplay(partial, new LineKey(1, 8, 10)), "OtherLineObservation_Rejected");
+            Check(!ObservationGate.CanDisplay(partial, new LineKey(1, 7, 11)), "OldObservation_Rejected");
+            Check(!ObservationGate.CanDisplay(new LineObservation(key, -1, 3, ObservationQuality.Valid), key), "NegativeTarget_Rejected");
+            Check(!ObservationGate.CanDisplay(new LineObservation(key, null, -1, ObservationQuality.Valid), key), "NegativeActual_Rejected");
+            Check(ObservationGate.CanDisplay(unknown, key), "CurrentUnavailable_RemainsVisibleAsUnknown");
             Console.WriteLine("All " + checks + " observation checks passed.");
             return 0;
         }

@@ -1,0 +1,21 @@
+<!-- Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management -->
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Exe</OutputType><AssemblyName>ThreadingWiringChecks</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion><LangVersion>5</LangVersion>
+    <OutputPath>bin\ThreadingWiring\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\ThreadingWiring\$(Configuration)\</IntermediateOutputPath>
+    <WarningLevel>4</WarningLevel><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Compile Include="ThreadingHarness\BoundaryStubs.cs" />
+    <Compile Include="ThreadingHarness\ThreadingWiringChecks.cs" />
+    <Compile Include="..\Source\Lifecycle\CitySession.cs"><Link>Production\CitySession.cs</Link></Compile>
+    <Compile Include="..\Source\Model\LineKey.cs"><Link>Production\LineKey.cs</Link></Compile>
+    <Compile Include="..\Source\Model\LineObservation.cs"><Link>Production\LineObservation.cs</Link></Compile>
+    <Compile Include="..\Source\State\ObservationGate.cs"><Link>Production\ObservationGate.cs</Link></Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

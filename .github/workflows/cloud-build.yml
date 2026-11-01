@@ -32,6 +32,17 @@ jobs:
         run: |
           & ./Tests/bin/Release/ObservationChecks.exe
           exit $LASTEXITCODE
+      # Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+      - name: Compile production threading wiring harness
+        shell: pwsh
+        run: |
+          & $env:VEHICLE_MSBUILD Tests/ThreadingWiringChecks.csproj /t:Rebuild /p:Configuration=Release /nologo
+          exit $LASTEXITCODE
+      - name: Run production threading wiring harness
+        shell: pwsh
+        run: |
+          & ./Tests/bin/ThreadingWiring/Release/ThreadingWiringChecks.exe
+          exit $LASTEXITCODE
       - name: Check out pinned reference supply
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
