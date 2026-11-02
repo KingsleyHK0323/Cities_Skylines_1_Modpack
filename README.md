@@ -11,7 +11,7 @@ Planning-stage Cities: Skylines 1 module for more realistic urban population sim
 
 The branch foundation workflow runs on pushes and pull requests targeting `Realistic_Urban_Population`, or by manual dispatch. It validates required non-empty project documents and licensing on GitHub-hosted Ubuntu. It does not compile or publish a mod.
 
-Future delivery requires implemented source, legally available Cities: Skylines 1 reference assemblies (including ICities, Assembly-CSharp and UnityEngine), a defined build project, and subscribed-game acceptance. Reference assembly distribution rights and acquisition are unresolved. Once ready, this module will publish its DLL and required individual files directly through its own GitHub Releases, without ZIP packaging. Automatic release publication remains disabled.
+Game delivery requires compilation against authorized ICities references and the .NET Framework 3.5 reference framework, followed by subscribed-game acceptance. The inactive entry/loading source and a separate game project are now prepared locally; game-data features may require further game assemblies. Reference assembly distribution rights and acquisition are unresolved. Once ready, this module will publish its DLL and required individual files directly through its own GitHub Releases, without ZIP packaging. Automatic release publication remains disabled.
 
 ## License
 
@@ -39,3 +39,35 @@ Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
 The test-first commit deliberately fails with unimplemented contracts; subsequent checks must be assessed by their exact commit SHA. Passing pure checks must not be described as a successful game build or gameplay acceptance. No automatic release publication or Workshop operation is configured.
 
 Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
+
+## Local read-only snapshot preparation (not cloud-validated)
+
+`Source/Demand/DemandSnapshotReader.cs` adds an injectable observation boundary. It does not contain a game source, game hook, reflection access or a `ZoneManager` field reader. The module checkout has no game reference assembly copy to verify such a reader. `GameSourceVerified` and `OfficeCouplingKnown` remain false even when an injected fixture supplies values.
+
+The boundary carries the caller's source label, city epoch, session revision and observation sequence. It preserves raw residential/commercial/workplace integers without applying fixed-target clamping. A source failure, city/revision change or invalidation removes usable cached values; late completions cannot replace a newer source binding or capture request. Reading never calls `TryApply`, changes the session, or writes demand.
+
+Callers must use `ReadLatest` to revalidate a retained observation. A previously returned immutable snapshot is a historical capture, not a live freshness or simulation-frame guarantee. No automatic time-to-live, sampling interval, game-thread identity or industrial/office separation is invented. A future game source must establish its actual assembly/version, instance lifecycle and safe simulation-thread read context before binding.
+
+`Checks/SnapshotChecks.cs` contains synthetic source cases for this boundary. They are registered in the check executable but have not been compiled or executed in this local-only batch. The previous ten-group cloud result applies only to commit `d61181022cfd3b703aa5df6ece04d97dc6112517`, not to these new changes. Commit, push, cloud execution and publication require a subsequent authorized step; no Release or Workshop operation is part of this batch.
+
+Signature: OpenAI-Codex_Realistic_Urban_Population
+
+## Inactive game DLL source batch (2026-11-02; not built)
+
+`Source/RealisticUrbanPopulation.csproj` is a separate classic MSBuild library targeting .NET Framework 3.5, C# 3 and AnyCPU. Its output is `bin/Game/Development/RealisticUrbanPopulation.dll` (or the Release configuration). It requires an explicitly supplied, authorized reference directory containing `ICities.dll`; reference copying is disabled. It performs no original-game discovery, game-directory deployment, packaging, dependency installation or upload.
+
+`Source/Game/RealisticUrbanPopulationMod.cs` provides the `IUserMod` name/description and a `LoadingExtensionBase` entry. Only NewGame/LoadGame start an inactive in-memory lifecycle; unloading/release close it. It installs no demand extension or patch, does not read/write game demand fields and grants no model control permission. Metadata explicitly describes the inactive foundation. The ICities signatures and true game loading remain pending authorized cloud compilation and game acceptance.
+
+`Source/Runtime/PopulationLifecycle.cs` and the synthetic lifecycle/error-boundary checks are independent of ICities. The pure check project includes Runtime sources, but excludes Game entry sources; its success alone cannot validate the game DLL. Snapshot sources receive the expected city epoch and must validate their instance lifetime inside a verified simulation context. Pre/post checks only reject stale results; a city can close between the pre-check and an already-started source read. No zero-read-after-concurrent-unload guarantee is made.
+
+For Main's future authorized Windows cloud build, supply .NET Framework 3.5 reference assemblies and an authorized ICities reference copy, then invoke:
+
+```text
+MSBuild.exe Source/RealisticUrbanPopulation.csproj /t:Build /p:Configuration=Development /p:GameManagedDir=<authorized-reference-copy>
+```
+
+Do not execute this command locally. Missing `ICities.dll` is an explicit error; the project has no substitute interface or modern-framework fallback. The workflow is owned by Main and was not edited in this batch. Cloud build, publication and a first private Workshop item require subsequent authorization and a real validated DLL. No new Workshop ID is assigned here.
+
+Signature: OpenAI-Codex_Realistic_Urban_Population
+
+The pending population-game-dll workflow runs demand, snapshot and lifecycle checks and compiles the inactive game foundation against pinned cloud references. Only the DLL and build provenance are retained for 14 days; population and RCI writes remain disabled. No Release or Workshop upload is performed. Signature: OpenAI-Codex.

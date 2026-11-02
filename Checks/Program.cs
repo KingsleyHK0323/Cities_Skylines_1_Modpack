@@ -1,4 +1,5 @@
 // Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
+// Updated by: OpenAI-Codex_Realistic_Urban_Population
 using System;
 using System.Threading;
 using RealisticUrbanPopulation.Demand;
@@ -317,7 +318,8 @@ internal static class Program
     {
         Action[] groups = new Action[] { NativePassThrough, FixedBounds, InvalidPoliciesAndNativeDefaults,
             ExplicitChannels, DraftAndAtomicSettings, LoadingAndPermissionGates, RevocationAndRestore,
-            CityEpochIsolation, OrderedTransitionsAndCoherentSnapshots, PipelineAndCurrentInputBoundary };
+            CityEpochIsolation, OrderedTransitionsAndCoherentSnapshots, PipelineAndCurrentInputBoundary,
+            SnapshotChecks.ReadOnlyBoundary, LifecycleChecks.InactiveLifecycle, LifecycleChecks.CallbackErrorBoundary };
         int failed = 0;
         foreach (Action group in groups)
         {
@@ -325,7 +327,8 @@ internal static class Program
             catch (Exception error) { failed++; Console.WriteLine("FAIL " + group.Method.Name + ": " + error); }
         }
         Console.WriteLine("Pure model only: " + (groups.Length - failed) + "/" + groups.Length +
-            " groups passed; " + assertions + " assertions; no game adapter, game DLL build, save or release.");
+            " groups passed; " + (assertions + SnapshotChecks.AssertionCount + LifecycleChecks.AssertionCount) +
+            " assertions; no game adapter, game DLL build, save or release.");
         return failed == 0 ? 0 : 1;
     }
 }

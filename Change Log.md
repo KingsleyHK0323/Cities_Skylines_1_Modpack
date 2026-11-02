@@ -26,3 +26,22 @@ Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
 - Added boundary, channel-isolation, stale-event, revocation, ordered-transition and concurrent-snapshot checks. Validation results belong to the exact cloud run and commit, not to this entry alone.
 
 Signature: OpenAI-Codex_Responsible: Realistic_Urban_Population
+
+## 2026-11-01 — Local read-only snapshot boundary
+
+- Added a source-injected read-only observation boundary with city epochs, session revisions, source labels and capture sequences.
+- Preserved raw values and explicitly unknown game-source/office-coupling evidence; no game reader or demand writes were added.
+- Added pending synthetic-source checks for unavailable/failed reads, invalidation, stale city events, source replacement and out-of-order capture completion.
+- Updated the local validation and publication boundary. This batch has no compile/test/cloud result and remains uncommitted.
+
+Signature: OpenAI-Codex_Realistic_Urban_Population
+
+## 2026-11-02 — Inactive game entry and separate build source
+
+- Added IUserMod/loading entry source and a .NET Framework 3.5 game library project requiring an explicit authorized ICities reference copy. Game control remains inactive.
+- Added game-independent lifecycle and callback-failure boundary checks; retained the pending snapshot preparation and raw-value/source-epoch boundaries.
+- Kept workflows unchanged for Main to integrate. No compilation, test execution, commit, push, deployment, release or Workshop operation was performed in this local source batch.
+
+Signature: OpenAI-Codex_Realistic_Urban_Population
+
+- Add Main-owned population-game-dll cloud compilation with contract checks and explicit .NET 8 compiler selection; pending cloud validation. Signature: OpenAI-Codex.

@@ -1,0 +1,35 @@
+<!-- Signature: OpenAI-Codex_Realistic_Urban_Population -->
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Development</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>RealisticUrbanPopulation</AssemblyName>
+    <RootNamespace>RealisticUrbanPopulation</RootNamespace>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <LangVersion>3</LangVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>..\bin\Game\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>..\obj\Game\$(Configuration)\</IntermediateOutputPath>
+    <Optimize>true</Optimize>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="ICities">
+      <HintPath>$(GameManagedDir)\ICities.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Compile Include="Demand\*.cs" />
+    <Compile Include="Runtime\*.cs" />
+    <Compile Include="Game\*.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="ValidateGameBuildInputs" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(Configuration)' != 'Development' and '$(Configuration)' != 'Release'"
+           Text="Configuration must be Development or Release." />
+    <Error Condition="'$(GameManagedDir)' == '' or !Exists('$(GameManagedDir)\ICities.dll')"
+           Text="An explicitly authorized ICities.dll reference copy is required through GameManagedDir. No game-directory discovery or fallback is performed." />
+  </Target>
+</Project>
