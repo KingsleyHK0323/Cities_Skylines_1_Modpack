@@ -119,3 +119,19 @@ Signature: OpenAI-Codex_Automated_Public_Transport_Planning
 - Export upload artifact ID and producing attempt from compile; use a run/attempt-specific artifact name and exact-ID download within the same run. Validate required outputs before download and constrain both jobs to the APTP repository/branch.
 - Add repository/ref to build-info. Verify artifact API ID/name/expiry/workflow run/source against the compile output and strict build-info fields before any release mutation. Release tags use the original producing attempt on publication-only retry.
 - Add pure provenance and actual-publisher fake-API negative contracts to the cloud compile gate. Preserve the existing whitelist, hashes, draft/release-ID digest checks and English release format. All new checks remain unexecuted; no local or remote workflow was run.
+
+## 2026-11-02 - Captured lane preview and finite stop data
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+- Show captured lane and segment build identity in read-only route proposal descriptions, distinguishing different lanes on one segment without enabling shared-stop writes.
+- Reject NaN/infinite stop coordinates before creation eligibility distance checks. Preserve existing same-lane duplicate and 2.5 metre spacing refusals, confirmations, and optional independent Vehicle Management operation.
+- Add an in-memory synthetic harness using actual production rules/formatter, with eighteen passing assertions after the original NaN case failed. Wire checks and a Describe integration assertion into the existing test project; full game-reference/cloud/native tests remain unexecuted for this candidate. No workflow, Git publication or fleet control changes.
+
+## 2026-11-02 - Explain copied stop-list eligibility
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+- Centralize existing stop-list eligibility into a shared rejection-reason function used by both the boolean gate and route preview description. Preserve all prior acceptance rules and limits.
+- Identify offending one-based stop positions and explain count, segment/lane, finite-coordinate, duplicate-lane and spacing refusals. Valid previews explicitly retain manual confirmation/live revalidation requirements.
+- Extend actual-rule synthetic checks to 33 passing assertions and prepare valid/refused Describe integration cases. Full game-reference/cloud/UI verification remains pending; no commit, push, workflow or native game operation was performed.

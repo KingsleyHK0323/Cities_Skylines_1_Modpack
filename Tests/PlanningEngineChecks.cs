@@ -28,6 +28,9 @@ internal static class PlanningEngineChecks
         // Contributor: OpenAI-Codex_manual_input_tests
         Run("manual route input validates order, road directions and malformed tokens", RouteManualInputChecks.Run);
         Run("ordinary road classification is independent of placement flag", RouteStreetStopChecks.Run);
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+        Run("stop-site data is finite and previews identify captured lanes", RouteStopPreviewChecks.Run);
+        Run("preview explains copied stop-list rejection without authorizing a write", PreviewRejectionExplanations);
         foreach (MethodInfo method in typeof(TransportLine).GetMethods())
         {
             if (method.Name == "MoveStop") { Console.WriteLine("TransportLine API: " + method); }
@@ -194,6 +197,28 @@ internal static class PlanningEngineChecks
             "route proposal must retain concrete directional stop sites");
         Require(result.Proposals[0].StopSites[0].LaneIndex >= 0,
             "route proposal must retain the selected bus lane index");
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+        RouteStopSite shown = result.Proposals[0].StopSites[0];
+        Require(result.Describe().Contains(RouteStopPreview.Describe(shown.SegmentId,
+            shown.SegmentBuildIndex, shown.Forward, shown.LaneIndex)),
+            "actual preview description must include captured lane and build identity");
+        Require(result.Describe().Contains("manual confirmation and live revalidation still required"),
+            "a valid copied list must not imply permission to write or successful native routing");
+    }
+
+    // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+    private static void PreviewRejectionExplanations()
+    {
+        RouteStopSite[] sites = {
+            new RouteStopSite(10, 7, true, 2, new Vector3(0f, 0f, 0f), true),
+            new RouteStopSite(10, 7, false, 2, new Vector3(10f, 0f, 0f), true),
+            new RouteStopSite(30, 9, true, 4, new Vector3(20f, 0f, 0f), false)
+        };
+        RouteProposal proposal = new RouteProposal(10, 30, 0, 0, 0, -1, 0, 0, sites, "synthetic");
+        PlanningPreviewResult preview = new PlanningPreviewResult(null, new RouteProposal[] { proposal },
+            new string[0], 0, 0, 0, 0, 0, 0);
+        Require(preview.Describe().Contains("not eligible - Stops 1 and 2 use the same captured segment/lane."),
+            "real description must carry the same refusal that disables creation");
     }
 
     private static void NormalizedPairing()

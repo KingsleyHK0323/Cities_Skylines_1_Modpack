@@ -127,3 +127,19 @@ Signature: OpenAI-Codex_Automated_Public_Transport_Planning
 Signature: OpenAI-Codex_Automated_Public_Transport_Planning
 
 The local cloud-workflow candidate now exports the upload artifact ID and producing build attempt, downloads that exact ID from the same run, and checks artifact API identity against build-info before creating any release. The artifact name includes run/attempt; release tags use the producing build attempt even when only publication is retried. Contract tests include the actual publisher with a fake API and assert mismatches stop before draft/upload/edit. Existing six-file/hash/draft verification remains. This supersedes the earlier name-only handoff limitation for the local candidate; no remote update or test execution is claimed.
+
+### Captured lane preview and finite stop data (local candidate, 2026-11-02)
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+Read-only proposal descriptions now include each selected segment/direction, zero-based captured lane index and segment build index. These values identify a copied proposal; they are not live validity, selectable lane enumeration, occupancy information or permission to share a stop. Route creation's existing stop-site rules now reject NaN/infinite coordinates before distance checks; distinct-lane and 2.5 metre spacing rules remain unchanged. The existing manual confirmations and live revalidation still apply. Vehicle Management is optional and no fleet state or dependency is added.
+
+`Tests/Run-StopPreviewSynthetic.ps1` executes the actual production stop-site rule source and preview formatter in memory, using only a small Vector3 arithmetic boundary substitute. Eighteen assertions passed locally after a meaningful NaN regression failed on the original source. This is not a game/module build, workflow runner or native Unity test. The full PlanningEngineChecks entry also includes the new checks and an actual Describe integration assertion, but the full game-reference build/test has not run for this candidate. No workflow or publication files were changed.
+
+### Copied stop-list explanations (local candidate, 2026-11-02)
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+
+Each route preview now explains whether its copied stop list passes the existing data checks. Refusals identify missing segment/lane, non-finite coordinates, duplicate segment/lane pairs, unsupported stop counts or the existing 2.5 metre spacing rule; stop numbers are one-based positions in the displayed list. The eligibility boolean and preview explanation share one validator, preventing separate display-only rules. Passing means copied-data checks only: manual confirmation and live revalidation remain required, and connectivity/shared-stop permission is not established.
+
+The in-memory synthetic suite now passes 33 assertions, including refusal explanations, after a missing-list explanation failed against the initial stub. Full preview rendering assertions are also prepared in PlanningEngineChecks but have not run with game references. Earlier local 18-assertion evidence remains historical. No workflow, Vehicle Management dependency or game mutation was added.

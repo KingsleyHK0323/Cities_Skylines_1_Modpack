@@ -154,6 +154,8 @@
     <Compile Include="Source\Planning\CitizenUnitDemand.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\PlanningSnapshot.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\PlanningEngine.cs" Condition=" '$(DevTools)' == 'true' " />
+    <!-- Signature: OpenAI-Codex_Automated_Public_Transport_Planning -->
+    <Compile Include="Source\Planning\RouteStopPreview.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\PlanningCapture.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\PlanningThreadingExtension.cs" Condition=" '$(DevTools)' == 'true' " />
     <!-- OpenAI-Codex: keep route creation isolated from Release builds. -->

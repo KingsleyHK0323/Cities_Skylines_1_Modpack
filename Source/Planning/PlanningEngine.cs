@@ -41,25 +41,41 @@ namespace AutomatedPublicTransportPlanning.Planning
 
         public static bool HasValidStopSites(IList<RouteStopSite> sites)
         {
-            if (sites == null || !IsStopCountAllowed(sites.Count)) { return false; }
+            return GetStopSiteRejectionReason(sites).Length == 0;
+        }
+
+        // Signature: OpenAI-Codex_Automated_Public_Transport_Planning
+        public static string GetStopSiteRejectionReason(IList<RouteStopSite> sites)
+        {
+            if (sites == null) { return "No captured stop list."; }
+            if (!IsStopCountAllowed(sites.Count)) { return "Requires 3-6 captured stops."; }
             for (int i = 0; i < sites.Count; i++)
             {
-                if (sites[i].SegmentId == 0 || sites[i].LaneIndex < 0) { return false; }
+                string stop = (i + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                if (sites[i].SegmentId == 0) { return "Stop " + stop + " has no captured segment."; }
+                if (sites[i].LaneIndex < 0) { return "Stop " + stop + " has no captured lane."; }
+                Vector3 position = sites[i].Position;
+                if (float.IsNaN(position.x) || float.IsInfinity(position.x) ||
+                    float.IsNaN(position.y) || float.IsInfinity(position.y) ||
+                    float.IsNaN(position.z) || float.IsInfinity(position.z))
+                { return "Stop " + stop + " has non-finite captured coordinates."; }
                 for (int j = 0; j < i; j++)
                 {
+                    string pair = "Stops " + (j + 1).ToString(System.Globalization.CultureInfo.InvariantCulture) +
+                        " and " + stop;
                     if (sites[i].SegmentId == sites[j].SegmentId &&
                         sites[i].LaneIndex == sites[j].LaneIndex)
                     {
-                        return false;
+                        return pair + " use the same captured segment/lane.";
                     }
                     if ((sites[i].Position - sites[j].Position).sqrMagnitude <=
                         MinimumDistinctStopDistanceSquared)
                     {
-                        return false;
+                        return pair + " are within 2.5 metres of each other.";
                     }
                 }
             }
-            return true;
+            return string.Empty;
         }
     }
 
@@ -189,15 +205,20 @@ namespace AutomatedPublicTransportPlanning.Planning
                         .Append("; home=").Append(proposal.HomeCoverage.ToString("P1"))
                         .Append("; work/visit=").Append(proposal.AttractionCoverage.ToString("P1"));
                 }
-                text.Append("; stop segment IDs/directions=");
+                text.Append("; stop sites (segment/direction, lane, build)=");
                 int shownStops = Math.Min(proposal.StopSites.Count, 12);
                 for (int stop = 0; stop < shownStops; stop++)
                 {
                     if (stop > 0) { text.Append(','); }
-                    text.Append(proposal.StopSites[stop].SegmentId)
-                        .Append(proposal.StopSites[stop].Forward ? "+" : "-");
+                    RouteStopSite site = proposal.StopSites[stop];
+                    text.Append(RouteStopPreview.Describe(site.SegmentId, site.SegmentBuildIndex,
+                        site.Forward, site.LaneIndex));
                 }
                 if (proposal.StopSites.Count > shownStops) { text.Append(",..."); }
+                string rejection = RouteCreationRules.GetStopSiteRejectionReason(proposal.StopSites);
+                text.Append("; captured stop list: ").Append(rejection.Length == 0
+                    ? "passes copied-data checks only; manual confirmation and live revalidation still required"
+                    : "not eligible - " + rejection);
                 text.Append("; ").Append(proposal.Diagnostic);
             }
 
