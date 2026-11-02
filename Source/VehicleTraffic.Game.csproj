@@ -1,0 +1,40 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Signature: OpenAI-Codex_Realistic_Vehicle_Traffic_Control -->
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <OutputType>Library</OutputType>
+    <AssemblyName>RealisticVehicleTrafficControl</AssemblyName>
+    <RootNamespace>RealisticVehicleTrafficControl</RootNamespace>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <LangVersion>3</LangVersion>
+    <OutputPath>..\bin\Game\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>..\obj\Game\$(Configuration)\</IntermediateOutputPath>
+    <Optimize>true</Optimize>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="ICities">
+      <HintPath>$(GameManagedDirectory)\ICities.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Planning\JunctionSnapshot.cs" />
+    <Compile Include="Planning\LaneProposalPlanner.cs" />
+    <Compile Include="Observation\PreviewLifecycle.cs" />
+    <Compile Include="Observation\RoadNetworkObservation.cs" />
+    <Compile Include="Observation\ReadOnlyJunctionCapture.cs" />
+    <Compile Include="Lifecycle\ModLifecycle.cs" />
+    <Compile Include="Game\ModEntry.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="RequireExplicitGameReferences" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(GameBuildEnabled)' != 'true'" Text="Game build is opt-in. Use an authorized cloud build; set GameBuildEnabled=true explicitly." />
+    <Error Condition="'$(GameManagedDirectory)' == ''" Text="Provide the authorized reference-copy directory through GameManagedDirectory. No game installation path is inferred." />
+    <Error Condition="!Exists('$(GameManagedDirectory)\ICities.dll')" Text="The authorized ICities.dll reference is missing. No stand-in or download fallback is provided." />
+  </Target>
+</Project>

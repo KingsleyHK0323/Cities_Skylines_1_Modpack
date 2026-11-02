@@ -149,6 +149,9 @@ static class Program
             catch(Exception e) {failures++; Console.WriteLine("FAIL "+name+": "+(e.InnerException??e).Message);}
         }
         Console.WriteLine($"RESULT {tests.Length-failures}/{tests.Length} passed; {failures} failed. Synthetic fixtures only; no game capture.");
+        // Signature: OpenAI-Codex_Realistic_Vehicle_Traffic_Control
+        failures += CaptureChecks.RunAll();
+        failures += LifecycleChecks.RunAll();
         return failures==0 ? 0 : 1;
     }
 }

@@ -1,5 +1,15 @@
 # Change Log
 
+## 2026-11-02 — Disabled game foundation (local, uncompiled)
+
+- Preserve the raw read-only capture draft and add lifecycle checks without enabling observation or traffic control.
+- Add the full-name ICities mod entry and loading/unloading failure boundary; invalidate only this module's in-memory pending previews.
+- Add an explicit seven-file .NET Framework 3.5 game build manifest with opt-in, an externally supplied ICities reference and no automatic deployment or dependency download.
+- Exclude the game entry from the .NET 8 model project. Add nine lifecycle checks; the 16 raw-capture checks and these new checks remain unexecuted in this batch.
+- Keep existing workflow and licensing unchanged. No DLL, Workshop upload, commit or push is claimed by this entry.
+
+Signature: OpenAI-Codex_Realistic_Vehicle_Traffic_Control
+
 ## 2026-11-01 — Pure preview model
 
 - Add immutable, provenance-labelled single-approach lane snapshots and bounded lane-connection suggestions validated against explicit legal targets.
@@ -23,3 +33,5 @@ Signature: OpenAI-Codex_Responsible: Realistic_Vehicle_Traffic_Control
 - Update this checkout's origin URL after verifying the existing remote branch commit.
 
 Signature: OpenAI-Codex_Responsible: Realistic_Vehicle_Traffic_Control
+
+- Add Main-owned vehicle-game-dll cloud tests and explicit-reference game compilation, with allowlisted artifact output and no release publishing. Signature: OpenAI-Codex.

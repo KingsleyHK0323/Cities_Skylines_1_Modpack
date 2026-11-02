@@ -8,4 +8,8 @@
     <Nullable>disable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <!-- Signature: OpenAI-Codex_Realistic_Vehicle_Traffic_Control -->
+  <ItemGroup>
+    <Compile Remove="Game/**/*.cs" />
+  </ItemGroup>
 </Project>
