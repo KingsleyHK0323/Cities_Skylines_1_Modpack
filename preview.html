@@ -1,0 +1,57 @@
+<!doctype html>
+<!-- Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Dev Manager · Interface preview</title>
+  <link rel="stylesheet" href="preview.css">
+  <script defer src="preview-model.js"></script>
+  <script defer src="preview.js"></script>
+</head>
+<body>
+  <a class="skip" href="#library">Skip to module library</a>
+  <header class="app-header">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">▤</span><div><strong>Dev Manager</strong><span>Cities Skylines 1 Modpack</span></div></div>
+    <div class="header-tools"><span class="preview-label">Interface preview</span><button id="theme" type="button" aria-pressed="false">Dark theme</button></div>
+  </header>
+  <main>
+    <section class="notice" aria-labelledby="preview-title">
+      <span class="notice-symbol" aria-hidden="true">i</span>
+      <div><h1 id="preview-title">Explore the manager before connecting your game.</h1>
+      <p>All modules and build states below are synthetic examples. No game folders are read, no updates are checked and no files are installed.</p></div>
+    </section>
+    <div class="workspace">
+      <section class="library" id="library" tabindex="-1" aria-labelledby="library-title">
+        <div class="section-heading"><div><h2 id="library-title">Development modules</h2><p>Select modules to preview a single or batch action.</p></div><span id="visible-count"></span></div>
+        <div class="filters">
+          <div class="field search"><label for="search">Find a module</label><input id="search" type="search" placeholder="Search module names" autocomplete="off"></div>
+          <div class="field"><label for="status-filter">Sample state</label><select id="status-filter"><option value="all">All states</option><option value="different-build">Different build</option><option value="unavailable">Unknown source</option><option value="current">Same build</option><option value="not-installed">Not installed</option></select></div>
+        </div>
+        <div class="selection-tools"><label><input type="checkbox" id="select-visible"> Select visible</label><button id="clear" type="button">Clear all selections</button></div>
+        <div id="modules" class="module-list"></div>
+        <p id="empty" class="empty" hidden>No modules match. Change the search or sample state filter.</p>
+        <p class="library-footnote">Build identities are compared per module. A different build does not establish which is newer.</p>
+      </section>
+      <aside class="selection-panel" aria-labelledby="selection-title">
+        <div class="selection-heading"><h2 id="selection-title">Your selection</h2><span id="selection-count">0</span></div>
+        <p id="selection-summary" role="status" aria-live="polite" aria-atomic="true">No modules selected.</p>
+        <ul id="selected-list"></ul>
+        <button id="review" type="button" aria-expanded="false" aria-controls="review-panel">Review selection plan</button>
+        <section id="review-panel" class="review-panel" aria-labelledby="review-title" hidden>
+          <h3 id="review-title">Preview plan only</h3>
+          <p>No step has run. Every real operation remains unavailable.</p>
+          <ol id="review-stages"></ol>
+          <ul id="review-items"></ul>
+        </section>
+        <div class="blocked"><strong>Actions are unavailable in this preview</strong><p id="action-reason">The trusted source, download service and real installation adapter are not connected. Selection changes only this page.</p></div>
+        <div class="actions" aria-describedby="action-reason"><button type="button" disabled>Install selected</button><button type="button" disabled>Update selected</button><button type="button" disabled>Uninstall selected</button></div>
+        <p class="selection-note">Selections reset when you reload. There is no background monitoring.</p>
+      </aside>
+    </div>
+    <footer>Local interface preview <span>Sample data only. No account or network connection required.</span></footer>
+    <noscript><p class="notice">JavaScript is required to display the sample module list. Real installation remains unavailable.</p></noscript>
+  </main>
+</body>
+</html>
