@@ -216,3 +216,9 @@ Author: OpenAI-Codex
 
 - Use MDX-compatible comments in both Wiki overview pages so the cloud website build can parse them.
 - Signature: OpenAI-Codex.
+
+## 2026-11-02 — Four additional foundation DLL builds
+
+- Verify Railway, Vehicle, Intercity and Wireless cloud DLL builds and update the delivery snapshot to 14 non-paused modules, with AI Gaming retaining its paused older preview.
+- Publish build-run evidence without claiming active simulation controls, Dev Tools, Workshop delivery or game acceptance.
+- Signature: OpenAI-Codex.

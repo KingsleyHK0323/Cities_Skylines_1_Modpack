@@ -4,6 +4,15 @@ import type { ChangeEntry } from '../lib/changelog';
 // Updated by OpenAI-Codex on 2026-11-01.
 const translations: Record<string, { title: string; bullets: string[] }> = {
     // Signature: OpenAI-Codex.
+    'Four additional foundation DLL builds': {
+        title: '新增四個基礎 DLL 建置',
+        bullets: [
+            '核對 Railway、Vehicle、Intercity 及 Wireless 雲端 DLL 建置，交付快照更新為 14 個未暫停模組；AI Gaming 保留暫停前的舊預覽版。',
+            '提供建置執行證據，不代表已啟用模擬控制、開發工具、工作坊交付或遊戲驗收。',
+            '署名：OpenAI-Codex。',
+        ],
+    },
+    // Signature: OpenAI-Codex.
     'MDX source comment correction': {
         title: 'MDX 來源註解修正',
         bullets: [

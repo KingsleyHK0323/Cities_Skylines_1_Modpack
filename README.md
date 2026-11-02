@@ -37,4 +37,4 @@ from AI Improve, Public Transport Planning and Public Transport Vehicle Manageme
 See [collector documentation](tools/modpack-release/README.md) for scheduling,
 artifact retention, integrity gates and publication behavior. Cloud publication and unchanged-source suppression passed on 2026-11-02. Signature: OpenAI-Codex.
 
-Status refresh (2 November 2026): 15 gameplay modules, 10 non-paused verified cloud game-DLL builds, AI Gaming paused, and four modules awaiting game-DLL delivery. The status/download guides distinguish the deployed three-module collector from the planned cloud-compile pipeline, identify Dev Manager as planning-only, and record warning-only duplicate handling and IMT exclusion. No game acceptance is claimed. Signature: OpenAI-Codex.
+Status refresh (2 November 2026): 15 gameplay modules, 14 non-paused verified cloud game-DLL builds and AI Gaming paused with its older preview. The status/download guides distinguish the deployed three-module collector from the planned cloud-compile pipeline, identify Dev Manager as planning-only, and record warning-only duplicate handling and IMT exclusion. No game acceptance is claimed. Signature: OpenAI-Codex.

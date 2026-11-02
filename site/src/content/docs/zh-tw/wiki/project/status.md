@@ -9,7 +9,7 @@ description: "附日期的 15 個模組及 22 項已確認替代方向總覽，�
 
 ## 最新交付快照 — 2026 年 11 月 2 日
 
-15 個遊戲模組中，**10 個未暫停模組已有成功的遊戲 DLL 雲端建置**。AI Gaming 保留舊預覽版本並維持暫停。Railway 及 Vehicle 的來源批次待雲端編譯；Intercity 及 Wireless 仍需補最小遊戲入口。基礎 DLL 編譯成功不代表完整功能或遊戲內載入驗收。
+15 個遊戲模組中，**14 個未暫停模組已有成功的遊戲 DLL 雲端建置**。AI Gaming 保留舊預覽版本並維持暫停。Railway、Vehicle、Intercity 及 Wireless 現已全部通過雲端 DLL 建置。基礎 DLL 編譯成功不代表完整功能或遊戲內載入驗收。
 
 | 近期遊戲 DLL | 已核對雲端執行 | 目前功能界線 |
 | --- | --- | --- |
@@ -20,6 +20,10 @@ description: "附日期的 15 個模組及 22 項已確認替代方向總覽，�
 | Realistic Border Control | [41403613247](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41403613247) | 不設旅客配額，未接即時旅客讀取 |
 | Realistic Import Export Control | [41404552970](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41404552970) | 不作貨運配對或經濟控制 |
 | Realistic Pedestrian Traffic Control | [41405888872](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41405888872) | 不改過路規則、號誌、路徑或標線 |
+| Realistic Railway Traffic Control | [41426765544](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41426765544) | 未啟用基礎入口；無即時鐵路擷取或控制 |
+| Realistic Vehicle Traffic Control | [41427157697](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427157697) | 未啟用基礎入口；無道路或交通燈控制 |
+| Intercity Resource Sharing | [41427169203](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427169203) | 未啟用基礎入口；無跨城資源傳輸或結算 |
+| Wireless Utilities And Global Coverage | [41427597725](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427597725) | 未啟用基礎入口；無公用設施模擬寫入 |
 
 其餘三個已核對 DLL 是 AI Improve、Public Transport Planning 及 Public Transport Vehicle Management。近期基礎版產物保留 14 日，下載可能需要登入 GitHub；它們不是個別公開發布版本。過往建置成功不保證產物仍可下載。
 

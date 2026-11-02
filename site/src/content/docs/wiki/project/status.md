@@ -9,7 +9,7 @@ Design delivery, source implementation, cloud compilation, downloadable artifact
 
 ## Current delivery snapshot — 2 November 2026
 
-Of the 15 gameplay modules, **10 non-paused modules have verified successful game-DLL cloud builds**. AI Gaming retains an older preview and remains paused. Railway and Vehicle have source batches awaiting cloud compilation; Intercity and Wireless still need their minimal game entry-point batches. A compiled foundation DLL is not a completed feature set or game-load acceptance.
+Of the 15 gameplay modules, **14 non-paused modules have verified successful game-DLL cloud builds**. AI Gaming retains an older preview and remains paused. Railway, Vehicle, Intercity and Wireless now also have verified cloud DLL builds. A compiled foundation DLL is not a completed feature set or game-load acceptance.
 
 | Recent game DLL | Verified cloud run | Current capability boundary |
 | --- | --- | --- |
@@ -21,6 +21,10 @@ Of the 15 gameplay modules, **10 non-paused modules have verified successful gam
 | Realistic Import Export Control | [41404552970](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41404552970) | Inactive foundation; no cargo matching or economy control |
 | Realistic Pedestrian Traffic Control | [41405888872](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41405888872) | Inactive foundation; no crossing-rule, signal, path or marking changes |
 
+| Realistic Railway Traffic Control | [41426765544](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41426765544) | Inactive foundation; no live railway capture or control |
+| Realistic Vehicle Traffic Control | [41427157697](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427157697) | Inactive foundation; no road or traffic-light control |
+| Intercity Resource Sharing | [41427169203](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427169203) | Inactive foundation; no cross-city resource transfer or settlement |
+| Wireless Utilities And Global Coverage | [41427597725](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427597725) | Inactive foundation; no utility simulation writes |
 AI Improve, Public Transport Planning and Public Transport Vehicle Management account for the other three verified DLL builds. The recent foundation artifacts are retained for 14 days and may require GitHub sign-in; they are not individual public releases. Download availability must be checked separately from historical build success.
 
 ### Distribution and planned behavior
