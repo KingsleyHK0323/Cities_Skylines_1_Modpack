@@ -1,0 +1,44 @@
+<!-- Signature: OpenAI-Codex_Wireless_Utilities_And_Global_Coverage -->
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{0D14EAC2-44AA-41D8-8B64-90B3E563B45A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>WirelessUtilitiesAndGlobalCoverage</AssemblyName>
+    <RootNamespace>WirelessUtilitiesAndGlobalCoverage</RootNamespace>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <LangVersion>3</LangVersion>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <GameReferenceRoot Condition="'$(GameReferenceRoot)' == ''">$(CS1_GAME_REFERENCE_ROOT)</GameReferenceRoot>
+    <DevTools Condition="'$(DevTools)' == ''">false</DevTools>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib"><HintPath>$(GameReferenceRoot)\mscorlib.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="System"><HintPath>$(GameReferenceRoot)\System.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="ICities"><HintPath>$(GameReferenceRoot)\ICities.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="ColossalManaged"><HintPath>$(GameReferenceRoot)\ColossalManaged.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameReferenceRoot)\UnityEngine.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(GameReferenceRoot)\Assembly-CSharp.dll</HintPath><Private>False</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="ModuleIdentity.cs" />
+    <Compile Include="ModuleLifecycle.cs" />
+    <Compile Include="WirelessUtilitiesMod.cs" />
+    <Compile Include="WirelessUtilitiesLoadingExtension.cs" />
+  </ItemGroup>
+  <Target Name="ValidateFoundationInputs" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(GameReferenceRoot)' == ''" Text="Pass an authorized GameReferenceRoot. No installed game directory is searched." />
+    <Error Condition="'$(DevTools)' != 'false'" Text="This inactive foundation has no DevTool. Development builds are not wired yet." />
+    <Error Condition="'$(Configuration)' != 'Release' And '$(Configuration)' != 'Debug'" Text="Only inactive foundation Release/Debug configurations are available." />
+    <Error Condition="!Exists('$(GameReferenceRoot)\mscorlib.dll') Or !Exists('$(GameReferenceRoot)\System.dll') Or !Exists('$(GameReferenceRoot)\ICities.dll') Or !Exists('$(GameReferenceRoot)\ColossalManaged.dll') Or !Exists('$(GameReferenceRoot)\UnityEngine.dll') Or !Exists('$(GameReferenceRoot)\Assembly-CSharp.dll')" Text="An authorized reference set is incomplete. Do not substitute mock game types." />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

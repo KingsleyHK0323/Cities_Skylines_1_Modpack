@@ -1,0 +1,34 @@
+<!-- Signature: OpenAI-Codex_Wireless_Utilities_And_Global_Coverage -->
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>WirelessUtilitiesAndGlobalCoverage.EntryPointChecks</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <LangVersion>3</LangVersion>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <GameReferenceRoot Condition="'$(GameReferenceRoot)' == ''">$(CS1_GAME_REFERENCE_ROOT)</GameReferenceRoot>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <AppConfig>App.config</AppConfig>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib"><HintPath>$(GameReferenceRoot)\mscorlib.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="System"><HintPath>$(GameReferenceRoot)\System.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="ICities"><HintPath>$(GameReferenceRoot)\ICities.dll</HintPath><Private>True</Private></Reference>
+    <Reference Include="ColossalManaged"><HintPath>$(GameReferenceRoot)\ColossalManaged.dll</HintPath><Private>True</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameReferenceRoot)\UnityEngine.dll</HintPath><Private>True</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(GameReferenceRoot)\Assembly-CSharp.dll</HintPath><Private>True</Private></Reference>
+    <ProjectReference Include="..\Source\WirelessUtilitiesAndGlobalCoverage.csproj">
+      <Project>{0D14EAC2-44AA-41D8-8B64-90B3E563B45A}</Project>
+      <Name>WirelessUtilitiesAndGlobalCoverage</Name>
+      <Private>True</Private>
+    </ProjectReference>
+    <Compile Include="EntryPointChecks.cs" />
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
