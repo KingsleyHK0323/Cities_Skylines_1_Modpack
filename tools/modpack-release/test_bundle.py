@@ -9,6 +9,13 @@ import bundle
 
 
 class BundleContracts(unittest.TestCase):
+    def test_draft_uses_release_id_not_tag_endpoint(self):
+        draft = {"tag_name": "modpack-dev-test", "draft": True, "id": 42}
+        with patch.object(bundle, "gh", return_value=[[draft]]), \
+                patch.object(bundle, "api", return_value=draft) as api:
+            self.assertEqual(bundle.draft_by_tag("modpack-dev-test"), draft)
+            api.assert_called_once_with("releases/42")
+
     def zip_bytes(self, names):
         data = io.BytesIO()
         with zipfile.ZipFile(data, "w") as archive:

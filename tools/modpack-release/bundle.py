@@ -44,6 +44,15 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def draft_by_tag(tag):
+    # The tag endpoint may return 404 for an unpublished draft. Retain its ID.
+    pages = gh("api", "--paginate", "--slurp", f"repos/{REPO}/releases?per_page=100")
+    matches = [r for page in pages for r in page if r["tag_name"] == tag]
+    if len(matches) != 1 or not matches[0]["draft"]:
+        raise ValueError("Expected exactly one newly created draft")
+    return api(f"releases/{matches[0]['id']}")
+
+
 def strict_zip(data, allowed):
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         entries = archive.infolist()
@@ -222,7 +231,7 @@ def main():
     gh("release", "create", tag, "--repo", REPO, "--target", os.environ["GITHUB_SHA"],
        "--draft", "--prerelease", "--latest=false", "--title", title,
        "--notes-file", str(notes), str(archive), binary=True)
-    release = api(f"releases/tags/{tag}")
+    release = draft_by_tag(tag)
     assets = release["assets"]
     if len(assets) != 1 or assets[0]["name"] != ARCHIVE:
         raise ValueError("Draft asset allowlist mismatch")

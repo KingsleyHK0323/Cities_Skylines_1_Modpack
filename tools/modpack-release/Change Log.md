@@ -9,3 +9,5 @@
 - Keep module histories independent and label bundle history within its channel.
 
 Signature: OpenAI-Codex
+
+- Fix unpublished draft lookup by retaining the authenticated release ID; add a regression contract. Signature: OpenAI-Codex.
