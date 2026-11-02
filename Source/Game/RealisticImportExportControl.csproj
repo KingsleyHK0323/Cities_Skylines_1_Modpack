@@ -1,0 +1,24 @@
+<!-- Signature: OpenAI-Codex_Realistic_Import_Export_Control -->
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Library</OutputType><AssemblyName>RealisticImportExportControl</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion><LangVersion>5</LangVersion>
+    <NoStdLib>true</NoStdLib><NoConfig>true</NoConfig>
+    <OutputPath>bin\$(Configuration)\</OutputPath><Optimize>true</Optimize>
+    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
+    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
+  </PropertyGroup>
+  <Target Name="RequireExplicitReferences" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(GameManagedDir)' == '' Or !Exists('$(GameManagedDir)\ICities.dll') Or !Exists('$(GameManagedDir)\mscorlib.dll')" Text="Provide an explicitly restored GameManagedDir with real game reference assemblies; no installation is searched." />
+  </Target>
+  <ItemGroup>
+    <Reference Include="mscorlib"><HintPath>$(GameManagedDir)\mscorlib.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="ICities"><HintPath>$(GameManagedDir)\ICities.dll</HintPath><Private>false</Private></Reference>
+    <Compile Include="CargoMod.cs" /><Compile Include="CargoSession.cs" /><Compile Include="CargoLoading.cs" />
+  </ItemGroup>
+  <Target Name="PreventReferenceCopies" AfterTargets="ResolveReferences">
+    <ItemGroup><ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" /></ItemGroup>
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,5 +1,6 @@
-<!-- Signature: OpenAI-Codex_Responsible: Realistic_Import_Export_Control -->
+<!-- Signature: OpenAI-Codex_Realistic_Import_Export_Control -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
   <ItemGroup><ProjectReference Include="../Source/CargoModel.csproj" /></ItemGroup>
+  <ItemGroup><Compile Include="../Source/Game/*.cs" Link="Game/%(Filename)%(Extension)" /></ItemGroup>
 </Project>

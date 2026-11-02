@@ -1,4 +1,4 @@
-// Signature: OpenAI-Codex_Responsible: Realistic_Import_Export_Control
+// Signature: OpenAI-Codex_Realistic_Import_Export_Control
 using CargoPreview;
 
 static class Checks
@@ -44,6 +44,8 @@ static class Checks
         Check(P(S(O("s", 10), O("d", 6, false)) with { Source = "" }).Matches.Count == 0, "unknown source rejected");
         var mixed = P(S(O("s1", 10), O("d1", 6, false), O("s2", 10, kind: "ore"), O("d2", 6, false, "ore")));
         Check(mixed.Total == null && mixed.Matches.Count == 2 && mixed.Matches.All(m => m.Unit == "test-units"), "mixed commodities retain units and have no combined total");
+        ObservationChecks.Run(Check);
+        GameBoundaryChecks.Run(Check);
         Console.WriteLine($"{count} checks passed; synthetic fixtures only.");
     }
 }
