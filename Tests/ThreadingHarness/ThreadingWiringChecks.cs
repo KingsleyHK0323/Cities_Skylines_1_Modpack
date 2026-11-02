@@ -55,6 +55,45 @@ internal static class ThreadingWiringChecks
             currentExtension.OnReleased();
             Check(ObservationPanel.Releases == 2 && CitySession.Display == "No playable city loaded.",
                 "CurrentRelease_StillCleansUp");
+            var previewExtension = new ObservationThreadingExtension();
+            CitySession.Load(true);
+            LineReader.HasObservation = false;
+            CitySession.Request();
+            previewExtension.OnAfterSimulationFrame();
+            Check(CitySession.Display.Contains("Observed records: 0; unavailable/incomplete: 0."),
+                "EmptyCensus_ReportsZeroRecords");
+            LineReader.HasObservation = true;
+            LineReader.Actual = 0;
+            CitySession.Request();
+            previewExtension.OnAfterSimulationFrame();
+            Check(CitySession.Display.Contains("actual=0;") &&
+                CitySession.Display.Contains("Observed records: 1; unavailable/incomplete: 0."),
+                "ValidZeroVehicles_IsNotAnEmptyCensus");
+            LineReader.Actual = null;
+            LineReader.Quality = AutomatedPublicTransportVehicleManagement.Model.ObservationQuality.Unavailable;
+            CitySession.Request();
+            previewExtension.OnAfterSimulationFrame();
+            Check(CitySession.Display.Contains("actual=Unknown;") &&
+                CitySession.Display.Contains("Observed records: 1; unavailable/incomplete: 1."),
+                "UnknownVehicles_AreCountedAsUnavailable");
+            LineReader.Actual = 2;
+            LineReader.Quality = AutomatedPublicTransportVehicleManagement.Model.ObservationQuality.Valid;
+            CitySession.Request();
+            previewExtension.OnAfterSimulationFrame();
+            Check(CitySession.Display.Contains("Observed records: 1; unavailable/incomplete: 0."),
+                "Refresh_ResetsCensusSummary");
+            LineReader.Actual = -1;
+            CitySession.Request();
+            previewExtension.OnAfterSimulationFrame();
+            Check(CitySession.Display.Contains("discarded records: 1") &&
+                CitySession.Display.Contains("Observed records: 0; unavailable/incomplete: 0."),
+                "RejectedObservation_IsReportedNotSilentlyOmitted");
+            LineReader.Actual = 2;
+            CitySession.Request();
+            previewExtension.OnAfterSimulationFrame();
+            Check(CitySession.Display.Contains("discarded records: 0"),
+                "Refresh_ResetsDiscardedRecordCount");
+            previewExtension.OnReleased();
             Console.WriteLine("All " + checks + " production threading wiring checks passed.");
             return 0;
         }

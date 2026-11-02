@@ -51,3 +51,11 @@ The cloud workflow runs the existing 21 model checks and this harness before ref
 After an authorized push to the module branch (or an authorized manual dispatch on that branch), the GitHub-hosted Windows job naturally retains a 14-day DLL/provenance artifact if all steps succeed. It does not create any public prerelease, GitHub Release, Workshop item or self-hosted job. Artifacts in a public repository are not private release drafts. No push or dispatch is performed by this local work.
 
 Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+
+Pending local preview improvement: a completed census reports observed-record and unavailable/incomplete-record totals. No records, a valid zero vehicle count, and an unknown count are distinct. Totals count accepted historical records, including invalid-prefab records whose transport mode is unknown; they are not passenger demand, capacity or live fleet totals. Refresh starts fresh totals. Four synthetic production-wiring scenarios are prepared but have not been executed. No workflow or operational control changes.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+
+Local synthetic validation update: the census also reports discarded records rejected by the observation gate, separately from accepted records with unavailable data. Refresh resets all totals. Existing Windows .NET compiler tooling was used in new isolated directories to execute the production-linked boundary harness (15 checks) and model checks (21 checks). These are synthetic tests, not a real game build, Unity UI test or Workshop acceptance. Earlier pending-execution statements describe the prior batch. No workflow changes.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management

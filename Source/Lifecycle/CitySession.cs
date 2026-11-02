@@ -18,6 +18,9 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
         private static bool active;
         private static bool requested;
         private static int cursor;
+        private static int observedRecords;
+        private static int unavailableRecords;
+        private static int discardedRecords;
         private static long sequence;
         private static int captureSession;
         private static StringBuilder capture;
@@ -39,7 +42,7 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
                 if (!active) return;
                 if (requested)
                 {
-                    requested = false; cursor = 1; sequence++; captureSession = session;
+                    requested = false; cursor = 1; observedRecords = 0; unavailableRecords = 0; discardedRecords = 0; sequence++; captureSession = session;
                     capture = new StringBuilder("Read-only city-bus census (collected across simulation frames).\nTarget counts and waiting passengers: Unknown.\n");
                 }
                 if (capture == null || captureSession != session) return;
@@ -51,9 +54,16 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
                     for (; cursor < end; cursor++)
                     {
                         LineObservation observation;
-                        if (LineReader.TryCapture((ushort)cursor, captureSession, sequence, out observation) &&
-                            ObservationGate.CanDisplay(observation, new LineKey(captureSession, (ushort)cursor, sequence)))
+                        if (LineReader.TryCapture((ushort)cursor, captureSession, sequence, out observation))
                         {
+                            if (!ObservationGate.CanDisplay(observation, new LineKey(captureSession, (ushort)cursor, sequence)))
+                            {
+                                discardedRecords++;
+                                continue;
+                            }
+                            observedRecords++;
+                            if (observation.Quality != ObservationQuality.Valid || !observation.ActualVehicles.HasValue)
+                                unavailableRecords++;
                             // Cap presentation size independently of the number of scanned slots.
                             if (capture.Length < 24000)
                                 capture.Append("Line ").Append(cursor).Append(": actual=")
@@ -63,6 +73,8 @@ namespace AutomatedPublicTransportVehicleManagement.Lifecycle
                     }
                     if (cursor >= size)
                     {
+                        capture.Append("Observed records: ").Append(observedRecords)
+                            .Append("; unavailable/incomplete: ").Append(unavailableRecords).Append(". discarded records: ").Append(discardedRecords).Append(".\n");
                         display = "City session " + captureSession + "; observation " + sequence + ".\n" + capture.ToString() + (capture.Length >= 24000 ? "\nDisplay truncated; refresh to recapture." : "\nCapture complete. Values are a historical census, not live dispatch state.");
                         capture = null;
                     }

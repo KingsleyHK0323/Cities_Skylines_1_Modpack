@@ -31,12 +31,16 @@ namespace AutomatedPublicTransportVehicleManagement.Game
     internal static class LineReader
     {
         internal static int Calls;
+        internal static bool HasObservation = true;
+        internal static int? Actual = 1;
+        internal static Model.ObservationQuality Quality = Model.ObservationQuality.Valid;
         internal static bool TryCapture(ushort lineId, int session, long sequence,
             out Model.LineObservation result)
         {
             Calls++;
+            if (!HasObservation) { result = null; return false; }
             result = new Model.LineObservation(new Model.LineKey(session, lineId, sequence),
-                null, 1, Model.ObservationQuality.Valid);
+                null, Actual, Quality);
             return true;
         }
     }

@@ -46,3 +46,11 @@ Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
 - Keep the existing 21 model cases, real game-reference compilation and artifact/provenance safeguards. Harness execution remains pending authorization.
 
 Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+
+- Add historical census record-quality totals, distinguishing an empty census from zero vehicles or unavailable counts. Prepare four synthetic production-wiring cases for empty/zero/unknown/reset behavior; execution pending.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
+
+- Report discarded observations separately and reset that total on refresh. Confirm the new rejected-record assertion fails before implementation and passes afterward; isolated synthetic regression: 15 wiring and 21 model checks passed.
+
+Signature: OpenAI-Codex_Automated_Public_Transport_Vehicle_Management
