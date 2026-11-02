@@ -1,0 +1,15 @@
+<!-- OpenAI-Codex_Intercity_Resource_Sharing -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <BaseIntermediateOutputPath>obj/Lifecycle/</BaseIntermediateOutputPath>
+    <OutputPath>bin/Lifecycle/</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="LifecycleChecks.cs" />
+    <Compile Include="ICitiesBoundary.cs" />
+    <Compile Include="../Source/Game/Entry.cs" Link="Production/Entry.cs" />
+    <Compile Include="../Source/Game/Lifecycle.cs" Link="Production/Lifecycle.cs" />
+  </ItemGroup>
+</Project>

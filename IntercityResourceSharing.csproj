@@ -1,0 +1,24 @@
+<!-- OpenAI-Codex_Intercity_Resource_Sharing -->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>IntercityResourceSharing</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>bin\Game\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\Game\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="ICities"><HintPath>$(GameReferenceDir)\ICities.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameReferenceDir)\UnityEngine.dll</HintPath><Private>False</Private></Reference>
+    <Compile Include="Source\Game\Entry.cs" />
+    <Compile Include="Source\Game\Lifecycle.cs" />
+  </ItemGroup>
+  <Target Name="RequireGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(GameReferenceDir)' == ''" Text="Supply an authorized GameReferenceDir explicitly." />
+    <Error Condition="!Exists('$(GameReferenceDir)\ICities.dll')" Text="Authorized ICities.dll is required; do not substitute test boundaries." />
+    <Error Condition="!Exists('$(GameReferenceDir)\UnityEngine.dll')" Text="Authorized UnityEngine.dll is required." />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
