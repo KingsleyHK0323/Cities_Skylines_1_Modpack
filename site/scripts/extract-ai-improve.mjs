@@ -5,10 +5,11 @@ import { fileURLToPath } from 'node:url';
 
 // Updated by OpenAI-Codex on 2026-10-26 to support an explicitly verified source commit
 // when sandbox policy blocks the extractor's child-process Git lookup.
+// Updated by OpenAI-Codex_extractor_worker for callback switches and the current project layout.
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sourceRoot = path.resolve(
-	process.env.AI_IMPROVE_SOURCE || path.join(siteRoot, '..', '..', '..', 'Cities_Skylines_1_AI_Improve', 'Source_Code'),
+	process.env.AI_IMPROVE_SOURCE || path.join(siteRoot, '..', '..', '..', 'AI_Improve', 'Source_Code'),
 );
 const outputPath = path.join(siteRoot, 'src', 'data', 'ai-improve.json');
 
@@ -117,7 +118,7 @@ function readSections(source, english, traditional, settings) {
 		const chunk = source.slice(sectionStart[i], sectionStart[i + 1] ?? source.length);
 		const sectionKey = chunk.match(/NavKey\s*=\s*"(nav\.[^"]+)"/);
 		if (!sectionKey) continue;
-		const featureMarkers = [...chunk.matchAll(/Toggle\("(feature\.[^"]+)"\s*,\s*ModSettings\.(\w+)\)|new Feature\s*\{\s*Key\s*=\s*"(feature\.[^"]+)"\s*\}/g)];
+		const featureMarkers = [...chunk.matchAll(/Toggle\("(feature\.[^"]+)"\s*,\s*ModSettings\.(\w+)(?=\s*[,)])|new Feature\s*\{\s*Key\s*=\s*"(feature\.[^"]+)"\s*\}/g)];
 		const features = [];
 		for (let index = 0; index < featureMarkers.length; index++) {
 			const match = featureMarkers[index];
@@ -151,6 +152,7 @@ function readSections(source, english, traditional, settings) {
 			if (featureKey === 'feature.aircraftReroute') group = 'aviationShipping';
 			if (featureKey === 'feature.emergencyReroute') group = 'emergency';
 			if (featureKey === 'feature.laneBottleneck') group = 'road';
+			if (featureKey === 'feature.rerouteTiming') group = null;
 			const switchSetting = switchProperty ? settings.get(switchProperty) : null;
 			features.push({
 				key: featureKey,
@@ -212,6 +214,8 @@ const output = {
 	metadata: {
 		sourceCommit,
 		extractedAt,
+		updatedBy: 'OpenAI-Codex_extractor_worker',
+		previousUpdatedBy: 'OpenAI-Codex',
 		sourceFiles: ['Localization.cs', 'ModSettings.cs', 'SettingsPageUI.cs'],
 		languages: ['en', 'zh-tw'],
 		featureCount: sections.reduce((sum, section) => sum + section.features.length, 0),

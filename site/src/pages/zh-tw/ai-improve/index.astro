@@ -10,25 +10,26 @@ import art from '../../../assets/projects/ai-improve.png';
 const base = import.meta.env.BASE_URL;
 ---
 
-<SiteLayout title="AI Improve" description="AI Improve 讓 Cities: Skylines 1 的車輛、公共服務與市民依真實狀況反應：塞車、擁擠的月台、附近火警與閒置運能。" locale="zh-tw" path="ai-improve/" active="mods">
+<SiteLayout title="AI Improve" description="AI Improve 開發版原始碼包含因應城市狀況的功能；遊戲內行為尚未驗證。" locale="zh-tw" path="ai-improve/" active="mods">
 	<section class="hero page-wrap">
 		<div class="hero-copy">
-			<p class="eyebrow">模組 01 · 已在 Workshop 發布</p>
+			<p class="eyebrow">模組 01 · GitHub 開發預覽</p>
 			<h1>AI Improve</h1>
-			<p class="hero-lead">讓城市裡的車輛、公共服務與市民做出更聰明的決定。每一項行為都有獨立開關，改變什麼由你決定。</p>
-			<div class="status-strip"><span class="tag">需要 Harmony</span><span class="tag">25 項可開關功能</span><span class="tag">9 種語言</span></div>
+			<p class="hero-lead">開發版原始碼包含功能開關，旨在改變車輛、公共服務與市民的決策。遊戲內行為尚未驗證。</p>
+			<div class="status-strip"><span class="tag">需要 Harmony</span><span class="tag">開發版原始碼有 25 個開關</span><span class="tag">9 種語言</span></div>
 			<WorkshopLinks mod="ai-improve" locale="zh-tw" />
 		</div>
 		<figure class="hero-art"><Image src={art} alt="AI Improve 美術圖" widths={[560, 720]} sizes="(max-width: 640px) 100vw, 45vw" format="webp" quality={78} loading="eager" /><figcaption class="art-note">專案美術圖 · 並非遊戲截圖</figcaption></figure>
 	</section>
 
 	<nav class="subnav page-wrap" aria-label="AI Improve 使用說明"><a href={base + 'zh-tw/wiki/ai-improve/overview/'}>使用說明</a><a href={base + 'zh-tw/wiki/ai-improve/features/'}>全部功能</a><a href={base + 'zh-tw/wiki/ai-improve/settings/'}>設定</a><a href={base + 'zh-tw/wiki/ai-improve/in-game/'}>遊戲內使用</a><a href={base + 'zh-tw/wiki/ai-improve/compatibility/'}>相容性</a><a href={base + 'zh-tw/wiki/ai-improve/faq/'}>常見問題</a></nav>
+	<p class="page-wrap">功能、設定及遊戲內指南說明已核對的開發版原始碼；連結的概述頁仍是較早的一般介紹。實際安裝的版本可能不同，遊戲內行為尚未驗證。</p>
 
 	<section class="section soft">
 		<div class="page-wrap">
 			<p class="eyebrow">為什麼需要它</p>
 			<h2>城市應該注意到正在發生的事。</h2>
-			<p class="section-intro">原版遊戲裡，前方塞住了車子還是照原路走；火車全擠在同一個月台，旁邊的月台卻空著；一場小火派出好幾台消防車。AI Improve 一次改善一種行為，讓城市察覺這些狀況。</p>
+			<p class="section-intro">原版遊戲裡，車輛可能在前方塞車時仍沿原路行駛；火車可能擠在同一個月台，或一場小火派出好幾台消防車。以下例子說明開發版原始碼的預期行為；遊戲內結果尚未驗證。</p>
 			<div class="highlight-grid">
 				<article><h3>遇到壅塞會改道</h3><p>私家車、計程車、貨車、公車、地鐵與城際列車，前方塞住時會重新考慮路線。</p></article>
 				<article><h3>善用閒置運能</h3><p>月台、機場登機口、直升機起降點與港口碼頭，依實際使用情況分配。</p></article>
@@ -37,16 +38,16 @@ const base = import.meta.env.BASE_URL;
 		</div>
 	</section>
 
-	<section class="interactive-section"><div class="page-wrap"><p class="section-label">功能瀏覽器</p><h2>看看每項功能在做什麼。</h2><p>選擇類別與功能，查看行為示意，以及它預設是開還是關。</p><FeatureExplorer locale="zh-tw" /></div></section>
+	<section class="interactive-section"><div class="page-wrap"><p class="section-label">功能瀏覽器</p><h2>瀏覽網站資料快照。</h2><p>選擇類別與卡片查看行為示意。網站資料擷取自<a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/75ef94407962817051cef4aa74ec6fbc1831fd02/SettingsPageUI.cs">開發版原始碼 75ef944</a>，包含 25 個開關及一張僅調整數值的卡片。瀏覽器顯示各開關；共用數值卡則在設定示範及指南中顯示。網站不能證明你所安裝版本的設定或行為。</p><FeatureExplorer locale="zh-tw" /></div></section>
 
 	<section class="section">
 		<div class="page-wrap columns">
 			<div class="text-stack">
 				<p class="eyebrow">設定</p>
-				<h2>訂閱之前，先看看每個開關。</h2>
-				<p>這裡重現模組在 Content Manager 中的選項頁，分區與預設值都相同。展開分區即可查看開關與進階數值。這只是網頁示範，不會改變你的遊戲。</p>
+				<h2>瀏覽開發版設定。</h2>
+				<p>這項示範使用上文所述的開發版原始碼資料，其分區、開關及數值可能與你安裝的版本不同，也不會改變你的遊戲。遊戲內行為尚未驗證。</p>
 				<a class="text-link" href={base + 'zh-tw/wiki/ai-improve/settings/'}>閱讀每項設定的說明 →</a>
-				<ScreenshotSlot locale="zh-tw" title="Content Manager 中的選項頁" description="一般分區（語言、記錄、進階調整），以及各類別各自的分區。" />
+				<ScreenshotSlot locale="zh-tw" title="Content Manager 中的選項頁" description="設定類別示意；版面及數值可能因版本而異。" />
 			</div>
 			<div class="demo-shell"><SettingsPreview locale="zh-tw" /></div>
 		</div>
@@ -56,15 +57,17 @@ const base = import.meta.env.BASE_URL;
 		<div class="page-wrap columns">
 			<div class="text-stack">
 				<p class="eyebrow">注意事項</p>
-				<h2>與其他模組和平共處。</h2>
-				<p>AI Improve 需要 <a href={harmonyUrl}>Harmony</a>。遇到其他模組已經負責的工作，它會主動讓位，不會互相干擾：安裝 Improved Public Transport 或 Express Bus Services 時，停站時間相關功能會暫停；Transfer Manager CE 負責消防派遣時，AI Improve 會把「去哪一場火」交給它決定，只保留每棟建築的出勤上限。它也不會改變任何載具的載客量。</p>
+				<h2>相容性取決於條件。</h2>
+				<p>AI Improve 需要 <a href={harmonyUrl}>Harmony</a>。已核對的開發版原始碼包含針對其他模組的條件處理：偵測到 Improved Public Transport 或 Express Bus Services 時，部分停站時間功能會停用；Transfer Manager CE 的消防派遣啟用時，AI Improve 會由它選擇火警並保留每棟建築的出勤上限。這些條件不能證明全面相容或通過遊戲內驗收。</p>
 				<p>已知限制：飛機滑行時的改道目前不會觸發，因為實際量到的滑行道壅塞程度，從未達到它的觸發門檻。</p>
 				<div class="link-list"><a href={base + 'zh-tw/wiki/ai-improve/compatibility/'}>相容性詳細說明 →</a><a href={base + 'zh-tw/wiki/ai-improve/faq/'}>常見問題與回報方式 →</a></div>
 			</div>
 			<div class="screenshot-stack">
-				<ScreenshotSlot locale="zh-tw" title="遊戲內面板" description="從 UnifiedUI 工具列打開的 AI Improve 面板，可快速開關各項功能。" />
+				<ScreenshotSlot locale="zh-tw" title="遊戲內面板" description="已核對的開發版原始碼中，UnifiedUI 面板提供空載城際列車及巴士掃描與設定重設；各功能開關位於 Content Manager。掃描後可能提供刪除車輛的選項，須另行確認。" />
 				<ScreenshotSlot locale="zh-tw" title="功能實際運作" description="車流繞過塞車路段，或繁忙車站的列車分散到空閒月台。" />
 			</div>
 		</div>
 	</section>
 </SiteLayout>
+<!-- Author: OpenAI-Codex_module_worker. -->
+<!-- Updated by OpenAI-Codex on 2026-11-01. -->

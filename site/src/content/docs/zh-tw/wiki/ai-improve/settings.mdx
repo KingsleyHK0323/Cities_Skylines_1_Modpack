@@ -1,17 +1,19 @@
 ---
-title: AI Improve 設定說明
-description: "AI Improve 選項頁的結構，以及一般設定的作用。"
+title: AI Improve 開發版設定說明
+description: "根據原始碼整理的 AI Improve 開發版選項頁結構及一般設定。"
 ---
 
 import AiImproveReference from '../../../../../components/AiImproveReference.astro';
 
-從遊戲的 **Options（選項）** 選單打開 AI Improve 的選項；若有使用 UnifiedUI，也可以從遊戲內面板打開（見[遊戲內使用](/Cities_Skylines_1_Modpack/zh-tw/wiki/ai-improve/in-game/)）。
+在[公開開發版原始碼 `75ef944`](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/75ef94407962817051cef4aa74ec6fbc1831fd02/SettingsPageUI.cs) 中，AI Improve 的完整設定從 Content Manager（內容管理員）的 **Options（選項）** 頁打開。選用的 UnifiedUI 遊戲內面板提供空載城際列車及公車掃描與重設設定，不能用來打開完整設定頁；請見[遊戲內使用](/Cities_Skylines_1_Modpack/zh-tw/wiki/ai-improve/in-game/)。
+
+已核對的原始碼定義了 25 個功能開關及一張純數值調校卡。下方使用網站隨附資料，其來源提交及擷取日期顯示在卡片上方。這是靜態原始碼核對，並非遊戲內驗收；工作坊穩定版介面及功能數量均未獨立核實。
 
 ## 頁面結構
 
 - **頁首**：模組狀態與版本、**更新日誌 (Changelog)** 按鈕、**搜尋設定**欄位，以及**重設為預設值**。
 - **一般**：語言、詳細記錄、顯示進階參數。
-- **各領域分區**：市民、緊急服務、環境清潔、道路交通、鐵路、航空、船運與貨運、進階、實驗功能。每項功能是一張有獨立開關的卡片。
+- **各領域分區**：市民、緊急服務、環境清潔、道路交通、鐵路、航空、船運與貨運、進階、實驗功能。多數功能卡片有開關；進階調校卡只有數值控制，開啟進階參數後才會出現。
 - **關於**：原始碼、本使用說明、Steam Workshop 頁面與問題回報表單的連結。
 
 ## 一般設定
@@ -19,17 +21,19 @@ import AiImproveReference from '../../../../../components/AiImproveReference.ast
 | 設定 | 作用 |
 | --- | --- |
 | 語言 | 預設跟隨遊戲語言，可另外指定；頁面會立即重新繪製。 |
-| 詳細記錄 | 記錄每一個個別決定，而不只是摘要。只在重現問題、準備回報時有用；會拖慢遊戲並寫入大量資料。預設關閉。 |
-| 顯示進階參數 | 在每張功能卡片中顯示數值滑桿。預設隱藏，因為改錯數值可能讓功能在沒有任何提示的情況下失效。 |
+| 詳細記錄 | 啟用部分逐車及逐事件診斷記錄，可能增加記錄輸出及效能成本。預設關閉。 |
+| 顯示進階參數 | 顯示可用的數值控制及「進階」分區。預設隱藏；修改數值可能讓功能在沒有任何提示的情況下失效。 |
 
 **重設為預設值**會把所有開關與數值還原成全新安裝的狀態，但保留你選擇的語言。
 
 ## 搜尋
 
-在**搜尋設定**欄位輸入文字，可同時篩選所有分區。清空欄位即可回到分區列表。
+當**搜尋設定**欄位可用時，輸入文字後按 Enter 或移開焦點，才會篩選各分區。清空欄位並提交，或使用返回控制，即可回到分區列表。選項頁過窄時可能不顯示搜尋欄。
 
 ## 所有分區一覽
 
 <AiImproveReference mode="settings" locale="zh-tw" />
 
-各項功能的完整說明，請見[全部功能](/Cities_Skylines_1_Modpack/zh-tw/wiki/ai-improve/features/)。
+網站隨附資料中的功能說明，請見[開發版功能](/Cities_Skylines_1_Modpack/zh-tw/wiki/ai-improve/features/)。
+
+{/* Author: OpenAI-Codex_status_worker. */}

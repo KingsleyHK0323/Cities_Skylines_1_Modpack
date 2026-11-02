@@ -1,17 +1,19 @@
 ---
-title: AI Improve settings
-description: "How the AI Improve options page is organised, and what the general settings do."
+title: AI Improve Development settings
+description: "A source-based guide to the AI Improve Development options page and general settings."
 ---
 
 import AiImproveReference from '../../../../components/AiImproveReference.astro';
 
-Open AI Improve's options from the game's **Options** menu, or from the in-game panel if you use UnifiedUI (see [Using AI Improve in game](/Cities_Skylines_1_Modpack/wiki/ai-improve/in-game/)).
+For the public [Development source at `75ef944`](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/75ef94407962817051cef4aa74ec6fbc1831fd02/SettingsPageUI.cs), open AI Improve's full settings from its **Options** page in Content Manager. The optional UnifiedUI in-game panel offers empty intercity train and bus scans and a settings reset; it does not open the full settings page. See [Using AI Improve in game](/Cities_Skylines_1_Modpack/wiki/ai-improve/in-game/).
+
+The reviewed source defines 25 feature switches and one tuning-only card. The data below is bundled with the site, and its source commit and extraction date appear above the cards. This is static source review, not in-game acceptance; the stable Workshop interface and feature count have not been independently verified.
 
 ## Page layout
 
 - **Header** — the mod's status and version, a **Changelog** button, a **Search settings** box and **Reset to defaults**.
 - **General** — language, verbose logging and *Show advanced tuning values*.
-- **One section per area** — Citizens, Emergency, Sanitation, Road Traffic, Rail, Aviation, Shipping & Cargo, Advanced and Experimental. Each feature is a card with its own switch.
+- **One section per area** — Citizens, Emergency, Sanitation, Road Traffic, Rail, Aviation, Shipping & Cargo, Advanced and Experimental. Most feature cards have a switch; the Advanced tuning card has numeric controls only and appears when advanced tuning is enabled.
 - **About** — links to the source code, this guide, the Steam Workshop page and the issue forms.
 
 ## General settings
@@ -19,17 +21,19 @@ Open AI Improve's options from the game's **Options** menu, or from the in-game 
 | Setting | What it does |
 | --- | --- |
 | Language | Uses the game's language by default. Pick another to override it; the page redraws immediately. |
-| Verbose logging | Logs every individual decision, not just summaries. Only useful when reproducing a bug for a report; it slows the game and writes a lot to disk. Off by default. |
-| Show advanced tuning values | Reveals the number sliders inside each feature card. Hidden by default, because changing them can stop a feature working without any visible sign. |
+| Verbose logging | Enables some per-vehicle and per-event diagnostic messages. It may increase log output and performance costs. Off by default. |
+| Show advanced tuning values | Reveals available numeric controls and the Advanced section. Hidden by default; changing values can stop a feature working without any visible sign. |
 
 **Reset to defaults** restores every switch and value to a fresh install. Your language choice is kept.
 
 ## Search
 
-Type in **Search settings** to filter every section at once. Clear the box to return to the section list.
+When **Search settings** is available, enter a term and press Enter or move focus away to apply the filter across sections. Clear and submit the field, or use the back control, to return to the section list. The search field may be omitted when the options page is too narrow.
 
 ## All sections at a glance
 
 <AiImproveReference mode="settings" locale="en" />
 
-For the full description of each feature, see [All features](/Cities_Skylines_1_Modpack/wiki/ai-improve/features/).
+For feature descriptions in the bundled data, see [Development features](/Cities_Skylines_1_Modpack/wiki/ai-improve/features/).
+
+{/* Author: OpenAI-Codex_status_worker. */}

@@ -3,17 +3,17 @@ title: AI Improve 相容性
 description: "AI Improve 與其他熱門 Cities: Skylines 1 模組一起使用時的行為。"
 ---
 
-AI Improve 盡量不和其他模組互相干擾。當另一個模組已經把某項工作做好時，AI Improve 會偵測到並主動讓位。
+已核對的[開發版原始碼 75ef944](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/tree/75ef94407962817051cef4aa74ec6fbc1831fd02) 會偵測部分模組，並針對某些組合作條件處理。相容性取決於涉及的版本及條件；遊戲內驗收仍待完成。
 
 | 模組 | AI Improve 的處理方式 |
 | --- | --- |
 | **Harmony** | 必須使用。AI Improve 透過它修改遊戲行為。 |
-| **UnifiedUI** | 選用。提供[遊戲內面板](/Cities_Skylines_1_Modpack/zh-tw/wiki/ai-improve/in-game/)。 |
-| **Improved Public Transport**、**Express Bus Services** | 安裝其中任何一個時，「縮短空站停留」與「拉開同線車輛間距」會停用，因為這些模組已經負責決定車輛何時發車。 |
-| **Transfer Manager CE** | 它的消防派遣啟用時，AI Improve 讓它決定車輛要去哪一場火，只保留每棟建築的出勤上限。 |
-| **Traffic Manager: President Edition（TM:PE）** | 會偵測。TM:PE 會取代遊戲的尋路。AI Improve 針對 TM:PE 尋路的緊急車輛成本調整目前無法載入，啟用 TM:PE 時不會生效，修正正在測試中。選用的緊急車輛中途改道不受影響。 |
-| **Real Time** | 會偵測。兩者會碰到同一個消防派遣步驟，但 Real Time 在那裡只做自己的記錄，不會互相干擾。 |
-| **SingleTrainTrackAI**、**Reversible Tram AI** | 會偵測。AI Improve 不會去做它們負責的工作。 |
+| **UnifiedUI** | 選用。已核對的開發版原始碼提供空載城際列車及巴士掃描與設定重設面板；各功能開關位於 Content Manager。掃描後可能提供刪除車輛的選項，須另行確認。條件及限制請見[遊戲內指南](/Cities_Skylines_1_Modpack/zh-tw/wiki/ai-improve/in-game/)；實際安裝的版本可能不同。 |
+| **Improved Public Transport**、**Express Bus Services** | 已核對的原始碼在偵測到其中一個模組時，會按條件停用「縮短空站停留」及「拉開同線車輛間距」。 |
+| **Transfer Manager CE** | 它的消防派遣啟用時，已核對的原始碼會由它選擇火警，並保留每棟建築的出勤上限。 |
+| **Traffic Manager: President Edition（TM:PE）** | 已核對的原始碼實作了緊急車輛尋路成本調整的候選方案。能否套用取決於 TM:PE 版本及指令是否符合預期；若遭拒絕，會保留原有邏輯。請在輸出記錄中檢查警告；遊戲內驗收仍待完成。 |
+| **Real Time** | 會偵測。兩個模組均涉及消防派遣步驟；遊戲內相容性尚未確立。 |
+| **SingleTrainTrackAI**、**Reversible Tram AI** | 會偵測。偵測本身不能證明相容。 |
 
 AI Improve 不會改變任何載具的載客量。
 
@@ -26,3 +26,5 @@ AI Improve 不會改變任何載具的載客量。
 如果和其他模組一起使用時出問題，請開一個 [Issue](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/issues/new/choose)，附上遊戲版本、完整模組清單、相關的 AI Improve 功能、重現步驟，以及輸出記錄的相關段落（見[常見問題](/Cities_Skylines_1_Modpack/zh-tw/wiki/ai-improve/faq/)）。
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+<!-- Author: OpenAI-Codex_module_worker. -->
+<!-- Updated by OpenAI-Codex on 2026-11-01. -->

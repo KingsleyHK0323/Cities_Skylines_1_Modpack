@@ -1,8 +1,9 @@
 {
   "metadata": {
-    "sourceCommit": "ab3299b",
-    "extractedAt": "2026-10-26",
-    "updatedBy": "OpenAI-Codex",
+    "sourceCommit": "75ef94407962817051cef4aa74ec6fbc1831fd02",
+    "extractedAt": "2026-11-01",
+    "updatedBy": "OpenAI-Codex_extractor_worker",
+    "previousUpdatedBy": "OpenAI-Codex",
     "sourceFiles": [
       "Localization.cs",
       "ModSettings.cs",
@@ -12,7 +13,7 @@
       "en",
       "zh-tw"
     ],
-    "featureCount": 25
+    "featureCount": 26
   },
   "generalSettings": [
     {
@@ -370,6 +371,32 @@
           "description": {
             "en": "Emergency helicopters stay grounded during a thunderstorm.",
             "zhTW": "雷暴雨期間緊急直升機停留在地面。",
+            "zhTWFallback": false
+          },
+          "defaultEnabled": true,
+          "sectionKey": "nav.emergency",
+          "section": {
+            "en": "Emergency",
+            "zhTW": "緊急服務",
+            "zhTWFallback": false
+          },
+          "group": "emergency",
+          "status": "implemented",
+          "tunables": []
+        },
+        {
+          "key": "feature.tmpeEmergencyCost",
+          "id": "tmpeEmergencyCost",
+          "setting": "TmpeEmergencyCostAdjustmentEnabled",
+          "property": "TmpeEmergencyCostAdjustmentEnabled",
+          "name": {
+            "en": "TM:PE emergency congestion cost adjustment",
+            "zhTW": "TM:PE 緊急車輛壅塞成本調整",
+            "zhTWFallback": false
+          },
+          "description": {
+            "en": "When enabled, emergency vehicle requests in TM:PE retain 25% of the normal congestion cost. Only applies when TM:PE is installed.",
+            "zhTW": "啟用後，TM:PE 尋路中的緊急車輛會保留正常壅塞成本的 25%。僅在安裝 TM:PE 時生效。",
             "zhTWFallback": false
           },
           "defaultEnabled": true,
@@ -1057,7 +1084,7 @@
             "zhTW": "進階",
             "zhTWFallback": false
           },
-          "group": "publicTransport",
+          "group": null,
           "status": "implemented",
           "tunables": [
             {

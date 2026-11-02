@@ -13,7 +13,7 @@ const base = import.meta.env.BASE_URL;
 		<div class="hero-copy">
 			<p class="eyebrow">模組 02 · 開發原型</p>
 			<h1>Automated Public Transport Planning</h1>
-			<p class="hero-lead">開發原型可預覽公車路線提案，並在你啟用建立功能及確認後，嘗試建立所選路線。建立路線可能變更存檔，亦不保證路線能夠運作。</p>
+			<p class="hero-lead">開發原型可預覽公車路線提案，並在你啟用建立功能及確認後，嘗試建立所選路線；亦提供既有路線移站原型。這些嘗試可能變更存檔，亦不保證路線能夠運作。</p>
 			<div class="status-strip"><span class="tag">可能變更存檔</span><span class="tag">需要確認</span><span class="tag">遊戲驗收待完成</span></div>
 			<WorkshopLinks mod="transport" locale="zh-tw" />
 		</div>
@@ -33,7 +33,9 @@ const base = import.meta.env.BASE_URL;
 					<li><strong>擷取世界快照</strong><span>規劃器會用到的道路與站點摘要。</span></li>
 					<li><strong>建立路線圖</strong><span>各站點之間可能的連接網絡。</span></li>
 				</ul>
-				<p>請備份存檔，並使用獨立的測試城市。工作坊訂閱版本的遊戲驗收尚未確認路線建立、儲存與重新載入能否成功。</p>
+				<p>來自<a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/commit/60976d7c34f73aee698af192a660abe001ec347d">原始碼 60976d7</a> 的<a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/Automated_Public_Transport_Planning-dev-41252417067-1">歷史開發版發行紀錄</a>當時包括手動及自動純移站編輯，適用於有 3–6 個站點的普通市內公車既有路線；設計上保留線路 ID 及站點數量。嘗試變更前，須預覽、啟用並確認兩次。原站及目標站的站位均須使用確切的 RoadAI，並通過路段資格及放置檢查；橋樑、隧道、車站專用道路、未知或自訂 AI（人工智能）道路上的站點會被保守拒絕。</p>
+				<p>2026 年 11 月 2 日可用性核查：目前無法確認可安裝的附件。安裝前請查看 <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases（發行清單）</a>及各發行項目的實際附件；自動產生的原始碼壓縮檔不是可安裝的模組檔案。</p>
+				<p>請備份存檔，並使用獨立的測試城市。回復並非原子操作且可能失敗；乘客、車輛及路徑可能無法完整還原。遊戲內運作及存檔重新載入尚未通過驗收。</p>
 			</div>
 			<div class="screenshot-stack">
 				<ScreenshotSlot locale="zh-tw" title="模組選項中的診斷工具" description="選項頁上的語言選擇與診斷按鈕。" />
@@ -55,3 +57,7 @@ const base = import.meta.env.BASE_URL;
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
 
 <!-- Translation review: OpenAI-Codex_zh_pages. -->
+
+<!-- Author: OpenAI-Codex_status_worker. -->
+
+<!-- Author: OpenAI-Codex_transport_update. -->

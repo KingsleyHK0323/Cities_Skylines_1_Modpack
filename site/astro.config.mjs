@@ -27,7 +27,7 @@ export default defineConfig({
 			logo: { src: './src/assets/icons/icon-192.png', alt: 'Cities: Skylines 1 Modpack' },
 			favicon: '/icons/favicon-32.png',
 			customCss: ['./src/styles/starlight.css'],
-			components: { Header: './src/components/DocsHeader.astro', ThemeProvider: './src/components/DocsThemeProvider.astro' },
+			components: { Header: './src/components/DocsHeader.astro', ThemeProvider: './src/components/DocsThemeProvider.astro', ThemeSelect: './src/components/DocsThemeSelect.astro' },
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack' }],
 			head: [
 				{ tag: 'meta', attrs: { property: 'og:type', content: 'website' } },

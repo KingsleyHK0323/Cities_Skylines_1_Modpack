@@ -5,13 +5,24 @@ import { Icon } from '@astrojs/starlight/components';
 <script is:inline>
 	window.StarlightThemeProvider = (() => {
 		let storedTheme;
+		// Preserve an explicit Auto selection separately from a first visit. OpenAI-Codex.
+		let automaticTheme = false;
 		try {
 			storedTheme = localStorage.getItem('starlight-theme');
+			automaticTheme = storedTheme === '';
+			if (storedTheme === 'auto') automaticTheme = true;
+			if (!automaticTheme) {
 			if (!storedTheme) { storedTheme = 'dark'; localStorage.setItem('starlight-theme', 'dark'); }
+			}
 		} catch { storedTheme = 'dark'; }
+		document.documentElement.dataset.themeAutomatic = automaticTheme ? 'true' : 'false';
 		document.documentElement.dataset.theme = storedTheme === 'light' ? 'light' : 'dark';
+		if (automaticTheme) document.documentElement.dataset.theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 		return {
 			updatePickers(theme = storedTheme || 'dark') {
+				if (arguments.length === 0 && automaticTheme) theme = 'auto';
+				if (arguments.length > 0) { automaticTheme = theme === 'auto'; storedTheme = automaticTheme ? '' : theme; }
+				if (arguments.length > 0) document.documentElement.dataset.themeAutomatic = automaticTheme ? 'true' : 'false';
 				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
 					const select = picker.querySelector('select');
 					if (select) select.value = theme;

@@ -1,56 +1,49 @@
 ---
 import { Image } from 'astro:assets';
 import ProjectStatusSummary from '../components/ProjectStatusSummary.astro';
-import PlannedVehicleManagement from '../components/PlannedVehicleManagement.astro';
 import DevelopmentNotice from '../components/DevelopmentNotice.astro';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { changeEntries } from '../lib/changelog';
-import { harmonyUrl } from '../data/workshop';
 import cityArt from '../assets/brand/modpack-city.png';
-import aiImproveArt from '../assets/projects/ai-improve.png';
-import transportArt from '../assets/projects/transport.png';
-import aiGamingArt from '../assets/projects/ai-gaming.png';
 const base = import.meta.env.BASE_URL;
-const recent = changeEntries.slice(0, 5);
-const projects = [
-	{ art: aiImproveArt, name: 'AI Improve', status: 'Available on the Workshop', text: 'Vehicles, services and citizens that react to what is actually happening in your city: jams, crowded platforms, nearby fires and full depots.', page: 'ai-improve/', wiki: 'wiki/ai-improve/overview/' },
-	{ art: transportArt, name: 'Automated Public Transport Planning', status: 'Development prototype · game acceptance pending', text: 'The Development prototype previews proposed bus routes and can attempt creation after confirmation. It may change saves; back up before testing.', page: 'automated-public-transport-planning/', wiki: 'wiki/transport/overview/' },
-	{ art: aiGamingArt, name: 'AI Gaming', status: 'Development paused · runtime unverified', text: 'The GitHub Development build includes a matching Windows x64 Companion for player-confirmed Ollama Local advice. Game runtime remains unverified.', page: 'ai-gaming/', wiki: 'wiki/ai-gaming/overview/' },
-];
+const recent = changeEntries.slice(0, 3);
 ---
 
 <SiteLayout title="Cities: Skylines 1 Modpack" description="A 15-module Cities: Skylines 1 project with prototypes, designs and paused work. See dated implementation and acceptance status." active="home">
-	<DevelopmentNotice />
 	<section class="hero page-wrap">
 		<div class="hero-copy">
 			<p class="eyebrow">Cities: Skylines 1 mods by Kingsley</p>
 			<h1>Make the city work better.</h1>
-			<p class="hero-lead" lang="en">A 15-module project spanning city behavior, transport and utilities, with implementation and acceptance at different stages. AI Gaming development is paused.</p>
-			<div class="hero-actions"><a class="button" href={base + 'wiki/getting-started/'}>Get started</a><a class="button secondary" href={base + 'ai-improve/'}>Explore AI Improve</a></div>
+			<p class="hero-lead" lang="en">A Cities: Skylines 1 mod project exploring city behavior, transport, and utilities. Each module is at a different stage of design, development, and validation.</p>
+			<div class="hero-actions"><a class="button" href={base + 'wiki/project/status/'}>Explore modules and status</a><a class="button secondary" href={base + 'wiki/getting-started/'}>Get started</a></div>
 		</div>
 		<figure class="hero-art"><Image src={cityArt} alt="Illustrated city block crossed by a red transit line" widths={[520, 760]} sizes="(max-width: 640px) 100vw, 45vw" format="webp" quality={78} loading="eager" /><figcaption class="art-note">Illustration · not a gameplay screenshot</figcaption></figure>
 	</section>
 
-	<ProjectStatusSummary />
-
 	<section class="section soft">
 		<div class="page-wrap">
-			<div class="section-heading" lang="en"><div><p class="eyebrow">Featured project pages</p><h2>Explore three existing previews.</h2></div><p>Independent operation and compatibility are design goals. Combined-mod and subscribed-game acceptance are not established.</p></div>
-			<div class="project-grid">
-				{projects.map((p) => <article class="project-card"><Image src={p.art} alt={p.name + ' artwork'} widths={[420, 640]} sizes="(max-width: 640px) 100vw, 33vw" format="webp" quality={76} /><div class="project-card-copy"><h3>{p.name}</h3><span class="status">{p.status}</span><p>{p.text}</p><div class="card-links"><a href={base + p.page}>Project page →</a><a href={base + p.wiki}>Guide →</a></div></div></article>)}
+			<p class="eyebrow">Project areas</p>
+			<h2>A city of connected systems.</h2>
+			<p class="section-intro">These areas describe the project's direction; each module follows its own development and validation path.</p>
+			<div class="highlight-grid home-areas">
+				<article><h3>City and citizens</h3><p>Population, demand, and city services.</p></article>
+				<article><h3>Traffic and transport</h3><p>Roads, railways, buses, and outside connections.</p></article>
+				<article><h3>Infrastructure and resources</h3><p>Maps, utilities, and resource exchange.</p></article>
 			</div>
 		</div>
 	</section>
 
-	<PlannedVehicleManagement />
+	<ProjectStatusSummary />
+
+	<DevelopmentNotice />
 
 	<section class="section">
 		<div class="page-wrap columns">
-			<div class="text-stack"><p class="eyebrow">How to begin</p><h2>Three steps to your first city.</h2><p>Every mod page links to its Workshop items, and the Wiki explains each setting in detail.</p><div class="hero-actions"><a class="button" href={base + 'wiki/getting-started/'}>Read the full guide</a></div></div>
+			<div class="text-stack"><p class="eyebrow">How to begin</p><h2>Three steps to get started.</h2><p>Check the status and instructions for the module you want to try.</p><div class="hero-actions"><a class="button" href={base + 'wiki/getting-started/'}>Read the full guide</a></div></div>
 			<ol class="steps">
-				<li><strong>Subscribe to Harmony</strong><p>AI Improve needs the <a href={harmonyUrl}>Harmony</a> mod, a shared library many Cities: Skylines mods depend on.</p></li>
-				<li><strong>Pick a version</strong><p>Stable releases use Steam Workshop; GitHub Development builds are experimental. Enable only one copy of each mod.</p></li>
-				<li><strong>Enable it and adjust</strong><p>Turn the mod on in the Content Manager, then open its options to switch individual features on or off.</p></li>
+				<li><strong>Check the status</strong><p>Review each module's stage and available versions before deciding what to try.</p></li>
+				<li><strong>Check its requirements</strong><p>Read the chosen module's guide and dependencies; availability and installation vary by module.</p></li>
+				<li><strong>Back up and follow the guide</strong><p>Back up your saves, use a test city for experimental builds, and follow the installation and testing instructions.</p></li>
 			</ol>
 		</div>
 	</section>
@@ -65,3 +58,5 @@ const projects = [
 <!-- Updated by OpenAI-Codex on 2026-10-26. -->
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Updated by OpenAI-Codex_home_worker on 2026-11-01. -->

@@ -8,12 +8,12 @@ import art from '../../assets/projects/ai-gaming.png';
 const base = import.meta.env.BASE_URL;
 ---
 
-<SiteLayout title="AI Gaming" description="AI Gaming offers a Development preview of player-confirmed Ollama Local advice. In-game behavior remains unverified." path="ai-gaming/" active="mods">
+<SiteLayout title="AI Gaming" description="The paused AI Gaming Development source offers player-confirmed Ollama Local advice. In-game behavior remains unverified." path="ai-gaming/" active="mods">
 	<section class="hero page-wrap">
 		<div class="hero-copy">
-			<p class="eyebrow">Mod 03 · Development preview 0.4.0</p>
+			<p class="eyebrow">Development paused · historical preview 0.4.0</p>
 			<h1>AI Gaming</h1>
-			<p class="hero-lead">The 0.4.0 Development source adds an optional Windows companion for Ollama Local advice. Choose which aggregate city details to share, write a question, review the complete request and confirm it each time. Replies are advice only; this preview does not control the simulation.</p>
+			<p class="hero-lead">The 0.4.0 Development source offers Ollama Local advice through a Windows x64 Companion. Review the city data and installed-content identifiers, write a question and confirm each complete request. Replies are advice only; this preview does not control the simulation.</p>
 			<div class="status-strip"><span class="tag">Ollama Local</span><span class="tag">Confirm every request</span><span class="tag">Game runtime unverified</span><span class="tag">English · 繁體中文</span></div>
 			<WorkshopLinks mod="ai-gaming" />
 		</div>
@@ -25,18 +25,19 @@ const base = import.meta.env.BASE_URL;
 	<section class="section soft">
 		<div class="page-wrap columns">
 			<div class="text-stack">
-				<p class="eyebrow">Current Development source</p>
+				<p class="eyebrow">Earlier Development source</p>
 				<h2>Review every request before confirming it.</h2>
-				<p>The settings page lets you choose which aggregate city fields to include: game date, population, funds, residential demand, commercial demand and workplace demand. All six start selected, so remove any fields you do not want to share. Add a model name and your question, then review the complete preview before sending.</p>
-				<p>The separate city-summary command remains available; it writes the game date, population and funds to the local game log when you request it.</p>
+				<p>The settings page in <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/e7de649f58c775f0692ef74d62eed351cf2d6607/Source/LocalAiRequestController.cs">Development source e7de649</a> offers six basic fields: game date, population, funds, residential demand, commercial demand and workplace demand. It also offers four data groups: utilities, built zoned buildings, traffic and public transport, and city service status. All six fields and four groups start selected and can be deselected.</p>
+				<p>Identifiers for DLC, creator packs and radio stations that the game reports as installed and available are added automatically, without a separate selection control. The preview shows the data, model name and question before each confirmation.</p>
+				<p>The separate city-summary command remains available; on request it writes the game date, population, funds, residential demand, commercial demand and workplace demand to the local game log.</p>
 				<p>Each request needs a separate confirmation. The response is displayed as advice only; it is not interpreted as a game action. The source has no cloud-provider adapter or API-key entry.</p>
-				<p>AI Gaming sends the selected information to Ollama on this PC. Ollama may route inference to a cloud service depending on its own configuration, which the mod cannot inspect. Do not include city names, account information, secrets or personal data in the free-text question.</p>
-				<p class="section-intro"><strong>Development build status:</strong> GitHub provides a DLL and Windows x64 Companion as separate assets. Use both files from the same release: the DLL requires the exact Companion hash. Publication and file checks do not establish successful Cities: Skylines gameplay or Ollama requests; both remain unverified. Back up saves and test in a separate city.</p>
+				<p>After each confirmation, AI Gaming sends the previewed data, model name and question through the local Companion to Ollama on this PC. Ollama may route inference to a cloud service depending on its own configuration, which the mod cannot inspect. Do not include city names, account information, secrets or personal data in the free-text question.</p>
+				<p class="section-intro"><strong>Development build status:</strong> Development is paused. An earlier package used separate DLL and Windows x64 Companion assets; current public availability is unverified. If matching official assets are available, use both files from the same release: the DLL requires the exact Companion hash. Publication and file checks do not establish successful Cities: Skylines gameplay or Ollama requests; both remain unverified. Back up saves and test in a separate city.</p>
 			</div>
 			<div class="screenshot-stack">
-				<ScreenshotSlot title="Ollama request preview" description="The selected city fields, model name, question and separate confirmation control." />
+				<ScreenshotSlot title="Ollama request preview" description="The selected city data, automatically added installed-content identifiers, model name, question and separate confirmation control." />
 				<ScreenshotSlot title="Advice response" description="The model response displayed as advice, without changing the simulation." />
-				<ScreenshotSlot title="City summary in the log" description="The separate manual summary with the game date, population and funds." />
+				<ScreenshotSlot title="City summary in the log" description="The separate manual summary with the game date, population, funds and residential, commercial and workplace demand." />
 			</div>
 		</div>
 	</section>
@@ -47,11 +48,14 @@ const base = import.meta.env.BASE_URL;
 		<div class="page-wrap">
 			<p class="eyebrow">Roadmap and safeguards</p>
 			<h2>You stay in control.</h2>
-			<div class="roadmap"><article><strong>1 · Observe</strong><p>Selected aggregate city data is available in the Development source.</p></article><article><strong>2 · Suggest</strong><p>Player-confirmed Ollama Local advice is in the Development build; game runtime remains unverified.</p></article><article><strong>3 · Act, with permission</strong><p>Game actions are not implemented and remain planned.</p></article></div>
-			<p class="section-intro">The long-term design is to use capabilities from other Modpack mods instead of duplicating them. Version 0.4.0 contains no interop calls, cloud-provider adapters or gameplay actions.</p>
+			<div class="roadmap"><article><strong>1 · Observe</strong><p>Selected aggregate city data is available in the Development source.</p></article><article><strong>2 · Suggest</strong><p>Player-confirmed Ollama Local advice is implemented in the historical Development source; game runtime remains unverified.</p></article><article><strong>3 · Act, with permission</strong><p>Game actions are not implemented and remain planned.</p></article></div>
+			<p class="section-intro">The Development source detects providers and reads interop manifests. Calling capabilities from other Modpack mods and interoperability in game have not been established. Cloud-provider adapters and gameplay actions are not implemented.</p>
 			<a class="text-link" href={base + 'wiki/project/roadmap/'}>Full roadmap →</a>
 		</div>
 	</section>
 </SiteLayout>
 <!-- Updated by OpenAI-Codex on 2026-10-26. -->
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+<!-- Author: OpenAI-Codex_module_worker. -->
+<!-- Updated by OpenAI-Codex on 2026-11-02. -->
+<!-- Author: OpenAI-Codex_gaming_update. -->

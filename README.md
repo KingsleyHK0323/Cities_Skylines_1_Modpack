@@ -4,11 +4,11 @@ The [dated module status index](https://kingsleyhk0323.github.io/Cities_Skylines
 
 Visit the [Cities: Skylines 1 Modpack website](https://kingsleyhk0323.github.io/Cities_Skylines_1_Modpack/) for project information, documentation, and updates.
 
-Experimental Development prereleases are available individually for [AI Gaming](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/AI_Gaming-dev-41205697941-1), [AI Improve](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/AI_Improve-dev-41211059018-1), and [Automated Public Transport Planning](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/Automated_Public_Transport_Planning-dev-41252417067-1). Back up saves, use a separate test city, and follow each release's installation and dependency instructions. Steam Workshop Development editions have been removed; GitHub prereleases are distributed separately. Check the individual Workshop listings for stable-version availability. <!-- OpenAI-Codex_Responsible: Modpack_Website --> <!-- Updated by OpenAI-Codex. -->
+Check [GitHub Releases](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases) for current Development availability and confirm that a release has matching installable attachments; source archives alone are not installers. Availability was not verified as of 2 November 2026. AI Gaming development is paused; its earlier build is a historical preview. Back up saves, use a separate test city, and follow each release's installation and dependency instructions. Steam Workshop Development editions have been removed; check the individual Workshop listings for stable-version availability. <!-- OpenAI-Codex_Responsible: Modpack_Website --> <!-- Updated by OpenAI-Codex. -->
 
 Author: OpenAI-Codex
 
-The website exposes Development downloads in the documentation sidebar and as the primary action on mod pages. On small screens, the Wiki menu contains language and theme controls. <!-- OpenAI-Codex_Responsible: Modpack_Website -->
+The website exposes Development download guidance in the documentation sidebar and a release-availability check on mod pages. On small screens, the Wiki menu contains language and theme controls. <!-- OpenAI-Codex_Responsible: Modpack_Website --> <!-- Updated by OpenAI-Codex. -->
 
 This is a source-available, noncommercial project.
 
@@ -38,3 +38,11 @@ See [collector documentation](tools/modpack-release/README.md) for scheduling,
 artifact retention, integrity gates and publication behavior. Cloud publication and unchanged-source suppression passed on 2026-11-02. Signature: OpenAI-Codex.
 
 Status refresh (2 November 2026): 15 gameplay modules, 14 non-paused verified cloud game-DLL builds and AI Gaming paused with its older preview. The status/download guides distinguish the deployed three-module collector from the planned cloud-compile pipeline, identify Dev Manager as planning-only, and record warning-only duplicate handling and IMT exclusion. No game acceptance is claimed. Signature: OpenAI-Codex.
+
+Workshop and local-build update (2 November 2026): screenshots provided by the owner show a Workshop item for each of the 15 modules, with visibility varying by item. Twelve modules were also compiled locally without Dev Tools. Neither item creation nor compilation establishes public availability or in-game acceptance. The status and download guides separate these facts from the existing three-module bundle and future publishing plans. Signature: OpenAI-Codex.
+
+Main navigation links expose the current page to assistive technologies. <!-- Updated by OpenAI-Codex. -->
+
+The documentation theme picker preserves an explicit automatic preference across pages, while first visits default to dark. <!-- Updated by OpenAI-Codex. -->
+
+When browser preference storage is blocked, the documentation theme picker remains usable on the current page; a preference cannot be guaranteed across full page loads. <!-- Updated by OpenAI-Codex. -->

@@ -1,12 +1,16 @@
 ---
-title: AI Improve 全部功能
-description: "AI Improve 每項功能的說明、預設狀態與可調數值。"
+title: AI Improve 開發版功能
+description: "根據原始碼整理的 AI Improve 開發版功能、預設狀態與可調數值。"
 ---
 
 import AiImproveReference from '../../../../../components/AiImproveReference.astro';
 
-下方每張卡片都是模組選項中的一個開關。**開／關**表示全新安裝時的預設狀態。可調數值在遊戲中預設隱藏，要開啟「顯示進階參數」才會出現；這些數值依實際遊玩校準，除非清楚原因，否則不建議修改。
+[公開開發版原始碼 `75ef944`](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/75ef94407962817051cef4aa74ec6fbc1831fd02/SettingsPageUI.cs) 定義了 25 個功能開關及一張純數值調校卡。純數值卡位於「進階」分區，開啟「顯示進階參數」後才會出現；並非每張卡片都有開關。
 
-這份清單直接從模組本身產生（版本 `d1cecad`），名稱與預設值和遊戲中看到的一致。
+下方卡片使用網站隨附的資料；資料的來源提交及擷取日期顯示在卡片上方。**開／關**標籤反映該資料記錄的預設值。這次靜態原始碼核對不代表遊戲內行為已驗證，也不能證明工作坊穩定版與其一致。
+
+請從 Content Manager（內容管理員）的 AI Improve **Options（選項）** 頁開啟模組的完整設定。在此開發版原始碼中，選用的 UnifiedUI 面板提供空載城際列車及公車掃描與重設設定，並非完整設定頁。
 
 <AiImproveReference mode="features" locale="zh-tw" />
+
+{/* Author: OpenAI-Codex_status_worker. */}

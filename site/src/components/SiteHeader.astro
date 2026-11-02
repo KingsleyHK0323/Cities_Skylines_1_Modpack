@@ -14,18 +14,18 @@ const text = locale === 'zh-tw';
 		<span><strong>Cities: Skylines 1</strong><small>Modpack / {text ? '城市規劃展' : 'Project atlas'}</small></span>
 	</a>
 	<nav aria-label={text ? '主要導覽' : 'Primary navigation'}>
-		<a class:list={{ current: active === 'home' }} href={href('')}>{text ? '首頁' : 'Home'}</a>
+		<a class:list={{ current: active === 'home' }} href={href('')} aria-current={active === 'home' ? 'page' : undefined}>{text ? '首頁' : 'Home'}</a>
 		<details class="mods-menu">
 			<summary>{text ? '模組' : 'Mods'}</summary>
 			<div class="mods-options">
-				<a href={href('ai-improve/')}>AI Improve</a>
-				<a href={href('automated-public-transport-planning/')}>{text ? '公共運輸自動規劃' : 'Automated Public Transport Planning'}</a>
-				<a href={href('ai-gaming/')}>AI Gaming</a>
+				<a href={href('ai-improve/')} aria-current={active === 'mods' && path === 'ai-improve/' ? 'page' : undefined}>AI Improve</a>
+				<a href={href('automated-public-transport-planning/')} aria-current={active === 'mods' && path === 'automated-public-transport-planning/' ? 'page' : undefined}>{text ? '公共運輸自動規劃' : 'Automated Public Transport Planning'}</a>
+				<a href={href('ai-gaming/')} aria-current={active === 'mods' && path === 'ai-gaming/' ? 'page' : undefined}>AI Gaming</a>
 			</div>
 		</details>
 		<a href={href('wiki/project/status/')}>{text ? '專案狀態' : 'Status'}</a>
-		<a class:list={{ current: active === 'wiki' }} href={href('wiki/')}>Wiki</a>
-		<a class:list={{ current: active === 'change-log' }} href={href('change-log/')}>{text ? '更新紀錄' : 'Change Log'}</a>
+		<a class:list={{ current: active === 'wiki' }} href={href('wiki/')} aria-current={active === 'wiki' ? 'page' : undefined}>Wiki</a>
+		<a class:list={{ current: active === 'change-log' }} href={href('change-log/')} aria-current={active === 'change-log' ? 'page' : undefined}>{text ? '更新紀錄' : 'Change Log'}</a>
 		<a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
 	</nav>
 	<div class="preferences">
@@ -36,9 +36,20 @@ const text = locale === 'zh-tw';
 
 <script>
 	const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+	// Retain Auto until the visitor explicitly switches themes. OpenAI-Codex.
+	let keepAutomaticTheme = false;
+	let allowThemeSave = true;
+	let lastReadableTheme: string | null = null;
+	let themeRead = false;
+	try { const saved = localStorage.getItem('starlight-theme'); keepAutomaticTheme = saved === '' || saved === 'auto'; lastReadableTheme = saved; themeRead = true; } catch { allowThemeSave = false; }
+	try { const saved = localStorage.getItem('starlight-theme'); keepAutomaticTheme = saved === '' || saved === 'auto'; lastReadableTheme = saved; themeRead = true; } catch { /* Use the current page theme. */ allowThemeSave = false; }
 	function applyTheme(theme: 'light' | 'dark') {
 		document.documentElement.dataset.theme = theme;
+		if (!keepAutomaticTheme) {
+		if (allowThemeSave) {
 		try { localStorage.setItem('starlight-theme', theme); } catch { /* Theme still applies for this visit. */ }
+		}
+		}
 		if (button) {
 			const isLight = theme === 'light';
 			button.setAttribute('aria-pressed', String(isLight));
@@ -47,9 +58,21 @@ const text = locale === 'zh-tw';
 		}
 	}
 	if (button) {
+		if (!themeRead && document.documentElement.dataset.themeAutomatic === 'true') keepAutomaticTheme = true;
+		if (themeRead && keepAutomaticTheme) document.documentElement.dataset.theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+		if (themeRead && (lastReadableTheme === 'light' || lastReadableTheme === 'dark')) document.documentElement.dataset.theme = lastReadableTheme;
+		allowThemeSave = false;
 		applyTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+		button.addEventListener('click', () => { allowThemeSave = true; });
+		button.addEventListener('click', () => { keepAutomaticTheme = false; document.documentElement.dataset.themeAutomatic = 'false'; });
 		button.addEventListener('click', () => applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'));
+	}
+	if (keepAutomaticTheme) {
+		window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (event) => {
+			if (keepAutomaticTheme) applyTheme(event.matches ? 'light' : 'dark');
+		});
 	}
 </script>
 
 <!-- Updated by: OpenAI-Codex -->
+<!-- Updated by OpenAI-Codex on 2026-11-02. -->

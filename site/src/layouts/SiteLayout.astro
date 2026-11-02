@@ -43,8 +43,14 @@ const lang = locale === 'zh-tw' ? 'zh-TW' : 'en';
 		<script is:inline>
 			try {
 				let saved = localStorage.getItem('starlight-theme');
+				// Keep an explicit Auto choice distinct from a first visit. OpenAI-Codex.
+				const automaticTheme = saved === '' || saved === 'auto';
+				if (automaticTheme) document.documentElement.dataset.themeAutomatic = 'true';
+				if (!automaticTheme) {
 				if (!saved) { saved = 'dark'; localStorage.setItem('starlight-theme', saved); }
+				}
 				document.documentElement.dataset.theme = saved === 'light' ? 'light' : 'dark';
+				if (automaticTheme) document.documentElement.dataset.theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 			} catch { document.documentElement.dataset.theme = 'dark'; }
 		</script>
 	</head>

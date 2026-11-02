@@ -13,7 +13,7 @@ const base = import.meta.env.BASE_URL;
 		<div class="hero-copy">
 			<p class="eyebrow">Mod 02 · Development prototype</p>
 			<h1>Automated Public Transport Planning</h1>
-			<p class="hero-lead">The Development prototype can preview proposed bus lines and attempt to create a selected route after you arm the feature and confirm. Creation may change a save, and runnable routes are not guaranteed.</p>
+			<p class="hero-lead">The Development prototype can preview proposed bus lines and attempt to create a selected route after you arm the feature and confirm. It also offers an existing-line stop-move prototype. These attempts may change a save, and runnable routes are not guaranteed.</p>
 			<div class="status-strip"><span class="tag">May change saves</span><span class="tag">Confirmation required</span><span class="tag">Game acceptance pending</span></div>
 			<WorkshopLinks mod="transport" />
 		</div>
@@ -33,7 +33,9 @@ const base = import.meta.env.BASE_URL;
 					<li><strong>Capture a world snapshot</strong><span>A summary of the roads and stops the planner would use.</span></li>
 					<li><strong>Build the route graph</strong><span>The network of possible stop connections.</span></li>
 				</ul>
-				<p>Back up saves and use a separate test city. Successful route creation and save/reload have not been established in subscribed-game acceptance.</p>
+				<p>The <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/Automated_Public_Transport_Planning-dev-41252417067-1">historical Development release</a> from <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/commit/60976d7c34f73aee698af192a660abe001ec347d">source 60976d7</a> included manual and automatic move-only editing for existing regular city-bus lines with 3–6 stops, intended to retain the line ID and stop count. Preview, enable and confirm twice before attempting a change. Both original and target stops must use exact RoadAI and pass segment-eligibility and placement checks. Stops on bridges, tunnels, station roads or unknown/custom-AI roads are conservatively rejected.</p>
+				<p>Availability check, 2 November 2026: current installable attachments could not be verified. Check <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a> and the actual release attachments before installing; automatically generated source archives are not installable mod files.</p>
+				<p>Back up saves and use a separate test city. Recovery is non-atomic and may fail; passengers, vehicles and paths may not be fully restored. In-game operation and save/reload have not been accepted.</p>
 			</div>
 			<div class="screenshot-stack">
 				<ScreenshotSlot title="Diagnostics in the mod options" description="The language selector and the Diagnostics buttons on the mod’s options page." />
@@ -53,3 +55,7 @@ const base = import.meta.env.BASE_URL;
 	</section>
 </SiteLayout>
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Author: OpenAI-Codex_status_worker. -->
+
+<!-- Author: OpenAI-Codex_transport_update. -->

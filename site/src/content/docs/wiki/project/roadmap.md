@@ -3,9 +3,9 @@ title: Roadmap
 description: "Where each Modpack mod is today and what it is working towards."
 ---
 
-<p lang="en">Status update, 2 November 2026: the project includes 15 modules at different stages and 22 replacement directions. See the <a href="/Cities_Skylines_1_Modpack/wiki/project/status/">complete status index</a>. AI Gaming development is paused. Earlier roadmap entries below are historical context; they do not establish current availability or combined-game acceptance.</p>
+<p lang="en">Status update, 2 November 2026: all 15 modules have Workshop items, but availability varies and an item is not proof of gameplay readiness. The project has 22 replacement directions; see the <a href="/Cities_Skylines_1_Modpack/wiki/project/status/">complete status index</a>. AI Gaming development is paused. Earlier roadmap entries below are historical context; they do not establish current availability or combined-game acceptance.</p>
 
-> **Development build update, 31 October 2026:** Separate GitHub prereleases are available for AI Gaming, AI Improve, and Automated Public Transport Planning. AI Gaming has a matching Windows x64 Companion asset, while its game runtime remains unverified. Automated Public Transport Planning can attempt selected route creation after confirmation. See [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/).
+> **Development build update, 2 November 2026:** Records from 31 October describe separate experimental builds for AI Gaming, AI Improve, and Automated Public Transport Planning. Current public availability of installable binaries is unverified and may change; check the actual assets on [GitHub Releases](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases), as automatically generated source archives are not installable binaries. AI Gaming development is paused; its earlier build required a matching Windows x64 Companion and its game runtime remains unverified. The Automated Public Transport Planning prototype can attempt selected route creation after confirmation. See [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/).
 
 These are directions, not release dates. Experimental Development builds can damage saves; back up before testing.
 
@@ -31,7 +31,7 @@ It currently covers regular city buses only.
 
 | Stage | Status |
 | --- | --- |
-| Player-confirmed Ollama Local advice | Development assets include matching DLL and Companion; game runtime unverified |
+| Player-confirmed Ollama Local advice | Earlier Development packaging paired a DLL and Companion; current availability and game runtime unverified |
 | Watch AI play and limited game actions | Planned; not implemented |
 
 ## All mods
@@ -47,3 +47,5 @@ Follow progress in the [change log](/Cities_Skylines_1_Modpack/change-log/).
 <!-- Author: OpenAI-Codex_status_worker. -->
 
 <!-- Updated by OpenAI-Codex on 2026-11-02. -->
+
+<!-- Updated by OpenAI-Codex_wiki_update on 2026-11-02. -->

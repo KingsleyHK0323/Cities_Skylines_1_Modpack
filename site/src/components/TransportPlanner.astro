@@ -10,7 +10,7 @@ const stages = zh
 
 <section class="transport-planner" data-transport-planner data-ready="false">
 	<p class="planned-label">{zh ? '規劃概念示意圖' : 'Planning concept illustration'}</p>
-	<p>{zh ? '此瀏覽器圖表展示規劃概念，並非遊戲截圖。GitHub 開發原型可預覽路線，並在確認後嘗試建立路線；可能改動存檔，遊戲驗收仍未完成。' : 'This browser diagram illustrates a planning concept; it is not an in-game screenshot. The GitHub Development prototype can preview routes and attempt creation after confirmation. It may change saves, and game acceptance remains pending.'}</p>
+	<p>{zh ? '此瀏覽器圖表展示規劃概念，並非遊戲截圖。開發原型可預覽提案，並在啟用及確認後嘗試建立路線。另一項原型可手動或自動移動既有普通市內公車路線的站點（3–6 站），設計上保留線路 ID 及站數；須先預覽、啟用並確認兩次。原站與目標站須通過道路及放置檢查；橋樑、隧道、車站專用道路及未知或自訂 AI 道路的站點會被保守拒絕。操作可能修改存檔，非原子的回復可能失敗；請先備份。遊戲及重新載入驗收待完成。' : 'This browser diagram illustrates a planning concept, not an in-game screenshot. The Development prototype can preview proposals and attempt route creation after enablement and confirmation. Another prototype offers manual or automatic stop-move attempts on existing regular city-bus lines with 3–6 stops, intending to retain the line ID and stop count. Preview, enable and confirm twice first. Both original and target stops must pass road and placement checks; stops on bridges, tunnels, station roads or unknown/custom-AI roads are conservatively rejected. Attempts may change saves; non-atomic recovery can fail. Back up first. Game and save/reload acceptance remain pending.'}</p>
 	<div class="planner-flow" role="group" aria-describedby={captionId} aria-label={zh ? '規劃流程示意' : 'Illustrated planning steps'}>
 		{stages.map((stage, index) => <button type="button" data-stage-button={stage.id} aria-pressed={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1}>{index + 1}. {stage.label}</button>)}
 	</div>
@@ -78,3 +78,5 @@ const stages = zh
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
 
 <!-- Author: OpenAI-Codex. -->
+
+<!-- Author: OpenAI-Codex_status_worker. -->

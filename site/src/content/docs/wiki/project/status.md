@@ -7,6 +7,12 @@ Status snapshot: **2 November 2026**. The project contains **15 modules at diffe
 
 Design delivery, source implementation, cloud compilation, downloadable artifacts, public releases and game acceptance are separate milestones. The project has confirmed responsibility areas, but that does not mean the corresponding features have been migrated or accepted in game; implementation details and interfaces may remain proposals. No complete replacement has been established by the evidence used for this snapshot.
 
+## Workshop and local build update — 2 November 2026
+
+The project owner has created Workshop items for all 15 modules. A Workshop item and ID do not mean that a module is publicly available, complete, or tested in game. Several items were hidden in the owner's screenshots; availability can change. The 12 newly compiled local DLLs have no development tools, and their source and output hashes were checked. They are foundations, not verified stable releases. The planned owner-approved issue, cloud-build and upload pipeline with automated identity checks is not yet implemented.
+
+<!-- Updated by OpenAI-Codex. -->
+
 ## Current delivery snapshot — 2 November 2026
 
 Of the 15 gameplay modules, **14 non-paused modules have verified successful game-DLL cloud builds**. AI Gaming retains an older preview and remains paused. Railway, Vehicle, Intercity and Wireless now also have verified cloud DLL builds. A compiled foundation DLL is not a completed feature set or game-load acceptance.
@@ -20,11 +26,11 @@ Of the 15 gameplay modules, **14 non-paused modules have verified successful gam
 | Realistic Border Control | [41403613247](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41403613247) | Inactive foundation; no passenger quotas or live passenger reader |
 | Realistic Import Export Control | [41404552970](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41404552970) | Inactive foundation; no cargo matching or economy control |
 | Realistic Pedestrian Traffic Control | [41405888872](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41405888872) | Inactive foundation; no crossing-rule, signal, path or marking changes |
-
 | Realistic Railway Traffic Control | [41426765544](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41426765544) | Inactive foundation; no live railway capture or control |
 | Realistic Vehicle Traffic Control | [41427157697](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427157697) | Inactive foundation; no road or traffic-light control |
 | Intercity Resource Sharing | [41427169203](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427169203) | Inactive foundation; no cross-city resource transfer or settlement |
 | Wireless Utilities And Global Coverage | [41427597725](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41427597725) | Inactive foundation; no utility simulation writes |
+
 AI Improve, Public Transport Planning and Public Transport Vehicle Management account for the other three verified DLL builds. The recent foundation artifacts are retained for 14 days and may require GitHub sign-in; they are not individual public releases. Download availability must be checked separately from historical build success.
 
 ### Distribution and planned behavior
@@ -59,7 +65,7 @@ This is a naming requirement, not proof that every foundation build already cont
 | Realistic Border Control | Passenger-data and quota-preview design delivered | Initial release: observation/preview; human-confirmed control is planned for later stages. Active arrival limiting is not established. |
 | Realistic Import Export Control | Freight-matching and trade design delivered | Initial release: observation/preview; human-confirmed control is planned for later stages. Active freight matching is not established. |
 | Intercity Resource Sharing | Water/electricity/heat exchange design delivered | Data sources, conservation and settlement are design work, not control of another save. |
-| Automated Public Transport Vehicle Management | Read-only bus observation implemented; DLL compiled and delivered as an Actions artifact | No public Release or Workshop item. Fleet-control proposals and subscribed-game acceptance remain pending. |
+| Automated Public Transport Vehicle Management | Read-only bus observation implemented; DLL compiled and delivered as an Actions artifact | A Workshop item exists; public availability and game acceptance remain separate. Fleet-control proposals and subscribed-game acceptance remain pending. |
 | Full Map Unlock And Expansion | 25-area milestone/save design delivered | 25-area purchasing and 81-area expansion are separate scopes; no validated unlock implementation claimed. |
 | Wireless Utilities And Global Coverage | Single-city electricity/water/sewage/heating design delivered | Facility behavior and pipe requirements remain design choices, separate from intercity exchange. |
 | Realistic City Time | Foundation documents/branch and time-consistency design delivered | Confirmed direction: one real minute per game minute at normal speed, default 1×, maximum 10× and decimal input. Decimal precision and detailed behavior remain undecided; game acceptance is pending. |
@@ -68,7 +74,7 @@ This is a naming requirement, not proof that every foundation build already cont
 
 [Cloud run 41250632157](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41250632157) completed successfully for commit `3b14890f3ab37c4a66799230ba6ac496a1627871`. Artifact `vehicle-management-41250632157-1` (ID `13060977517`) was present and not expired when checked on 1 November 2026. The delivered DLL was reported and verified in the project handoff as **11,776 bytes**; the compressed artifact size is a different measurement.
 
-Actions artifacts can expire and may require GitHub sign-in. This evidence does not establish a public Release, a Workshop ID, successful in-game observation, or implemented fleet control. Planned edition names do not establish public availability.
+Actions artifacts can expire and may require GitHub sign-in. This evidence does not establish a public Release, successful in-game observation, or implemented fleet control. A Workshop item now exists. Planned edition names do not establish public availability.
 
 ## Confirmed external replacement directions
 

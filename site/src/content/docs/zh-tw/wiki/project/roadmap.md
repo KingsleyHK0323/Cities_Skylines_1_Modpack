@@ -3,9 +3,9 @@ title: 路線圖
 description: "各 Modpack 模組目前的進度與努力方向。"
 ---
 
-<p>狀態更新，2026 年 11 月 2 日：專案包括處於不同階段的 15 個模組及 22 項替代方向。請見<a href="/Cities_Skylines_1_Modpack/zh-tw/wiki/project/status/">完整狀態索引</a>。AI Gaming 開發已暫緩。以下較早的路線圖只作歷史背景，不代表目前可下載的內容，也不代表已完成組合遊戲驗收。</p>
+<p>狀態更新，2026 年 11 月 2 日：15 個模組均已有工作坊項目，但可用性不同，建立項目不代表已可在遊戲中使用。專案有 22 項替代方向，請見<a href="/Cities_Skylines_1_Modpack/zh-tw/wiki/project/status/">完整狀態索引</a>。AI Gaming 開發已暫緩。以下較早的路線圖只作歷史背景，不代表目前可下載的內容，也不代表已完成組合遊戲驗收。</p>
 
-> **開發版更新，2026 年 10 月 31 日：** AI Gaming、AI Improve 及 Automated Public Transport Planning 各自提供 GitHub 預覽版本。AI Gaming 提供配對的 Windows x64 輔助程式，但遊戲內執行尚未驗證。Automated Public Transport Planning 可在確認後嘗試建立所選路線。請見[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)。
+> **開發版更新，2026 年 11 月 2 日：** 10 月 31 日的記錄曾描述 AI Gaming、AI Improve 及 Automated Public Transport Planning 各自的實驗性版本。目前公開可安裝檔案的供應情況尚未核實，亦可能改變；請查看 [GitHub Releases（發行清單）](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases)中的實際附件，自動產生的原始碼壓縮檔不是可直接安裝的版本。AI Gaming 開發已暫緩；較早版本需要配對的 Windows x64 輔助程式，遊戲內執行尚未驗證。Automated Public Transport Planning 原型可在確認後嘗試建立所選路線。請見[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)。
 
 這些是發展方向，並非發布日期。實驗性開發版可能損壞存檔，測試前請先備份。
 
@@ -31,7 +31,7 @@ description: "各 Modpack 模組目前的進度與努力方向。"
 
 | 階段 | 狀態 |
 | --- | --- |
-| 玩家確認的 Ollama Local 建議 | 開發版檔案包括配對的 DLL 與輔助程式；遊戲內執行尚未驗證 |
+| 玩家確認的 Ollama Local 建議 | 較早開發版配對 DLL 與輔助程式；現時供應情況及遊戲內執行尚未驗證 |
 | AI 觀看城市及有限度遊戲操作 | 規劃中，尚未實作 |
 
 ## 所有模組
@@ -49,3 +49,5 @@ Modpack 的模組以協同運作為設計方向，但組合運作尚未通過遊
 <!-- Author: OpenAI-Codex_status_worker. -->
 
 <!-- Updated by OpenAI-Codex on 2026-11-02. -->
+
+<!-- Updated by OpenAI-Codex_wiki_update on 2026-11-02. -->

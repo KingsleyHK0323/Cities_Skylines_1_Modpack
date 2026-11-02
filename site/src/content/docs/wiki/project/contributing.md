@@ -11,6 +11,8 @@ Never post Steam passwords, Steam Guard codes, API keys or other private informa
 
 ## Testing the Development Versions
 
+> **Availability note (2 November 2026):** The following paragraph describes earlier releases. Current installable attachments have not been verified; consult the [GitHub Releases list](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases) and installation guide. AI Gaming development is paused. Source archives alone are not installers.
+
 AI Gaming, AI Improve, and Automated Public Transport Planning have experimental GitHub Development prereleases. Back up your saves and use a separate test city. Enable only one copy of each mod, and read the [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/) guide before reporting results.
 
 ## Source code
@@ -28,6 +30,10 @@ Each mod lives on its own branch of the [Modpack repository](https://github.com/
 
 The Modpack is source-available and noncommercial. Mod and website code use the [**PolyForm Noncommercial License 1.0.0**](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/Modpack_Website/LICENSE). Original website content, including text and images, is licensed under [**CC BY-NC-SA 4.0**](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/Modpack_Website/LICENSE-CONTENT). Copyright © Kingsley. Third-party components and assets keep their own licenses.
 
+The adapted documentation theme selector uses [Starlight's MIT license](/Cities_Skylines_1_Modpack/starlight-theme-select-LICENSE.txt). <!-- Added by OpenAI-Codex. -->
+
 <!-- Updated by OpenAI-Codex on 2026-10-27. -->
 
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
+
+<!-- Updated by OpenAI-Codex on 2026-11-02. -->

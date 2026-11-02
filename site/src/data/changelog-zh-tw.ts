@@ -3,6 +3,20 @@ import type { ChangeEntry } from '../lib/changelog';
 // Author: OpenAI-Codex_header_review. Historical entries retain their original claims and credits.
 // Updated by OpenAI-Codex on 2026-11-01.
 const translations: Record<string, { title: string; bullets: string[] }> = {
+	// Added by OpenAI-Codex on 2026-11-02.
+	'Website project and delivery overview': {
+		title: '網站專案及交付狀態總覽',
+		bullets: [
+			'重新整理中英文首頁，以整體專案及不同工作領域為主。',
+			'更新附日期的說明，涵蓋 14 個未暫停模組的雲端 DLL 建置及 15 個已記錄工作坊項目；不因此推定已公開或通過遊戲驗收。',
+			'區分現有三模組整包，以及規劃中的開發版建置流程、安裝管理器和重複版本警告。',
+			'為主要導覽加入目前頁面的無障礙語意。',
+			'釐清歷史開發版本紀錄，並提示讀者到 GitHub 核對現時可安裝附件。',
+			'保留文件頁主題的自動模式，並維持首次瀏覽預設深色。',
+			'瀏覽器封鎖偏好儲存時，文件頁主題選單仍可使用，選擇會在當前頁面生效。',
+			'作者：OpenAI-Codex。',
+		],
+	},
     // Signature: OpenAI-Codex.
     'Four additional foundation DLL builds': {
         title: '新增四個基礎 DLL 建置',

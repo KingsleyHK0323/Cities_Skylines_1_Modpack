@@ -10,25 +10,26 @@ import art from '../../assets/projects/ai-improve.png';
 const base = import.meta.env.BASE_URL;
 ---
 
-<SiteLayout title="AI Improve" description="AI Improve makes Cities: Skylines 1 vehicles, services and citizens react to real conditions: congestion, crowded platforms, nearby fires and spare capacity." path="ai-improve/" active="mods">
+<SiteLayout title="AI Improve" description="AI Improve Development source includes features intended to respond to city conditions. In-game behavior remains unverified." path="ai-improve/" active="mods">
 	<section class="hero page-wrap">
 		<div class="hero-copy">
-			<p class="eyebrow">Mod 01 · Available on the Workshop</p>
+			<p class="eyebrow">Mod 01 · GitHub Development preview</p>
 			<h1>AI Improve</h1>
-			<p class="hero-lead">Smarter decisions for the vehicles, services and citizens of your city. Every behaviour has its own switch, so you choose exactly what changes.</p>
-			<div class="status-strip"><span class="tag">Requires Harmony</span><span class="tag">25 switchable features</span><span class="tag">9 languages</span></div>
+			<p class="hero-lead">The Development source includes switches for features intended to change decisions by vehicles, services and citizens. In-game behavior remains unverified.</p>
+			<div class="status-strip"><span class="tag">Requires Harmony</span><span class="tag">25 switches in Development source</span><span class="tag">9 languages</span></div>
 			<WorkshopLinks mod="ai-improve" />
 		</div>
 		<figure class="hero-art"><Image src={art} alt="AI Improve artwork" widths={[560, 720]} sizes="(max-width: 640px) 100vw, 45vw" format="webp" quality={78} loading="eager" /><figcaption class="art-note">Project artwork · not a gameplay screenshot</figcaption></figure>
 	</section>
 
 	<nav class="subnav page-wrap" aria-label="AI Improve guide"><a href={base + 'wiki/ai-improve/overview/'}>Guide</a><a href={base + 'wiki/ai-improve/features/'}>All features</a><a href={base + 'wiki/ai-improve/settings/'}>Settings</a><a href={base + 'wiki/ai-improve/in-game/'}>Using it in game</a><a href={base + 'wiki/ai-improve/compatibility/'}>Compatibility</a><a href={base + 'wiki/ai-improve/faq/'}>FAQ</a></nav>
+	<p class="page-wrap">The feature, settings and in-game guides describe the checked Development source. The linked overview remains an older general description; installed versions may differ and in-game behavior remains unverified.</p>
 
 	<section class="section soft">
 		<div class="page-wrap">
 			<p class="eyebrow">Why it exists</p>
 			<h2>The city should notice what is happening.</h2>
-			<p class="section-intro">In the base game, a car keeps its route while the road ahead is jammed, trains crowd onto one platform while another sits empty, and several fire trucks answer one small fire. AI Improve adds that awareness one behaviour at a time.</p>
+			<p class="section-intro">In the base game, a car may keep its route while the road ahead is jammed, trains may crowd onto one platform while another sits empty, and several fire trucks may answer one small fire. The examples below describe intended Development-source behavior; in-game results have not been verified.</p>
 			<div class="highlight-grid">
 				<article><h3>Reacts to congestion</h3><p>Cars, taxis, trucks, buses, metro and intercity trains reconsider their route when the way ahead is jammed.</p></article>
 				<article><h3>Uses free capacity</h3><p>Platforms, airport gates, helicopter pads and harbour docks are assigned by how busy they actually are.</p></article>
@@ -37,16 +38,16 @@ const base = import.meta.env.BASE_URL;
 		</div>
 	</section>
 
-	<section class="interactive-section"><div class="page-wrap"><p class="section-label">Feature browser</p><h2>See what each feature does.</h2><p>Pick a category, then a feature, to see an illustration of the behaviour and whether it starts on or off.</p><FeatureExplorer locale="en" /></div></section>
+	<section class="interactive-section"><div class="page-wrap"><p class="section-label">Feature browser</p><h2>Explore the website snapshot.</h2><p>Pick a category and a card to see an illustration. The site catalog is extracted from <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/75ef94407962817051cef4aa74ec6fbc1831fd02/SettingsPageUI.cs">Development source 75ef944</a> and contains 25 switches and one value-only card. The browser shows the switches; the shared tuning-only card appears in the settings demonstration and guides. It does not establish the settings or behavior of your installed version.</p><FeatureExplorer locale="en" /></div></section>
 
 	<section class="section">
 		<div class="page-wrap columns">
 			<div class="text-stack">
 				<p class="eyebrow">Settings</p>
-				<h2>Every switch, before you subscribe.</h2>
-				<p>This mirrors the mod’s options page in the Content Manager, with the same sections and defaults. Open a section to see its switches and advanced values. It is a web demonstration only and changes nothing in your game.</p>
+				<h2>Explore the Development settings.</h2>
+				<p>This demonstration uses the same Development-source catalog described above. Its sections, switches and values may differ from your installed version, and it changes nothing in your game. In-game behavior has not been verified.</p>
 				<a class="text-link" href={base + 'wiki/ai-improve/settings/'}>Read what each setting does →</a>
-				<ScreenshotSlot title="Options page in the Content Manager" description="The General section with language, logging and advanced tuning, followed by one section per category." />
+				<ScreenshotSlot title="Options page in the Content Manager" description="Illustrative settings categories; the layout and values may vary by version." />
 			</div>
 			<div class="demo-shell"><SettingsPreview locale="en" /></div>
 		</div>
@@ -56,15 +57,17 @@ const base = import.meta.env.BASE_URL;
 		<div class="page-wrap columns">
 			<div class="text-stack">
 				<p class="eyebrow">Good to know</p>
-				<h2>Plays well with other mods.</h2>
-				<p>AI Improve needs <a href={harmonyUrl}>Harmony</a>. Where another mod already handles the same job, it steps aside instead of fighting it: the stop-timing features pause while Improved Public Transport or Express Bus Services is installed, and when Transfer Manager CE runs fire dispatch, AI Improve leaves the choice of fire to it and only keeps the per-building cap. It never changes how many passengers a vehicle carries.</p>
+				<h2>Compatibility depends on conditions.</h2>
+				<p>AI Improve needs <a href={harmonyUrl}>Harmony</a>. The checked Development source contains conditional behavior for other mods: selected stop-timing features stand down when Improved Public Transport or Express Bus Services is detected; when Transfer Manager CE fire dispatch is active, AI Improve leaves fire selection to it and retains the per-building cap. These conditions do not establish general compatibility or in-game acceptance.</p>
 				<p>One known limit: aircraft rerouting while taxiing does not trigger yet, because measured taxiway congestion never reaches the level it reacts to.</p>
 				<div class="link-list"><a href={base + 'wiki/ai-improve/compatibility/'}>Compatibility details →</a><a href={base + 'wiki/ai-improve/faq/'}>FAQ and how to report a problem →</a></div>
 			</div>
 			<div class="screenshot-stack">
-				<ScreenshotSlot title="In-game panel" description="The AI Improve panel opened from the UnifiedUI toolbar, with quick switches for each feature." />
+				<ScreenshotSlot title="In-game panel" description="In the checked Development source, the UnifiedUI panel provides scans for empty intercity trains and buses and a settings reset; feature switches are in Content Manager. A scan may offer to remove vehicles after confirmation." />
 				<ScreenshotSlot title="A feature at work" description="Traffic rerouting around a jam, or trains spread across free platforms at a busy station." />
 			</div>
 		</div>
 	</section>
 </SiteLayout>
+<!-- Author: OpenAI-Codex_module_worker. -->
+<!-- Updated by OpenAI-Codex on 2026-11-01. -->

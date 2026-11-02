@@ -1,0 +1,68 @@
+---
+// Adapted from Starlight 0.42.6; see THIRD_PARTY_NOTICES.md. OpenAI-Codex.
+import Select from '@astrojs/starlight/components/Select.astro';
+---
+
+<starlight-theme-select>
+	<Select
+		icon="laptop"
+		label={Astro.locals.t('themeSelect.accessibleLabel')}
+		options={[
+			{ label: Astro.locals.t('themeSelect.dark'), selected: false, value: 'dark' },
+			{ label: Astro.locals.t('themeSelect.light'), selected: false, value: 'light' },
+			{ label: Astro.locals.t('themeSelect.auto'), selected: true, value: 'auto' },
+		]}
+		width="6.25em"
+	/>
+</starlight-theme-select>
+
+<script is:inline>
+	StarlightThemeProvider.updatePickers();
+</script>
+
+<script>
+	type Theme = 'auto' | 'dark' | 'light';
+	const storageKey = 'starlight-theme';
+	const systemTheme = matchMedia('(prefers-color-scheme: light)');
+	let pageTheme: Theme | undefined;
+
+	// A blocked read must not prevent the selector from registering. OpenAI-Codex.
+	function initialTheme(): Theme {
+		if (pageTheme) return pageTheme;
+		try {
+			const saved = localStorage.getItem(storageKey);
+			if (saved === '' || saved === 'auto') return 'auto';
+			if (saved === 'light' || saved === 'dark') return saved;
+		} catch { /* Use the provider's current page theme. */ if (document.documentElement.dataset.themeAutomatic === 'true') return 'auto'; }
+		return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+	}
+
+	function applyTheme(theme: Theme, persist: boolean): void {
+		pageTheme = theme;
+		StarlightThemeProvider.updatePickers(theme);
+		document.documentElement.dataset.theme = theme === 'auto' ? (systemTheme.matches ? 'light' : 'dark') : theme;
+		if (persist) {
+			try { localStorage.setItem(storageKey, theme === 'auto' ? '' : theme); }
+			catch { /* The choice remains active for this page. */ }
+		}
+	}
+
+	systemTheme.addEventListener('change', () => {
+		if (pageTheme === 'auto') applyTheme('auto', false);
+	});
+
+	class DocsThemeSelect extends HTMLElement {
+		constructor() {
+			super();
+			applyTheme(initialTheme(), false);
+			this.querySelector('select')?.addEventListener('change', (event) => {
+				if (event.currentTarget instanceof HTMLSelectElement) {
+					const value = event.currentTarget.value;
+					applyTheme(value === 'dark' || value === 'light' ? value : 'auto', true);
+				}
+			});
+		}
+	}
+
+	if (!customElements.get('starlight-theme-select')) customElements.define('starlight-theme-select', DocsThemeSelect);
+</script>

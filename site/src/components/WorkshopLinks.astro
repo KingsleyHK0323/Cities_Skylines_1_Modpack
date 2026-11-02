@@ -4,19 +4,20 @@ interface Props { mod: 'ai-improve' | 'transport' | 'ai-gaming'; locale?: 'en' |
 const { mod, locale = 'en' } = Astro.props;
 const zh = locale === 'zh-tw';
 const items = workshop[mod];
-// GitHub prereleases are separate from the Workshop editions. OpenAI-Codex_Responsible: Modpack_Website.
+// Historical tags retain source provenance; current installation files must be checked on GitHub. OpenAI-Codex.
 const developmentReleases = {
-	'ai-gaming': { name: 'AI Gaming', tag: 'ai-gaming-dev-41185662728-1', status: 'The GitHub Development build includes a matching Windows x64 Companion; in-game behavior remains unverified.' },
-	'ai-improve': { name: 'AI Improve', tag: 'ai-improve-dev-41185802009-1', status: 'The GitHub Development build requires its matching CitiesHarmony.API.dll and the Harmony Workshop mod.' },
-	transport: { name: 'Automated Public Transport Planning', tag: 'aptp-dev-41185686621-1', status: 'The GitHub Development prototype can attempt to create a selected route after confirmation and may change a save; it is not read-only.' },
+	'ai-gaming': { name: 'AI Gaming', tag: 'AI_Gaming-dev-41205697941-1', status: 'Development is paused. Historical builds required a matching Windows x64 Companion; current installation files have not been verified.' },
+	'ai-improve': { name: 'AI Improve', tag: 'AI_Improve-dev-41291471598-1', status: 'If a build is available, follow its dependency instructions, including any matching CitiesHarmony.API.dll and Harmony Workshop provider requirements.' },
+	transport: { name: 'Automated Public Transport Planning', tag: 'Automated_Public_Transport_Planning-dev-41291785222-1', status: 'A historical prototype could attempt route creation or limited stop moves after confirmation. Either can change a save; in-game acceptance remains pending.' },
 } as const;
 const developmentRelease = developmentReleases[mod];
 const translatedStatus = {
- 'ai-gaming': 'GitHub 開發版包含配套的 Windows x64 輔助程式；遊戲內行為仍未驗證。',
- 'ai-improve': 'GitHub 開發版需要同一版本的 CitiesHarmony.API.dll，以及 Harmony 工作坊模組。',
- transport: 'GitHub 開發原型可在確認後嘗試建立所選路線，可能改動存檔，並非唯讀工具。',
+ 'ai-gaming': '開發已暫停。歷史版本需要配對的 Windows x64 輔助程式；目前可安裝檔案的供應情況尚未核實。',
+ 'ai-improve': '如有可用版本，請依該版本的相依項目說明，包括可能需要的配對 CitiesHarmony.API.dll 及 Harmony 工作坊提供方。',
+ transport: '歷史原型可在確認後嘗試建立路線或有限度移動站點；兩者均可能改動存檔，遊戲內驗收尚未完成。',
 };
-const downloadLabel = zh ? '下載 ' + developmentRelease.name + ' 開發版' : 'Download ' + developmentRelease.name + ' Development build';
+const downloadLabel = zh ? '查看 GitHub 發行版本' : 'Check GitHub releases';
+const releases = 'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases';
 const guide = import.meta.env.BASE_URL + (zh ? 'zh-tw/' : '') + 'wiki/development-downloads/';
 const labels = {
 	release: zh ? 'Steam 工作坊穩定版' : 'Steam Workshop Stable',
@@ -25,18 +26,18 @@ const labels = {
 ---
 
 <div class="workshop-links" lang={zh ? 'zh-TW' : 'en'}>
-	<a class="button github-development" href={'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/' + developmentRelease.tag}>{downloadLabel} <span aria-hidden="true">↗</span></a>
+	<a class="button github-development" href={releases}>{downloadLabel} <span aria-hidden="true">↗</span></a>
 	{(['release', 'development'] as const).map((edition) => items[edition].public
 		? <a class={edition === 'release' ? 'button' : 'button secondary'} href={workshopUrl(items[edition].id)}>{labels[edition]} <span aria-hidden="true">↗</span></a>
 		: <span class="button pending" aria-disabled="true">{labels[edition]} · {items[edition].removed ? (zh ? '已下架' : 'removed') : (zh ? '尚未公開' : 'not yet public')}</span>)}
 </div>
-<p class="workshop-note" lang={zh ? 'zh-TW' : 'en'}>{zh ? 'Steam 工作坊開發版已下架；GitHub 開發預覽版獨立提供。每個模組僅啟用一個版本。' : 'Steam Workshop Development editions have been removed; GitHub Development prereleases are separate. Enable only one copy of each mod.'}</p>
+<p class="workshop-note" lang={zh ? 'zh-TW' : 'en'}>{zh ? 'Steam 工作坊開發版已下架；GitHub 發行版本的可用性請於發布頁確認。每個模組僅啟用一個版本。穩定版連結沿用來源紀錄；實際可用性請查看各模組工作坊頁面。' : 'Steam Workshop Development editions have been removed; check GitHub for release availability. Enable only one copy of each mod. Stable-edition links are based on existing records; check each Workshop page for availability.'}</p>
 <div class="development-notice" lang={zh ? 'zh-TW' : 'en'}>
-	<p><strong>{zh ? 'GitHub 開發預覽版：' : 'GitHub Development prerelease:'}</strong> {zh ? translatedStatus[mod] : developmentRelease.status}</p>
-	<p>{zh ? '請備份存檔，並使用獨立測試城市。不要同時啟用此模組的其他版本。' : 'Back up saves and test on a separate city. Do not enable this build alongside another copy.'} <a href={'https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/' + developmentRelease.tag}>{downloadLabel}</a> · <a href={guide}>{zh ? '安裝與風險' : 'Installation and risks'}</a></p>
+	<p><strong>{zh ? 'GitHub 開發版本資訊：' : 'GitHub Development information:'}</strong> {zh ? translatedStatus[mod] : developmentRelease.status}</p>
+	<p>{zh ? '可安裝附件的現況尚未核實；原始碼壓縮檔並非安裝檔。請備份存檔，並使用獨立測試城市；不要同時啟用此模組的其他版本。' : 'Current installable attachments have not been verified; source archives are not installers. Back up saves and use a separate test city; do not enable another copy of this mod.'} <a href={releases}>{downloadLabel}</a> · <a href={guide}>{zh ? '安裝與風險' : 'Installation and risks'}</a></p>
 </div>
 <style>
-	/* Prioritize the current GitHub build while preserving Workshop access.
+	/* Provide the GitHub release check while preserving Workshop access.
 	   OpenAI-Codex_Responsible: Modpack_Website. */
 	.github-development { max-width: 100%; text-align: center; overflow-wrap: anywhere; }
 	.workshop-links a[href*="steamcommunity.com"] { background: transparent; color: var(--ink); border-color: var(--field); }
@@ -47,3 +48,7 @@ const labels = {
 <!-- Updated by OpenAI-Codex on 2026-10-26. -->
 
 <!-- Author: OpenAI-Codex. -->
+
+<!-- Author: OpenAI-Codex_module_worker. -->
+
+<!-- Updated by OpenAI-Codex on 2026-11-02. -->

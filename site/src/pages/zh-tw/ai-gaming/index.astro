@@ -8,12 +8,12 @@ import art from '../../../assets/projects/ai-gaming.png';
 const base = import.meta.env.BASE_URL;
 ---
 
-<SiteLayout title="AI Gaming" description="AI Gaming 提供由玩家逐次確認的 Ollama Local 建議開發預覽。遊戲內行為尚未驗證。" locale="zh-tw" path="ai-gaming/" active="mods">
+<SiteLayout title="AI Gaming" description="已暫停開發的 AI Gaming 原始碼提供由玩家逐次確認的 Ollama Local 建議。遊戲內行為尚未驗證。" locale="zh-tw" path="ai-gaming/" active="mods">
 	<section class="hero page-wrap">
 		<div class="hero-copy">
-			<p class="eyebrow">模組 03 · 開發預覽 0.4.0</p>
+			<p class="eyebrow">開發已暫停 · 歷史預覽 0.4.0</p>
 			<h1>AI Gaming</h1>
-			<p class="hero-lead">0.4.0 開發版原始碼加入可選的 Windows 輔助程式，讓玩家透過 Ollama Local 取得建議。選擇要提供的城市統計資料、輸入問題，先檢視完整請求並逐次確認。回覆只作建議；此預覽不會操控模擬。</p>
+			<p class="hero-lead">0.4.0 開發版原始碼透過 Windows x64 輔助程式提供 Ollama Local 建議。檢視城市資料及已安裝內容的識別項、輸入問題，並逐次確認完整請求。回覆只作建議；此預覽不會操控模擬。</p>
 			<div class="status-strip"><span class="tag">Ollama Local</span><span class="tag">每次請求都要確認</span><span class="tag">遊戲內執行尚未驗證</span><span class="tag">英文 · 繁體中文</span></div>
 			<WorkshopLinks mod="ai-gaming" locale="zh-tw" />
 		</div>
@@ -25,18 +25,19 @@ const base = import.meta.env.BASE_URL;
 	<section class="section soft">
 		<div class="page-wrap columns">
 			<div class="text-stack">
-				<p class="eyebrow">目前 開發版原始碼</p>
+				<p class="eyebrow">較早的開發版原始碼</p>
 				<h2>先檢視請求，再逐次確認。</h2>
-				<p>模組設定頁可選擇要包含哪些城市統計資料：遊戲日期、人口、資金、住宅需求、商業需求及工作需求。六項資料預設全選，不想分享的資料需自行取消。輸入模型名稱與問題後，先檢視完整預覽。</p>
-				<p>另外保留獨立的手動城市摘要功能；依玩家要求，將遊戲日期、人口與資金寫入本機遊戲記錄。</p>
+				<p><a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/e7de649f58c775f0692ef74d62eed351cf2d6607/Source/LocalAiRequestController.cs">開發版原始碼 e7de649</a> 的設定頁提供六項基本資料：遊戲日期、人口、資金、住宅需求、商業需求及工作需求；另有四組資料：公用設施、已建分區建築、交通與公共運輸，以及城市服務狀態。六項及四組資料預設均勾選，可自行取消。</p>
+				<p>遊戲回報為已安裝且可用的 DLC、創作者包及電台識別項會自動加入，沒有獨立的選擇控制項。每次確認前，預覽會顯示資料、模型名稱及問題。</p>
+				<p>另外保留獨立的手動城市摘要功能；依玩家要求，將遊戲日期、人口、資金、住宅需求、商業需求及工作需求寫入本機遊戲記錄。</p>
 				<p>每次請求都要重新確認。回覆只會作為建議顯示，不會轉成遊戲操作。原始碼沒有雲端供應商介接或 API 金鑰輸入欄位。</p>
-				<p>AI Gaming 會把所選資料傳給這台電腦上的 Ollama。Ollama 可能依自身設定把推論轉送至雲端服務，模組無法檢查其設定。自由輸入的問題未經自動檢查，請勿包含城市名稱、帳戶資料、秘密或個人資料。</p>
-				<p class="section-intro"><strong>開發版本狀態：</strong>GitHub 分別提供 DLL 及 Windows x64 輔助程式。兩個檔案必須來自同一次發布：DLL 需要雜湊值完全相符的輔助程式。發布及檔案檢查不代表已確認 Cities: Skylines 遊戲運作或 Ollama 請求成功；兩者仍未驗證。請備份存檔並使用獨立的測試城市。</p>
+				<p>每次確認後，AI Gaming 會透過本機輔助程式把預覽中的資料、模型名稱及問題傳給這台電腦上的 Ollama。Ollama 可能依自身設定把推論轉送至雲端服務，模組無法檢查其設定。自由輸入的問題未經自動檢查，請勿包含城市名稱、帳戶資料、秘密或個人資料。</p>
+				<p class="section-intro"><strong>開發版本狀態：</strong>開發維持暫停。較早的套件曾分別提供 DLL 及 Windows x64 輔助程式；目前公開檔案是否可用尚未核實。如有相符的官方發布檔案，兩個檔案必須來自同一次發布：DLL 需要雜湊值完全相符的輔助程式。發布及檔案檢查不代表已確認 Cities: Skylines 遊戲運作或 Ollama 請求成功；兩者仍未驗證。請備份存檔並使用獨立的測試城市。</p>
 			</div>
 			<div class="screenshot-stack">
-				<ScreenshotSlot locale="zh-tw" title="Ollama 請求預覽" description="所選城市資料、模型名稱、問題及獨立的確認控制項。" />
+				<ScreenshotSlot locale="zh-tw" title="Ollama 請求預覽" description="所選城市資料、自動加入的已安裝內容識別項、模型名稱、問題及獨立的確認控制項。" />
 				<ScreenshotSlot locale="zh-tw" title="AI 建議回覆" description="模型回覆以建議方式呈現，不會改變模擬。" />
-				<ScreenshotSlot locale="zh-tw" title="記錄中的城市摘要" description="玩家手動要求輸出的遊戲日期、人口及資金摘要。" />
+				<ScreenshotSlot locale="zh-tw" title="記錄中的城市摘要" description="玩家手動要求輸出的遊戲日期、人口、資金、住宅需求、商業需求及工作需求摘要。" />
 			</div>
 		</div>
 	</section>
@@ -47,8 +48,8 @@ const base = import.meta.env.BASE_URL;
 		<div class="page-wrap">
 			<p class="eyebrow">路線圖與安全原則</p>
 			<h2>主導權在你手上。</h2>
-			<div class="roadmap"><article><strong>1 · 觀察</strong><p>開發版原始碼已有可選的城市統計資料。</p></article><article><strong>2 · 建議</strong><p>開發版本已包含由玩家逐次確認的 Ollama Local 建議；遊戲內執行仍未驗證。</p></article><article><strong>3 · 經你允許才行動</strong><p>遊戲操作尚未實作，仍屬規劃中。</p></article></div>
-			<p class="section-intro">長期設計方向是運用其他 Modpack 模組的能力，而非重複實作。0.4.0 尚未加入模組互通呼叫、雲端供應商介接或遊戲操作。</p>
+			<div class="roadmap"><article><strong>1 · 觀察</strong><p>開發版原始碼已有可選的城市統計資料。</p></article><article><strong>2 · 建議</strong><p>歷史開發版原始碼已實作由玩家逐次確認的 Ollama Local 建議；遊戲內執行仍未驗證。</p></article><article><strong>3 · 經你允許才行動</strong><p>遊戲操作尚未實作，仍屬規劃中。</p></article></div>
+			<p class="section-intro">開發版原始碼會偵測提供方並讀取互通 manifest（資訊清單）；呼叫其他 Modpack 模組的能力及遊戲內互通尚未確立。雲端供應商介接及遊戲操作尚未實作。</p>
 			<a class="text-link" href={base + 'zh-tw/wiki/project/roadmap/'}>完整路線圖 →</a>
 		</div>
 	</section>
@@ -57,3 +58,6 @@ const base = import.meta.env.BASE_URL;
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
 
 <!-- Translation review: OpenAI-Codex_zh_pages. -->
+<!-- Author: OpenAI-Codex_module_worker. -->
+<!-- Updated by OpenAI-Codex on 2026-11-02. -->
+<!-- Author: OpenAI-Codex_gaming_update. -->

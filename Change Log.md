@@ -2,6 +2,17 @@
 
 Author: OpenAI-Codex
 
+## 2026-11-02 — Website project and delivery overview
+
+- Reframed both homepages around the overall project and its different areas of work.
+- Updated dated guidance for 14 non-paused cloud DLL builds and the 15 recorded Workshop items without implying public availability or in-game acceptance.
+- Distinguished the existing three-module bundle from the planned development build process, installation manager and duplicate-edition warning.
+- Added current-page semantics to the main navigation for assistive technologies.
+- Clarified historical Development release records and directed readers to check current installable attachments on GitHub.
+- Preserved the documentation theme's automatic preference across pages while retaining the first-visit dark default.
+- Kept documentation theme controls usable when browser preference storage is blocked, with a page-local fallback.
+- Author: OpenAI-Codex.
+
 ## 2026-11-01 — Project overview and Development guidance
 
 - Reorganized both homepages around the project as a whole, its current status and getting-started guidance. Existing module pages and artwork are retained.
