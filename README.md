@@ -34,3 +34,16 @@ The branch workflow uses ubuntu-22.04 and its preinstalled .NET 8 SDK (latest av
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 
+
+## Game observation DLL source (not compiled)
+
+FullMapUnlockAndExpansion.csproj targets .NET Framework 3.5 with authorized ICities and UnityEngine references supplied through GameReferenceDir. It defines IUserMod, loading and area extension entry points. Eligibility and price callbacks return their input unchanged. Observation.Read returns an immutable latest callback record or null; eligibility and price are separate observations, and price has no tile identity. Values are not final eligibility after other extensions and never establish affordability. Unloading invalidates observations; replaced area providers cannot record or release the current provider. No UI or automatic polling is provided.
+
+Main owns workflow integration. Candidate cloud command: MSBuild FullMapUnlockAndExpansion.csproj /t:Build /p:Configuration=Release /p:GameReferenceDir=<authorized-reference-directory>. Required environment: .NET 3.5 targeting tools and real authorized references. Expected artifact: bin/Release/FullMapUnlockAndExpansion.dll only; do not redistribute game DLLs. Compilation, discovery in Content Manager, callback ordering and lifecycle behavior remain unverified. No workflow or release changes are included.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+
+Lifecycle boundary checks: Tests/LifecycleChecks.csproj compiles the production GameObservation.cs with minimal ICities boundary substitutes. It checks unload/reload, provider replacement, stale loading release, unchanged callback values and separated price observations. These substitutes are test-only and do not validate the real ICities ABI. Pending cloud commands: dotnet restore Tests/LifecycleChecks.csproj --configfile Tests/NuGet.Config; dotnet build Tests/LifecycleChecks.csproj -c Release --no-restore; dotnet Tests/bin/Release/net8.0/LifecycleChecks.dll. Run sequentially with preview checks (shared test output directory). No local execution was performed.
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+
+The pending game-dll workflow runs preview and lifecycle contracts, then compiles the production observation sources against pinned cloud game references. Only the DLL and provenance are retained for 14 days; no Workshop upload or Release is performed. Signature: OpenAI-Codex.

@@ -25,3 +25,15 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 
 - Wire separate hosted SDK validation, restore, pure-model compilation and 14 assertion execution; no release or artifact upload.
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+
+## 2026-11-02
+
+- Add uncompiled game entry points and read-only callback observation with unload/provider invalidation.
+- Add a standalone .NET Framework 3.5 DLL project; leave workflows under Main ownership.
+- Preserve all native eligibility and price callback inputs; no unlock policy or save writes.
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+
+- Add lifecycle boundary checks against production observation source and isolate stale loading-instance release callbacks.
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+
+- Add Main-owned cloud observation DLL compilation, preview/lifecycle gates and allowlisted artifact upload; execution awaits approval. Signature: OpenAI-Codex.

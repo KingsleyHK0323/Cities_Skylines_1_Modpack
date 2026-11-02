@@ -1,0 +1,23 @@
+<!-- OpenAI-Codex_Full_Map_Unlock_And_Expansion -->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>FullMapUnlockAndExpansion</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <GameReferenceDir Condition="'$(GameReferenceDir)' == ''">$(MSBuildThisFileDirectory)..\Resource\Game_Data</GameReferenceDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="ICities"><HintPath>$(GameReferenceDir)\ICities.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameReferenceDir)\UnityEngine.dll</HintPath><Private>False</Private></Reference>
+    <Compile Include="Source\AreaPreview.cs" />
+    <Compile Include="Source\GameObservation.cs" />
+  </ItemGroup>
+  <Target Name="RequireGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameReferenceDir)\ICities.dll')" Text="Provide authorized ICities.dll via GameReferenceDir." />
+    <Error Condition="!Exists('$(GameReferenceDir)\UnityEngine.dll')" Text="Provide authorized UnityEngine.dll via GameReferenceDir." />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
