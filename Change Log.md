@@ -211,3 +211,8 @@ Author: OpenAI-Codex
 - Signature: OpenAI-Codex.
 
 - Synchronize the four existing Wiki overview/roadmap summary paragraphs with the 22-direction count; preserve the separate historical collection inventory. Signature: OpenAI-Codex.
+
+## 2026-11-02 — MDX source comment correction
+
+- Use MDX-compatible comments in both Wiki overview pages so the cloud website build can parse them.
+- Signature: OpenAI-Codex.

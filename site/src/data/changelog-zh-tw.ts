@@ -3,6 +3,14 @@ import type { ChangeEntry } from '../lib/changelog';
 // Author: OpenAI-Codex_header_review. Historical entries retain their original claims and credits.
 // Updated by OpenAI-Codex on 2026-11-01.
 const translations: Record<string, { title: string; bullets: string[] }> = {
+    // Signature: OpenAI-Codex.
+    'MDX source comment correction': {
+        title: 'MDX 來源註解修正',
+        bullets: [
+            '將兩個 Wiki 首頁改用 MDX 支援的註解格式，讓雲端網站建置可解析內容。',
+            '署名：OpenAI-Codex。',
+        ],
+    },
     // Updated by OpenAI-Codex on 2026-11-02. Keep counts aligned with the source parser.
     'Central development bundle workflow': {
         title: '集中開發版整包工作流程',
