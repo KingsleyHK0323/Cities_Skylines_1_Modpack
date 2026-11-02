@@ -1,7 +1,39 @@
 import type { ChangeEntry } from '../lib/changelog';
 
 // Author: OpenAI-Codex_header_review. Historical entries retain their original claims and credits.
+// Updated by OpenAI-Codex on 2026-11-01.
 const translations: Record<string, { title: string; bullets: string[] }> = {
+    // Updated by OpenAI-Codex on 2026-11-02. Keep counts aligned with the source parser.
+    'Central development bundle workflow': {
+        title: '集中開發版整包工作流程',
+        bullets: [
+            '新增排程及手動觸發的三模組 ZIP 收集器，核對來源、完整產物，並在來源未變時跳過重複發布。',
+            '公開開發預發行版本前下載核對草稿 ZIP，並在整包頻道內維護最新開發版及歷史標示。',
+            '七項雲端契約檢查、公開 ZIP 驗證及來源未變跳過均已通過，工作流程已啟用。',
+            '署名：OpenAI-Codex。',
+        ],
+    },
+    'Delivery status and distribution guidance': {
+        title: '交付狀態與分發指南',
+        bullets: [
+            '更新共用狀態摘要及雙語狀態／下載指南，加入七個基礎 DLL 建置參考與已核對的三模組整包。',
+            '區分規劃中的開發工具編譯、正式版核准上傳、並存警告及管理器，避免與已部署功能混淆。',
+            '列明包括 Right of Way 的 22 項確認替代方向；三項新候選維持未確認，IMT 不取代。',
+            '保留網站既有未提交修改；本輪只更新本機來源，不宣稱已部署或通過遊戲驗收。',
+            '署名：OpenAI-Codex。',
+            '同步四個既有 Wiki 首頁／路線圖摘要的 22 項計數，保留獨立的歷史收藏清冊。署名：OpenAI-Codex。',
+        ],
+    },
+	'Project overview and Development guidance': {
+		title: '專案總覽及開發版指南',
+		bullets: [
+			'重新整理兩種語言的首頁，以整個專案、目前狀態及入門指南為主，並保留現有模組專頁與美術素材。',
+			'將附日期的狀態索引更新為 15 個模組及 21 個已確認替代方向，分開說明產品決策、實作及遊戲驗收。',
+			'修正三個過時的 GitHub 開發版連結，並說明 AI Gaming 所選資料、自動加入的 DLC 識別資訊及逐次確認。',
+			'更新 AI Improve 開發版功能資料、相容性及遊戲內指南，並釐清公車路線編輯；遊戲驗收仍待完成。',
+			'作者：OpenAI-Codex。',
+		],
+	},
 	'Workshop Development removal and complete Chinese navigation': {
 		title: '工作坊開發版本下架與完整繁中導覽',
 		bullets: [

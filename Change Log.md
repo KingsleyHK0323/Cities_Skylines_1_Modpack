@@ -2,6 +2,14 @@
 
 Author: OpenAI-Codex
 
+## 2026-11-01 — Project overview and Development guidance
+
+- Reorganized both homepages around the project as a whole, its current status and getting-started guidance. Existing module pages and artwork are retained.
+- Updated the dated status index to 15 modules and 21 confirmed replacement directions, distinguishing product decisions from implementation and game acceptance.
+- Replaced three obsolete GitHub Development links and clarified AI Gaming's selected data, automatically included DLC identifiers and per-request confirmation.
+- Updated the AI Improve Development feature catalog, compatibility and in-game guides, and clarified bus-route editing; game acceptance remains pending.
+- Author: OpenAI-Codex.
+
 ## 2026-11-01 — Workshop Development removal and complete Chinese navigation
 
 - Marked Steam Workshop Development editions as removed while retaining separate GitHub prerelease downloads.
@@ -189,9 +197,17 @@ Author: OpenAI-Codex
 
 ## 2026-11-02 — Central development bundle workflow
 
-- Add a scheduled and manually dispatched three-module ZIP collector with strict
-  provenance, complete payload checks and unchanged-source suppression.
-- Verify uploaded draft ZIP bytes before publishing a development prerelease;
-  maintain Latest Dev / Historical titles within the bundle channel.
+- Add a scheduled and manually dispatched three-module ZIP collector with strict provenance, complete payload checks and unchanged-source suppression.
+- Verify uploaded draft ZIP bytes before publishing a development prerelease; maintain Latest Dev / Historical titles within the bundle channel.
 - Seven cloud contracts, public ZIP verification and unchanged-source suppression passed; the workflow is active.
 - Signature: OpenAI-Codex.
+
+## 2026-11-02 — Delivery status and distribution guidance
+
+- Refresh the shared status summary and both language status/download guides with seven foundation DLL build references and the verified three-module bundle.
+- Distinguish planned Dev Tool compilation, stable approval/upload, duplicate warnings and Dev Manager from deployed features.
+- Record 22 confirmed replacement directions including Right of Way; leave three new candidates unconfirmed and IMT excluded.
+- Preserve existing uncommitted website work. Local source update only; deployment and game acceptance are not claimed.
+- Signature: OpenAI-Codex.
+
+- Synchronize the four existing Wiki overview/roadmap summary paragraphs with the 22-direction count; preserve the separate historical collection inventory. Signature: OpenAI-Codex.
