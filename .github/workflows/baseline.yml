@@ -21,7 +21,9 @@ jobs:
           test -s LICENSE
           test -s 'Change Log.md'
           grep -q 'PolyForm Noncommercial License 1.0.0' LICENSE
-          grep -q 'No gameplay implementation or DLL is available yet' README.md
+          # Signature: OpenAI-Codex. Validate the inactive source foundation.
+          test -s Source/RealisticPedestrianTrafficControl.csproj
+          test -s Source/Game/PedestrianMod.cs
           if find . -path './.git' -prune -o -type f \( -iname '*.dll' -o -iname '*.zip' \) -print | grep -q .; then
             echo 'Unexpected binary deliverable in documentation-only skeleton.' >&2
             exit 1

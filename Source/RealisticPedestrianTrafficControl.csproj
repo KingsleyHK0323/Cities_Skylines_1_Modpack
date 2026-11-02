@@ -1,0 +1,27 @@
+<!-- Signature: OpenAI-Codex -->
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>RealisticPedestrianTrafficControl</AssemblyName>
+    <RootNamespace>PedestrianTrafficControl</RootNamespace>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <LangVersion>3</LangVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <GameReferencePath Condition="'$(GameReferencePath)' == ''">$(MSBuildProjectDirectory)\References</GameReferencePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="ICities"><HintPath>$(GameReferencePath)\ICities.dll</HintPath><Private>false</Private></Reference>
+    <Compile Include="Pedestrian\CrossingModel.cs" />
+    <Compile Include="Pedestrian\CrossingReadAdapter.cs" />
+    <Compile Include="Runtime\PedestrianRuntime.cs" />
+    <Compile Include="Game\PedestrianMod.cs" />
+  </ItemGroup>
+  <Target Name="RequireGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameReferencePath)\ICities.dll')" Text="Provide lawfully obtained ICities.dll via GameReferencePath. No game installation is read automatically." />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

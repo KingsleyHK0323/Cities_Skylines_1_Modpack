@@ -1,4 +1,4 @@
-<!-- Signature: OpenAI-Codex_Responsible: Realistic_Pedestrian_Traffic_Control -->
+<!-- Signature: OpenAI-Codex -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,5 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../Source/Pedestrian/*.cs" Link="Model/%(Filename)%(Extension)" />
+    <Compile Include="../Source/Runtime/PedestrianRuntime.cs" Link="Model/PedestrianRuntime.cs" />
   </ItemGroup>
 </Project>

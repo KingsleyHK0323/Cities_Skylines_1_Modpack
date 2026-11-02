@@ -1,4 +1,4 @@
-// Signature: OpenAI-Codex_Responsible: Realistic_Pedestrian_Traffic_Control
+// Signature: OpenAI-Codex
 using System;
 using PedestrianTrafficControl;
 internal static class Program {
@@ -68,6 +68,8 @@ internal static class Program {
             Assert(Read(Data(CrossingRule.Allow,CrossingSignal.Unknown,MarkingState.Unknown,ObservationSource.Synthetic,
                 CrossingGeometry.Supported,null)).Status == PreviewStatus.Observed,"unknown signal/marking remain inspectable without implying permission");
             Assert(Read(null).Source == ObservationSource.Unknown,"missing input preserves unknown provenance");
+            checks += AdapterChecks.Run();
+            checks += LifecycleChecks.Run();
             Console.WriteLine("Passed " + checks + " model assertions. Synthetic input only; no game integration.");
             return 0;
         } catch (Exception e) { Console.Error.WriteLine(e.Message); return 1; }

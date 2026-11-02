@@ -1,0 +1,93 @@
+# Signature: OpenAI-Codex
+name: Realistic Pedestrian Traffic Control game DLL
+on:
+  push:
+    branches: [Realistic_Pedestrian_Traffic_Control]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  game-dll:
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Realistic_Pedestrian_Traffic_Control'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run crossing, adapter and lifecycle contracts
+        shell: pwsh
+        run: |
+          dotnet run --project Tests/PedestrianChecks.csproj --configuration Release
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Check out pinned encrypted reference supply
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 7b8a5e7c10f2db84388e8dd8af2084f239957b13
+          path: build-dependencies
+          persist-credentials: false
+          sparse-checkout: |
+            build-references/cs1/v1
+            tools/build-references
+      - name: Restore cloud-only references
+        shell: pwsh
+        env:
+          CS1_GAME_REFERENCES_KEY: ${{ secrets.CS1_GAME_REFERENCES_KEY }}
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'pedestrian-references'
+          & ./build-dependencies/tools/build-references/Restore-GameReferences.ps1 -BundleDirectory ./build-dependencies/build-references/cs1/v1 -GameRoot $root
+          "PEDESTRIAN_REFERENCE_ROOT=$root" >> $env:GITHUB_ENV
+      - name: Compile observation DLL against explicit game references
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sdks = @(dotnet --list-sdks)
+          if ($LASTEXITCODE) { throw 'Could not list hosted SDKs.' }
+          $selected = $sdks | ForEach-Object {
+            if ($_ -match '^(8\.0\.[0-9]+) \[(.+)\]$') {
+              [pscustomobject]@{ Version = [version]$Matches[1]; Root = $Matches[2] }
+            }
+          } | Sort-Object Version -Descending | Select-Object -First 1
+          if (-not $selected) { throw 'No stable .NET 8 SDK is installed.' }
+          $compiler = Join-Path $selected.Root "$($selected.Version)/Roslyn/bincore/csc.dll"
+          Write-Host "Selected compiler SDK: $($selected.Version)"
+          $managed = Join-Path $env:PEDESTRIAN_REFERENCE_ROOT 'Cities_Data/Managed'
+          $output = Join-Path $env:RUNNER_TEMP 'pedestrian-public'
+          New-Item -ItemType Directory -Path $output | Out-Null
+          $dll = Join-Path $output 'RealisticPedestrianTrafficControl.dll'
+          $arguments = @('/noconfig','/nostdlib+','/target:library','/langversion:3','/warnaserror+','/optimize+','/deterministic+',"/out:$dll")
+          foreach ($name in @('mscorlib.dll','System.dll','System.Core.dll','ICities.dll')) {
+            $reference = Join-Path $managed $name
+            if (-not (Test-Path -LiteralPath $reference -PathType Leaf)) { throw 'Missing explicit reference.' }
+            $arguments += "/reference:$reference"
+          }
+          # Compile the production sources, never a test harness with API stubs.
+          $arguments += @(Get-ChildItem Source/Pedestrian,Source/Runtime,Source/Game -Filter '*.cs' -File | Sort-Object FullName | ForEach-Object { $_.FullName })
+          & dotnet $compiler @arguments
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $assembly = [Reflection.AssemblyName]::GetAssemblyName($dll)
+          if ($assembly.Name -cne 'RealisticPedestrianTrafficControl' -or (Get-Item $dll).Length -le 0) { throw 'Invalid output assembly.' }
+          @{
+            schemaVersion = 1
+            sourceSHA = $env:GITHUB_SHA
+            runId = $env:GITHUB_RUN_ID
+            runAttempt = $env:GITHUB_RUN_ATTEMPT
+            sharedReferencesSHA = '7b8a5e7c10f2db84388e8dd8af2084f239957b13'
+            sha256 = (Get-FileHash $dll -Algorithm SHA256).Hash
+            observationOnly = $true
+            gameplayVerified = $false
+            signature = 'OpenAI-Codex'
+          } | ConvertTo-Json | Set-Content (Join-Path $output 'build-provenance.json') -Encoding utf8
+          'Inactive foundation DLL. No pedestrian rules, signals, paths, markings or save writes. Gameplay remains unverified.' >> $env:GITHUB_STEP_SUMMARY
+      - name: Preserve only DLL and provenance
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pedestrian-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/pedestrian-public/RealisticPedestrianTrafficControl.dll
+            ${{ runner.temp }}/pedestrian-public/build-provenance.json
