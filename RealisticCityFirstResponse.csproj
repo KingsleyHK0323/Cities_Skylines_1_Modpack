@@ -1,0 +1,27 @@
+<!-- Signature: OpenAI-Codex_Realistic_City_First_Response -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net35</TargetFramework>
+    <AssemblyName>RealisticCityFirstResponse</AssemblyName>
+    <RootNamespace>RealisticCityFirstResponse</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Source/*.cs" />
+    <Reference Include="ICities">
+      <HintPath>$(GameReferencesDir)/ICities.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(GameReferencesDir)/UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="ValidateGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(GameReferencesDir)' == ''" Text="Specify GameReferencesDir with authorized game reference assemblies." />
+    <Error Condition="!Exists('$(GameReferencesDir)/ICities.dll')" Text="Missing ICities.dll." />
+    <Error Condition="!Exists('$(GameReferencesDir)/UnityEngine.dll')" Text="Missing UnityEngine.dll." />
+  </Target>
+</Project>
