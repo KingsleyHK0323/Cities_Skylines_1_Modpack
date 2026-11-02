@@ -37,3 +37,5 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 
 - Add Main-owned cloud observation DLL compilation, preview/lifecycle gates and allowlisted artifact upload; execution awaits approval. Signature: OpenAI-Codex.
+
+- Select the installed stable .NET 8 compiler explicitly when the hosted default SDK is newer. Signature: OpenAI-Codex.
