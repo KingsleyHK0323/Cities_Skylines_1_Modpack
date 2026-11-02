@@ -11,6 +11,7 @@ import re
 import subprocess
 import zipfile
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 REPO = "KingsleyHK0323/Cities_Skylines_1_Modpack"
 REFERENCES = "7b8a5e7c10f2db84388e8dd8af2084f239957b13"
@@ -39,6 +40,13 @@ def gh(*args, binary=False):
 
 def api(path):
     return gh("api", f"repos/{REPO}/{path}")
+
+
+def write_api(path, method, body):
+    result = subprocess.run(["gh", "api", f"repos/{REPO}/{path}",
+                             "--method", method, "--input", "-"],
+                            input=json.dumps(body).encode(), check=True, capture_output=True)
+    return json.loads(result.stdout)
 
 
 def digest(data):
@@ -229,10 +237,18 @@ def main():
     notes.write_text(release_notes(manifest) + "\n\n" + instructions, encoding="utf-8")
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     title = f"[LATEST DEV] Cities Skylines 1 Modpack — Development Bundle — {date} — {identity[:12]}"
-    gh("release", "create", tag, "--repo", REPO, "--target", os.environ["GITHUB_SHA"],
-       "--draft", "--prerelease", "--latest=false", "--title", title,
-       "--notes-file", str(notes), f"{archive}#{ARCHIVE}", binary=True)
-    release = draft_by_tag(tag)
+    release = write_api("releases", "POST", {
+        "tag_name": tag, "target_commitish": os.environ["GITHUB_SHA"],
+        "draft": True, "prerelease": True, "make_latest": "false",
+        "name": title, "body": notes.read_text(encoding="utf-8")})
+    release_id = release["id"]
+    upload_url = release["upload_url"].split("{")[0]
+    if upload_url != f"https://uploads.github.com/repos/{REPO}/releases/{release_id}/assets":
+        raise ValueError("Unexpected upload destination")
+    gh("api", upload_url + "?name=" + quote(ARCHIVE) + "&label=" + quote(ARCHIVE),
+       "--method", "POST", "-H", "Content-Type: application/zip",
+       "--input", str(archive), binary=True)
+    release = api(f"releases/{release_id}")
     assets = release["assets"]
     if len(assets) != 1 or assets[0]["name"] not in (ARCHIVE, REMOTE_ARCHIVE):
         raise ValueError("Draft asset allowlist mismatch")
@@ -240,7 +256,8 @@ def main():
                     "-H", "Accept: application/octet-stream", binary=True)
     if digest(downloaded) != digest(archive.read_bytes()):
         raise ValueError("Uploaded ZIP hash mismatch; draft retained")
-    gh("release", "edit", tag, "--repo", REPO, "--draft=false", "--prerelease", "--latest=false", binary=True)
+    write_api(f"releases/{release_id}", "PATCH",
+              {"draft": False, "prerelease": True, "make_latest": "false"})
     if api(f"releases/{release['id']}")["draft"]:
         raise ValueError("Publication was not confirmed")
     # Only this channel's old titles change, after the new asset is verified.
