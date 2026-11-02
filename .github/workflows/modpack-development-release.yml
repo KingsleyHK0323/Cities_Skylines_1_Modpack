@@ -1,0 +1,38 @@
+# Signature: OpenAI-Codex
+name: Modpack development bundle
+on:
+  schedule:
+    # Hong Kong 08:00, 13:00 and 20:00. Hosted schedules may be delayed.
+    - cron: '0 0,5,12 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: modpack-development-bundle
+  cancel-in-progress: false
+jobs:
+  contracts:
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Modpack_Website'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check collector failure contracts
+        run: python3 -B -m unittest discover -s tools/modpack-release -p 'test_bundle.py' -v
+  publish:
+    needs: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify current-source builds and publish complete bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B tools/modpack-release/bundle.py

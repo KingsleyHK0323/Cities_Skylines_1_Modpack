@@ -186,3 +186,12 @@ Author: OpenAI-Codex
 - Added the Website Icon to the shared site header and favicon.
 - Added the 1280 × 640 social preview image to Open Graph and Twitter metadata across generated pages.
 - Author: OpenAI-Codex.
+
+## 2026-11-02 — Central development bundle workflow
+
+- Add a scheduled and manually dispatched three-module ZIP collector with strict
+  provenance, complete payload checks and unchanged-source suppression.
+- Verify uploaded draft ZIP bytes before publishing a development prerelease;
+  maintain Latest Dev / Historical titles within the bundle channel.
+- Implementation is pending cloud contract tests and deployment approval.
+- Signature: OpenAI-Codex.
