@@ -1,0 +1,33 @@
+# Signature: OpenAI-Codex.
+name: Dev Manager checks
+
+on:
+  push:
+    branches: [Cities_Skylines_1_Modpack_Dev_Manager]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-tests:
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Cities_Skylines_1_Modpack_Dev_Manager'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check installed Node.js
+        shell: pwsh
+        run: |
+          node --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node -e "if (Number(process.versions.node.split('.')[0]) < 20) process.exit(1)"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run isolated package and filesystem tests
+        shell: pwsh
+        run: |
+          node --test core.test.mjs filesystem.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
