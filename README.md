@@ -30,8 +30,7 @@ Traditional Chinese Starlight interface overrides cover heading-link labels and 
 
 ## Central development bundle automation
 
-The pending central bundle workflow collects exact-source verified cloud outputs
+The central bundle workflow collects exact-source verified cloud outputs
 from AI Improve, Public Transport Planning and Public Transport Vehicle Management.
 See [collector documentation](tools/modpack-release/README.md) for scheduling,
-artifact retention, integrity gates and publication behavior. This addition has
-not yet been pushed or cloud-validated. Signature: OpenAI-Codex.
+artifact retention, integrity gates and publication behavior. Cloud publication and unchanged-source suppression passed on 2026-11-02. Signature: OpenAI-Codex.

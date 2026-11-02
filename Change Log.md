@@ -193,5 +193,5 @@ Author: OpenAI-Codex
   provenance, complete payload checks and unchanged-source suppression.
 - Verify uploaded draft ZIP bytes before publishing a development prerelease;
   maintain Latest Dev / Historical titles within the bundle channel.
-- Implementation is pending cloud contract tests and deployment approval.
+- Seven cloud contracts, public ZIP verification and unchanged-source suppression passed; the workflow is active.
 - Signature: OpenAI-Codex.
