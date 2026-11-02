@@ -23,7 +23,9 @@ jobs:
           test -s 'Change Log.md'
           test -s LICENSE
           grep -Fq '# PolyForm Noncommercial License 1.0.0' LICENSE
-          grep -Fq 'No game implementation' README.md
+          # Signature: OpenAI-Codex. Verify the inactive source foundation.
+          test -s Source/RealisticRailwayTrafficControl.csproj
+          test -s Source/Game/RealisticRailwayTrafficControlMod.cs
           if git ls-files | grep -Ei '\.(dll|exe|zip)$'; then
             echo 'Unexpected binary or archive in planning-only branch.' >&2
             exit 1

@@ -1,8 +1,10 @@
 // Signature: OpenAI-Codex_railway_checks
+// Observation batch signature: OpenAI-Codex_Realistic_Railway_Traffic_Control
 using System;
 using RealisticRailwayTrafficControl.Model;
+using RealisticRailwayTrafficControl.Observation;
 
-internal static class Program
+internal static partial class Program
 {
     private delegate void Check();
     private static int groups;
@@ -40,6 +42,26 @@ internal static class Program
         Run("Duplicate resource within one request", RepeatedResource);
         Run("Inclusive configured limits", InclusiveLimits);
         Run("Oversized captures remain unknown", OversizedCapture);
+        Run("Observation starts disabled", ObservationStartsDisabled);
+        Run("Observation requires an explicit city and scope", ObservationActivation);
+        Run("Only one capture can remain pending", ObservationSinglePending);
+        Run("Incomplete capture evidence remains unknown", ObservationPreservesUnknown);
+        Run("Invalidation rejects a late callback", ObservationInvalidation);
+        Run("Old callback cannot consume a newer request", ObservationNewerRequest);
+        Run("City reload invalidates old requests", ObservationCityReload);
+        Run("Disable clears only local observations", ObservationDisable);
+        Run("Mismatched completion headers are rejected", ObservationHeaderMismatch);
+        Run("Foreign session ticket is rejected", ObservationForeignTicket);
+        Run("New capture drops the previous preview", ObservationDropsOldPreview);
+        Run("Completion tickets are single use", ObservationSingleCompletion);
+        Run("Inactive shell lifecycle starts unloaded", LifecycleStartsUnloaded);
+        Run("Only gameplay activates a local city", LifecycleGameplayOnly);
+        Run("Unload clears pending observation state", LifecycleUnloadInvalidatesCapture);
+        Run("Load failure is isolated and cleaned up", LifecycleLoadFailure);
+        Run("Cleanup failure prevents load", LifecycleCleanupFailure);
+        Run("Secondary cleanup error preserves first failure", LifecycleSecondaryFailure);
+        Run("Extension callback failure clears local state", LifecycleExternalFailure);
+        Run("Repeated load unload does not retain old captures", LifecycleRepeatedCycles);
         Console.WriteLine("Groups: {0}; failures: {1}; assertions: {2}", groups, failures, assertions);
         return failures == 0 ? 0 : 1;
     }
@@ -441,5 +463,164 @@ internal static class Program
         for (int i = 0; i < conflicts.Length; i++) conflicts[i] = "neighbor";
         Invalid(Snapshot(new ResourceEvidence("block", EvidenceState.Clear, conflicts, true, new string[0]), Clear("neighbor", "block")),
             new MovementRequest[] { Request("first", "train-a", "block") }, ShadowReasonCode.IncompleteCapture);
+    }
+
+    private static CaptureTicket Begin(RailwayObservationSession session)
+    {
+        CaptureTicket ticket;
+        Assert(session.TryBeginCapture("observed-topology", out ticket) == CaptureStartResult.Started, "Capture must start.");
+        Assert(ticket != null, "A started capture must have a ticket.");
+        return ticket;
+    }
+
+    private static RailwaySnapshot ObservationSnapshot(CaptureTicket ticket)
+    {
+        // Synthetic lifecycle fixture: this deliberately contains no complete live occupancy evidence.
+        return new RailwaySnapshot(ticket.CityEpoch, ticket.CaptureSerial, ticket.TopologyToken, 123,
+            1, false, NetworkSupport.Unknown,
+            new ResourceEvidence[] { new ResourceEvidence("unverified", EvidenceState.Unknown, new string[0], false, new string[0]) },
+            new VehicleEvidence[0]);
+    }
+
+    private static RailwayObservationSession ActiveSession()
+    {
+        RailwayObservationSession session = new RailwayObservationSession();
+        Assert(session.ActivateCity(), "A local city lifecycle must activate.");
+        return session;
+    }
+
+    private static void ObservationStartsDisabled()
+    {
+        RailwayObservationSession session = new RailwayObservationSession();
+        CaptureTicket ticket;
+        Assert(session.State == ObservationState.Disabled && session.CurrentSnapshot == null, "No city or data is inferred at construction.");
+        Assert(session.TryBeginCapture("scope", out ticket) == CaptureStartResult.Inactive && ticket == null, "No capture before explicit activation.");
+    }
+
+    private static void ObservationActivation()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket ticket;
+        Assert(session.State == ObservationState.NoSnapshot && session.CurrentSnapshot == null, "Activation cannot manufacture data.");
+        Assert(session.TryBeginCapture(" ", out ticket) == CaptureStartResult.InvalidScope && ticket == null, "No fabricated topology token.");
+        ticket = Begin(session);
+        Assert(ticket.CityEpoch > 0 && ticket.CaptureSerial > 0, "Local counters must be positive.");
+    }
+
+    private static void ObservationSinglePending()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket first = Begin(session);
+        CaptureTicket rejected;
+        Assert(session.TryBeginCapture("second", out rejected) == CaptureStartResult.Busy && rejected == null, "Do not enqueue another capture.");
+        session.Invalidate();
+        CaptureTicket second = Begin(session);
+        Assert(second.CityEpoch == first.CityEpoch && second.CaptureSerial > first.CaptureSerial, "Invalidation does not invent a new city or reuse a capture serial.");
+    }
+
+    private static void ObservationPreservesUnknown()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket ticket = Begin(session);
+        RailwaySnapshot incomplete = ObservationSnapshot(ticket);
+        Assert(session.TryComplete(ticket, incomplete) == CaptureCompletion.Accepted, "Matching callback can deliver incomplete evidence.");
+        Assert(session.CurrentSnapshot == incomplete && !session.CurrentSnapshot.Complete, "Do not turn receipt into evidence completeness.");
+        Assert(session.CurrentSnapshot.Network == NetworkSupport.Unknown && session.CurrentSnapshot.Resources[0].State == EvidenceState.Unknown,
+            "No topology or occupancy is inferred from successful receipt.");
+        Invalid(session.CurrentSnapshot, new MovementRequest[] {
+            new MovementRequest("preview", "unverified-train", ticket.CityEpoch, ticket.CaptureSerial,
+                ticket.TopologyToken, new string[] { "unverified" }) }, ShadowReasonCode.IncompleteCapture);
+    }
+
+    private static void ObservationInvalidation()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket old = Begin(session);
+        session.Invalidate();
+        Assert(session.TryComplete(old, ObservationSnapshot(old)) == CaptureCompletion.Stale, "Invalidated callbacks cannot revive a snapshot.");
+        Assert(session.CurrentSnapshot == null && session.State == ObservationState.NoSnapshot, "Only local preview state is cleared.");
+    }
+
+    private static void ObservationNewerRequest()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket old = Begin(session);
+        session.Invalidate();
+        CaptureTicket current = Begin(session);
+        Assert(session.TryComplete(old, ObservationSnapshot(old)) == CaptureCompletion.Stale, "Old response must be ignored.");
+        Assert(session.State == ObservationState.Pending, "Old response cannot cancel a newer pending request.");
+        Assert(session.TryComplete(current, ObservationSnapshot(current)) == CaptureCompletion.Accepted, "New request must remain usable.");
+    }
+
+    private static void ObservationCityReload()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket old = Begin(session);
+        Assert(session.ActivateCity(), "A new explicit city lifecycle must activate.");
+        CaptureTicket current = Begin(session);
+        Assert(current.CityEpoch > old.CityEpoch, "Local city epochs must not be reused across activation.");
+        Assert(session.TryComplete(old, ObservationSnapshot(old)) == CaptureCompletion.Stale, "Previous city cannot publish results.");
+        Assert(session.CurrentSnapshot == null && session.State == ObservationState.Pending, "No cross-city data leak.");
+    }
+
+    private static void ObservationDisable()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket old = Begin(session);
+        session.Disable();
+        Assert(session.State == ObservationState.Disabled && session.CurrentSnapshot == null, "Disable drops local pending and preview state.");
+        Assert(session.TryComplete(old, ObservationSnapshot(old)) == CaptureCompletion.Stale, "Disabled callback must be ignored.");
+        CaptureTicket rejected;
+        Assert(session.TryBeginCapture("scope", out rejected) == CaptureStartResult.Inactive, "Disable does not silently reactivate.");
+        Assert(session.ActivateCity(), "Explicit activation can start a new lifecycle.");
+        Assert(Begin(session).CityEpoch > old.CityEpoch, "Reactivation cannot reuse the old lifecycle.");
+    }
+
+    private static void ObservationHeaderMismatch()
+    {
+        for (int kind = 0; kind < 5; kind++)
+        {
+            RailwayObservationSession session = ActiveSession();
+            CaptureTicket ticket = Begin(session);
+            RailwaySnapshot wrong = kind == 4 ? null : new RailwaySnapshot(
+                kind == 0 ? ticket.CityEpoch + 1 : ticket.CityEpoch,
+                kind == 1 ? ticket.CaptureSerial + 1 : ticket.CaptureSerial,
+                kind == 2 ? "other-topology" : ticket.TopologyToken,
+                kind == 3 ? -1 : 123, 0, false, NetworkSupport.Unknown, new ResourceEvidence[0], new VehicleEvidence[0]);
+            Assert(session.TryComplete(ticket, wrong) == CaptureCompletion.InvalidCapture, "Mismatched header or missing data must be rejected.");
+            Assert(session.CurrentSnapshot == null && session.State == ObservationState.NoSnapshot, "Invalid capture must not leave stale data or a stuck pending request.");
+            Begin(session);
+        }
+    }
+
+    private static void ObservationForeignTicket()
+    {
+        RailwayObservationSession first = ActiveSession();
+        RailwayObservationSession second = ActiveSession();
+        CaptureTicket foreign = Begin(first);
+        CaptureTicket own = Begin(second);
+        Assert(foreign.CityEpoch == own.CityEpoch && foreign.CaptureSerial == own.CaptureSerial, "Fixture must exercise equal numeric counters.");
+        Assert(second.TryComplete(foreign, ObservationSnapshot(foreign)) == CaptureCompletion.Stale, "Numeric equality does not authorize another session's ticket.");
+        Assert(second.TryComplete(own, ObservationSnapshot(own)) == CaptureCompletion.Accepted, "Foreign ticket cannot consume the correct ticket.");
+    }
+
+    private static void ObservationDropsOldPreview()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket old = Begin(session);
+        session.TryComplete(old, ObservationSnapshot(old));
+        Assert(session.CurrentSnapshot != null, "Fixture must contain an old preview.");
+        Begin(session);
+        Assert(session.CurrentSnapshot == null && session.State == ObservationState.Pending, "A new request makes the previous preview unavailable immediately.");
+    }
+
+    private static void ObservationSingleCompletion()
+    {
+        RailwayObservationSession session = ActiveSession();
+        CaptureTicket ticket = Begin(session);
+        RailwaySnapshot current = ObservationSnapshot(ticket);
+        Assert(session.TryComplete(ticket, current) == CaptureCompletion.Accepted, "First completion must be accepted.");
+        Assert(session.TryComplete(ticket, ObservationSnapshot(ticket)) == CaptureCompletion.Stale, "A callback ticket can be consumed only once.");
+        Assert(session.CurrentSnapshot == current, "A duplicate completion cannot replace the accepted preview.");
     }
 }

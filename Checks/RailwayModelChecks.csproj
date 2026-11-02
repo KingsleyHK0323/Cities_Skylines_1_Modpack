@@ -1,4 +1,5 @@
 <!-- Signature: OpenAI-Codex_Responsible: Realistic_Railway_Traffic_Control -->
+<!-- Lifecycle batch signature: OpenAI-Codex_Realistic_Railway_Traffic_Control -->
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
@@ -13,6 +14,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Compile Include="Program.cs" />
+    <Compile Include="LifecycleChecks.cs" />
     <ProjectReference Include="..\Source\RailwayShadowModel.csproj"><Name>RailwayShadowModel</Name></ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

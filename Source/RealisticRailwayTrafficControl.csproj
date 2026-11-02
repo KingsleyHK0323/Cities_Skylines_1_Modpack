@@ -1,0 +1,37 @@
+<!-- Signature: OpenAI-Codex_Realistic_Railway_Traffic_Control -->
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>RealisticRailwayTrafficControl</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <LangVersion>3</LangVersion>
+    <OutputPath>..\bin\Game\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>..\obj\Game\$(Configuration)\</IntermediateOutputPath>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="ICities"><HintPath>$(GameReferenceRoot)\ICities.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="ColossalManaged"><HintPath>$(GameReferenceRoot)\ColossalManaged.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameReferenceRoot)\UnityEngine.dll</HintPath><Private>False</Private></Reference>
+    <!-- Explicit production source manifest: no console checks or test substitutes. -->
+    <Compile Include="Model\MovementRequest.cs" />
+    <Compile Include="Model\RailwayShadowAnalyzer.cs" />
+    <Compile Include="Model\RailwaySnapshot.cs" />
+    <Compile Include="Model\RailwaySnapshotValidator.cs" />
+    <Compile Include="Model\ShadowDecision.cs" />
+    <Compile Include="Model\ValidationReport.cs" />
+    <Compile Include="Observation\RailwayObservationSession.cs" />
+    <Compile Include="Runtime\RailwayModLifecycle.cs" />
+    <Compile Include="Game\RealisticRailwayTrafficControlMod.cs" />
+    <Compile Include="Game\RailwayLoadingExtension.cs" />
+  </ItemGroup>
+  <Target Name="ValidateGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(GameReferenceRoot)' == ''" Text="GameReferenceRoot must point to an explicitly approved reference copy. No discovery or installation is performed." />
+    <Error Condition="!Exists('$(GameReferenceRoot)\ICities.dll')" Text="ICities.dll is required." />
+    <Error Condition="!Exists('$(GameReferenceRoot)\ColossalManaged.dll')" Text="ColossalManaged.dll is required." />
+    <Error Condition="!Exists('$(GameReferenceRoot)\UnityEngine.dll')" Text="UnityEngine.dll is required." />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
