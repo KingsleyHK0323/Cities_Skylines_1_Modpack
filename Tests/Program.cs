@@ -1,4 +1,5 @@
 // Signature: OpenAI-Codex
+// Observation batch: OpenAI-Codex_Realistic_Border_Control
 using System;
 using System.Collections.Generic;
 using RealisticBorderControl;
@@ -31,6 +32,7 @@ class Program
         }
         Check(PassengerQuotaPreview.ObservedPassengers == null);
         Check(PassengerQuotaPreview.DataSource.Contains("Unknown"));
+        ObservationChecks.Run(Check, Reject);
         Console.WriteLine(count + " model checks passed. Synthetic inputs only; no game integration.");
     }
 }

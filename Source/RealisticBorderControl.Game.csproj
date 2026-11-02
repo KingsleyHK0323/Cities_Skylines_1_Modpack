@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Signature: OpenAI-Codex -->
+  <PropertyGroup>
+    <TargetFramework>net35</TargetFramework>
+    <AssemblyName>RealisticBorderControl</AssemblyName>
+    <RootNamespace>RealisticBorderControl.Game</RootNamespace>
+    <Version>0.1.0</Version>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Game/BorderControlMod.cs" />
+    <Compile Include="Game/BorderControlLifecycle.cs" />
+    <Compile Include="Game/BorderControlLoading.cs" />
+    <Reference Include="ICities"><HintPath>$(GameManagedDir)/ICities.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="ValidateGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(GameManagedDir)' == ''" Text="GameManagedDir must point to an explicitly provisioned cloud reference directory. No local game discovery is permitted." />
+    <Error Condition="!Exists('$(GameManagedDir)/ICities.dll')" Text="Missing real ICities.dll. Synthetic test boundaries cannot build a game artifact." />
+  </Target>
+</Project>

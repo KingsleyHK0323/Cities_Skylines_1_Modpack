@@ -1,4 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- Signature: OpenAI-Codex -->
   <PropertyGroup><TargetFramework>net8.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
+  <!-- Signature: OpenAI-Codex; game entry points are compiled only by the game project. -->
+  <ItemGroup><Compile Remove="Game/**/*.cs" /></ItemGroup>
 </Project>
