@@ -10,6 +10,8 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="ClockInputTests.cs" />
+    <Compile Include="GameClockStateTests.cs" />
+    <Compile Include="../../Game/GameClockState.cs" />
     <Compile Include="../../src/RealisticCityTime/ClockModel.cs" />
     <Compile Include="../../src/RealisticCityTime/ClockInputSession.cs" />
   </ItemGroup>

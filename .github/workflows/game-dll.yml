@@ -1,0 +1,79 @@
+# Signature: OpenAI-Codex
+name: Realistic City Time observation DLL
+on:
+  push:
+    branches: [Realistic_City_Time]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  game-dll:
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Realistic_City_Time'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run model and observation contracts
+        shell: pwsh
+        run: |
+          dotnet restore tests/ClockModel.Tests/ClockModel.Tests.csproj --configfile tests/ClockModel.Tests/NuGet.Config
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-restore
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - name: Check out pinned encrypted reference supply
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 7b8a5e7c10f2db84388e8dd8af2084f239957b13
+          path: build-dependencies
+          persist-credentials: false
+          sparse-checkout: |
+            build-references/cs1/v1
+            tools/build-references
+      - name: Restore cloud-only game references
+        shell: pwsh
+        env:
+          CS1_GAME_REFERENCES_KEY: ${{ secrets.CS1_GAME_REFERENCES_KEY }}
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'time-game-references'
+          & ./build-dependencies/tools/build-references/Restore-GameReferences.ps1 -BundleDirectory ./build-dependencies/build-references/cs1/v1 -GameRoot $root
+          "TIME_REFERENCE_ROOT=$root" >> $env:GITHUB_ENV
+      - name: Compile observation-only game DLL and record provenance
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = (dotnet --version).Trim()
+          if ($LASTEXITCODE -or $version -notmatch '^8\.0\.[0-9]+$') { throw 'Expected a stable .NET 8 SDK.' }
+          $sdkRoot = Split-Path (Get-Command dotnet).Source
+          $compiler = Join-Path $sdkRoot "sdk/$version/Roslyn/bincore/csc.dll"
+          $output = Join-Path $env:RUNNER_TEMP 'time-public-output'
+          & ./Game/Build-GameAssembly.ps1 -CompilerPath $compiler -ReferenceDirectory (Join-Path $env:TIME_REFERENCE_ROOT 'Cities_Data/Managed') -OutputDirectory $output
+          $dll = Get-Item (Join-Path $output 'RealisticCityTime.dll')
+          if ($dll.Length -le 0) { throw 'Empty game DLL.' }
+          $assembly = [Reflection.AssemblyName]::GetAssemblyName($dll.FullName)
+          if ($assembly.Name -cne 'RealisticCityTime') { throw 'Unexpected assembly identity.' }
+          @{
+            schemaVersion = 1
+            sourceSHA = $env:GITHUB_SHA
+            runId = $env:GITHUB_RUN_ID
+            runAttempt = $env:GITHUB_RUN_ATTEMPT
+            sharedReferencesSHA = '7b8a5e7c10f2db84388e8dd8af2084f239957b13'
+            sha256 = (Get-FileHash $dll.FullName -Algorithm SHA256).Hash
+            observationOnly = $true
+            gameplayVerified = $false
+            signature = 'OpenAI-Codex'
+          } | ConvertTo-Json | Set-Content (Join-Path $output 'build-provenance.json') -Encoding utf8
+          'This DLL observes game time only. Time control, acceleration and gameplay acceptance are not implemented or verified.' >> $env:GITHUB_STEP_SUMMARY
+      - name: Preserve only the DLL and provenance
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: city-time-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/time-public-output/RealisticCityTime.dll
+            ${{ runner.temp }}/time-public-output/build-provenance.json

@@ -1,6 +1,17 @@
 # Change Log
 
-## Unreleased — 2026-11-01
+## Unreleased — 2026-11-02
+
+### Local candidate — 2026-11-02
+
+- Add observation-only IUserMod/loading/threading entry classes and a generation-guarded cache after inspecting the approved reference copies' metadata.
+- Prepare a cloud-only compiler entry script and instructions without modifying workflows or bundling game references.
+- Keep CLR 2.0-compatible game observation sources separate from the BigInteger/.NET 8 pure model; prepare cache lifecycle checks using the real cache source.
+- The previous 645a3e9 cloud baseline passed 40 arithmetic checks plus observation contracts. This new local candidate has not been compiled or tested and produces no DLL yet.
+
+Signature: OpenAI-Codex_Realistic_City_Time
+
+### Earlier foundation and model changes — 2026-11-01
 
 - Wire separate hosted SDK validation, framework-only restore, explicit compilation of both models and both check files, and execution without implicit build/restore.
 - Select the preinstalled stable .NET 8 SDK through global.json without installation or preview/major fallback; SDK failures remain infrastructure failures.
@@ -29,3 +40,7 @@ Signature: OpenAI-Codex_Responsible: Realistic_City_Time
 Local pure-model implementation signature: OpenAI-Codex_Realistic_City_Time
 
 Observation contract batch signature: OpenAI-Codex_Realistic_City_Time
+
+## 2026-11-02 — Observation DLL cloud wiring
+
+- Add a cloud-only compilation workflow with contract checks, pinned reference restoration and allowlisted artifact upload. Cloud execution is pending approval; no time control or gameplay acceptance is claimed. Signature: OpenAI-Codex.

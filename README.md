@@ -1,6 +1,10 @@
 # Realistic City Time
 
-Source-available module in early development for Cities: Skylines 1. No game functionality or game mod binaries are implemented yet. A standalone pure clock conversion model exists locally; execution has not been verified.
+Source-available module in early development for Cities: Skylines 1. No game functionality has been accepted in gameplay, and no game mod binary has been produced. Standalone pure-model checks are cloud-verified at the baseline below; subsequent game code remains uncompiled.
+
+Latest verified baseline: commit `645a3e93cf983c48d7898915a561c5a7e4f3710c` passed [cloud build and model/observation checks](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41291599199), including 40 arithmetic checks, with .NET SDK 8.0.427 and zero build warnings/errors. Statements below about the original uncommitted batch describe its earlier preparation stage. They do not supersede that baseline evidence.
+
+A subsequent local [observation-only game assembly candidate](Game/README.md) adds game entry classes and a cloud compiler entry script, with no workflow change. It is uncompiled and has no DLL output or gameplay acceptance. Its CLR-compatible observation code is deliberately separate from the BigInteger pure model; it does not alter time or choose decimal precision.
 
 Repository branch: [Realistic_City_Time](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/tree/Realistic_City_Time).
 
@@ -66,3 +70,5 @@ Signature: OpenAI-Codex_Responsible: Realistic_City_Time
 Local pure-model implementation signature: OpenAI-Codex_Realistic_City_Time
 
 Observation contract batch signature: OpenAI-Codex_Realistic_City_Time
+
+The pending game-dll workflow runs observation contracts and compiles an observation-only game assembly against pinned cloud references. It preserves only the DLL and provenance as a 14-day artifact; it does not publish a Release or enable time control. Cloud execution is pending approval. Signature: OpenAI-Codex.

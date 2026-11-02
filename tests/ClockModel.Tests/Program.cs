@@ -68,6 +68,7 @@ internal static class Program
             Test("stored trailing zeros remain exact", () => Equal(5L,Advance(New(2),4,1.2500m)));
             Test("decimal syntax rejects multiple points and punctuation", () => {var m=New(3); foreach(var s in new[]{".","1..2","1/2","--1","１.２"}) Reject<ArgumentException>(()=>Call(m,"ParseMultiplier",s)); });
             ClockInputTests.Run();
+            GameClockStateTests.Run();
             Console.WriteLine($"Passed {count} model checks plus observation contract checks; no live game reader or gameplay tested.");
             return 0;
         }
