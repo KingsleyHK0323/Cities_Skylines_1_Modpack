@@ -35,3 +35,5 @@ The independent .NET 8 checks now include 17 observation and 7 lifecycle asserti
 Signature: OpenAI-Codex_Realistic_City_First_Response
 
 The pending first-response-game-dll workflow runs observation and lifecycle checks and compiles the inactive production game entry point against pinned cloud references. Only the DLL and build provenance are retained for 14 days. No dispatch, fire suppression or traffic changes are enabled; no Release or Workshop upload is performed. Signature: OpenAI-Codex.
+
+Cloud validation correction: observation checks now distinguish mismatched building identity from a matching zero-ID invalid sample (18 observation checks plus 7 lifecycle checks). The documentation baseline checks the present inactive game entry point instead of requiring the obsolete no-code statement. Signature: OpenAI-Codex.

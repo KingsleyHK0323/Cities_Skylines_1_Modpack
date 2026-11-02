@@ -21,4 +21,6 @@ jobs:
           test -s 'Change Log.md'
           grep -Fq 'PolyForm Noncommercial' LICENSE.md
           grep -Fq '(LICENSE.md)' README.md
-          grep -Fq 'No gameplay code' README.md
+          # Signature: OpenAI-Codex. The branch now has an inactive game entry point.
+          test -s RealisticCityFirstResponse.csproj
+          test -s Source/Mod.cs

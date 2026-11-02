@@ -4,10 +4,12 @@ using RealisticCityFirstResponse;
 
 internal static class Program
 {
-    private static void Expect(ObservationStatus expected, FireWeatherSnapshot snapshot)
+    // Signature: OpenAI-Codex. Isolate identity mismatch from invalid sample data.
+    private static void Expect(ObservationStatus expected, FireWeatherSnapshot snapshot, ushort buildingId = 12)
     {
-        if (FireWeatherAnalysis.Inspect(snapshot, 7, 12, 100) != expected)
-            throw new Exception("Unexpected observation status: " + expected);
+        var actual = FireWeatherAnalysis.Inspect(snapshot, 7, buildingId, 100);
+        if (actual != expected)
+            throw new Exception("Expected " + expected + "; actual " + actual);
     }
 
     private static FireWeatherSnapshot Sample(double? rain, double? fire)
@@ -29,7 +31,8 @@ internal static class Program
         Expect(ObservationStatus.Stale, new FireWeatherSnapshot(7, 13, 100, true, 1, 1));
         Expect(ObservationStatus.Stale, new FireWeatherSnapshot(7, 12, 99, true, 1, 1));
         Expect(ObservationStatus.Invalid, new FireWeatherSnapshot(7, 12, 100, false, 1, 1));
-        Expect(ObservationStatus.Invalid, new FireWeatherSnapshot(7, 0, 100, true, 1, 1));
+        Expect(ObservationStatus.Stale, new FireWeatherSnapshot(7, 0, 100, true, 1, 1));
+        Expect(ObservationStatus.Invalid, new FireWeatherSnapshot(7, 0, 100, true, 1, 1), 0);
         Expect(ObservationStatus.NoReportedFire, Sample(1, 0));
         Expect(ObservationStatus.NoReportedRain, Sample(0, 1));
         Expect(ObservationStatus.RainAndFireReported, Sample(2, 500));
@@ -53,6 +56,6 @@ internal static class Program
         if (lifecycle.IsLoaded) throw new Exception("Editor retained loaded state.");
         if (lifecycle.Inspect(original, 7, 12, 100) != ObservationStatus.Missing)
             throw new Exception("Editor observation accepted.");
-        Console.WriteLine("17 observation and 7 lifecycle checks passed; game entry points remain untested.");
+        Console.WriteLine("18 observation and 7 lifecycle checks passed; game entry points remain untested.");
     }
 }

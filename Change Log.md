@@ -25,3 +25,5 @@ Signature: OpenAI-Codex_Realistic_City_First_Response
 Signature: OpenAI-Codex_Realistic_City_First_Response
 
 - Add Main-owned first-response-game-dll workflow with explicit .NET 8 compiler selection, cloud reference restoration and allowlisted artifact output; cloud validation is pending. Signature: OpenAI-Codex.
+
+- Isolate stale identity and invalid zero-ID regression cases without changing analysis behavior; update the obsolete documentation baseline for the inactive game entry point. Signature: OpenAI-Codex.
