@@ -11,3 +11,5 @@
 Signature: OpenAI-Codex
 
 - Fix unpublished draft lookup by retaining the authenticated release ID; add a regression contract. Signature: OpenAI-Codex.
+
+- Accept only GitHub's observed space-to-dot asset-name normalization, preserving the requested display label and ZIP hash verification. Signature: OpenAI-Codex.

@@ -16,6 +16,7 @@ REPO = "KingsleyHK0323/Cities_Skylines_1_Modpack"
 REFERENCES = "7b8a5e7c10f2db84388e8dd8af2084f239957b13"
 PREFIX = "modpack-dev-"
 ARCHIVE = "Cities Skylines_1_Modpack.zip"
+REMOTE_ARCHIVE = "Cities.Skylines_1_Modpack.zip"
 MODULES = (
     ("AI_Improve", "cloud-compile-test.yml", "AIImprove.dll", (
         "AIImprove.dll", "CitiesHarmony.API.dll", "README.md", "LICENSE",
@@ -230,10 +231,10 @@ def main():
     title = f"[LATEST DEV] Cities Skylines 1 Modpack — Development Bundle — {date} — {identity[:12]}"
     gh("release", "create", tag, "--repo", REPO, "--target", os.environ["GITHUB_SHA"],
        "--draft", "--prerelease", "--latest=false", "--title", title,
-       "--notes-file", str(notes), str(archive), binary=True)
+       "--notes-file", str(notes), f"{archive}#{ARCHIVE}", binary=True)
     release = draft_by_tag(tag)
     assets = release["assets"]
-    if len(assets) != 1 or assets[0]["name"] != ARCHIVE:
+    if len(assets) != 1 or assets[0]["name"] not in (ARCHIVE, REMOTE_ARCHIVE):
         raise ValueError("Draft asset allowlist mismatch")
     downloaded = gh("api", f"repos/{REPO}/releases/assets/{assets[0]['id']}",
                     "-H", "Accept: application/octet-stream", binary=True)
@@ -265,7 +266,9 @@ provides observation tools. This bundle collects verified independent cloud buil
 ## Manual installation
 
 1. Close Cities: Skylines and back up your saves and existing mod files.
-2. Download and extract `Cities Skylines_1_Modpack.zip` to a temporary directory.
+2. Download and extract the bundle to a temporary directory. GitHub normalizes
+   its filename to `Cities.Skylines_1_Modpack.zip`; its display label is
+   `Cities Skylines_1_Modpack.zip`.
 3. Open `%LOCALAPPDATA%\\Colossal Order\\Cities_Skylines\\Addons\\Mods`.
 4. Copy the entire `AI_Improve` folder there, keeping `AIImprove.dll` and
    `CitiesHarmony.API.dll` together. For each standalone DLL at the ZIP root,
