@@ -37,3 +37,5 @@ Signature: OpenAI-Codex_Realistic_Import_Export_Control
 Signature: OpenAI-Codex_Responsible: Realistic_Import_Export_Control
 
 - Add Main-owned import-export-game-dll workflow with cloud checks, explicit .NET 8 compiler selection and real-reference inactive game DLL compilation; validation is pending. Signature: OpenAI-Codex.
+
+- Add the explicit compile-only System.Core reference required by the .NET 3.5 Action delegate in CargoSession; do not distribute game reference assemblies. Signature: OpenAI-Codex.

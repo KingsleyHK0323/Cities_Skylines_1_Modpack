@@ -14,6 +14,8 @@
   </Target>
   <ItemGroup>
     <Reference Include="mscorlib"><HintPath>$(GameManagedDir)\mscorlib.dll</HintPath><Private>false</Private></Reference>
+    <!-- Signature: OpenAI-Codex. .NET 3.5 non-generic Action is in System.Core. -->
+    <Reference Include="System.Core"><HintPath>$(GameManagedDir)\System.Core.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="ICities"><HintPath>$(GameManagedDir)\ICities.dll</HintPath><Private>false</Private></Reference>
     <Compile Include="CargoMod.cs" /><Compile Include="CargoSession.cs" /><Compile Include="CargoLoading.cs" />
   </ItemGroup>
