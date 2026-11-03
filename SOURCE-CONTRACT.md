@@ -1,5 +1,23 @@
 # Development source contract assessment
 
+## Current desktop contract (2026-11-03)
+
+The current desktop contract is in [ARTIFACT-CONTRACT.md](ARTIFACT-CONTRACT.md).
+The only player-facing module source is independent artifact branches; historical
+individual/bundle code is retained internally. The application has anonymous HTTPS
+adapters, exact source/run checks, manifest provenance, managed assembly
+inspection and owned-folder transactions. Source availability is not assumed.
+GitHub rate limits and missing published builds remain explicit unavailable states.
+Optional signed pointers below are research, not a production requirement.
+
+The following dated assessment preserves the earlier prototype boundary and
+observations. Its statements about absent adapters/UI do not describe the newer
+desktop implementation. It is not current Release inventory or game acceptance.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+## Historical assessment
+
 This is a read-only assessment on 2026-11-02, not a configured downloader or a
 claim that any candidate is the latest version for every module.
 
@@ -34,6 +52,95 @@ consumer of explicitly supplied fixture bytes and expected hashes.
 No GitHub binary, game reference, mod DLL, credential or Steam file was downloaded
 or installed as part of this assessment. Only JSON metadata and the official
 project license text were read online.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+## GitHub-native candidate route (normal API trust, no signing service)
+
+The supported route uses trusted HTTPS GitHub REST responses and an explicit
+module registry. It does not require the optional signed-pointer experiment.
+It reads complete release and asset pagination, exact branch/tag refs and the
+selected workflow run attempt. Module candidates follow a caller-configured
+`<prefix><runId>-<attempt>` convention, confirmed against repository, branch,
+workflow path, tag commit and required runtime assets. This is a proposed adapter
+using observed project conventions, not a claim that every legacy tag fits them.
+
+Official documentation establishes the needed interfaces:
+
+- [List releases](https://docs.github.com/en/rest/releases/releases): published
+  releases are public; authenticated listings can additionally contain drafts.
+  `target_commitish` may be a branch and is ignored for an existing tag.
+- [Pagination](https://docs.github.com/en/rest/using-the-rest-api/using-pagination-in-the-rest-api):
+  follow Link next relations until none remain; missing pages are not completion.
+- [Workflow runs](https://docs.github.com/en/rest/actions/workflow-runs): request
+  the exact run attempt and compare head branch/SHA/repository and workflow path.
+- [Git references](https://docs.github.com/en/rest/git/refs) and
+  [annotated tags](https://docs.github.com/en/rest/git/tags): resolve refs to the
+  actual commit, peeling tag objects with cycle/depth protection.
+
+An additional read-only inspection confirmed the observed project run shape has
+head branch, head SHA, run attempt, workflow path, successful status and matching
+repository/head repository. No asset bytes or logs were fetched. The earlier
+release snapshot was draft-only and lacked full response Link headers, so it
+cannot establish a complete usable public module list. Real modules without a
+verified usable release remain unknown; no fallback download is configured.
+
+The resolver distinguishes latest **published** module release (unambiguous
+publication time) from latest branch commit. It does not equate the two, infer
+commit ancestry or choose by Repo Latest, title, prerelease flag or largest run ID.
+Unknown installed state can coexist with a separately identified published
+candidate. Missing run/tag/assets, ambiguous dates, failed pagination, API errors
+and detected changes yield unknown; a failed newest candidate never silently
+selects an older build.
+
+Repeated reads detect some concurrent changes but GitHub API pagination is not a
+transactional or cryptographically fresh snapshot. The injected adapter must
+preserve all Link headers, use trusted HTTPS without silent redirects, and bound
+its own JSON decoding/resources. No actual polling transport, module registry,
+independent artifact attestation, binary identity or game installation is wired
+into the UI. These are metadata candidates, not installation authorization.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+## 2026-11-03 read-only refresh and proposed freshness contract
+
+Correction: the signed-pointer mechanism in this section is optional, unadopted
+research. It is not a user requirement or a prerequisite for normal GitHub-native
+update detection. No additional online signing infrastructure is planned or created.
+
+Read-only queries of the repository's [release collection first page](https://api.github.com/repos/KingsleyHK0323/Cities_Skylines_1_Modpack/releases?per_page=10)
+and [second page](https://api.github.com/repos/KingsleyHK0323/Cities_Skylines_1_Modpack/releases?per_page=10&page=2)
+returned an authenticated snapshot containing unpublished data and an empty second
+page. This is limited query evidence, not proof of a complete per-module catalog.
+No asset bytes were fetched. Draft payload details remain in internal notes;
+drafts cannot serve as installable published candidates. Current source APIs do
+not provide the independently authenticated freshness contract described below.
+
+`classifyModuleSource` accepts an independently pinned public Ed25519 key,
+existing catalog policy/bytes, installation record, signed pointer and raw
+GitHub-shaped release records. The proposed pointer is UTF-8 JSON (maximum 16 KiB)
+with a detached 64-byte Ed25519 signature over those exact bytes. No production
+key, signing service or dispatch mechanism is created by this implementation.
+
+Signed fields are `schema:1`, `selection:'latest-published-development'`, module,
+repository, branch, assembly, workflow, channel, buildId, sourceSha,
+catalogSha256, releaseId, releaseTag, issuedAtMs, expiresAtMs, nonce and sequence.
+The issued/expiry window is positive and no longer than 300,000 ms. Trusted caller
+time must lie inside it. The request nonce must match, and the sequence must be
+positive and at least the independently retained per-module sequence floor.
+The caller must provide fresh unpredictable nonces and durable anti-rollback state;
+neither is generated or persisted here. Key rotation/revocation and clock trust
+are also outside this prototype. A still-valid signed statement is the signer's
+claim at issuance, not proof that no later build exists after issuance.
+
+The signed snapshot must bind to a unique selected non-draft published release,
+exact repository release URLs/tag, full source target SHA and every runtime asset's
+ID/name/size/digest/download URL. Duplicate candidate IDs or ambiguous assets,
+branch-name-only targets and absent digests yield unknown. Source/build/module
+checks do not inspect DLL metadata or attest actual workflow execution. A newer
+unrelated repository release or a prerelease flag cannot change module selection.
+The browser, download and installation paths remain disconnected from this
+proposed freshness verifier until trusted policy delivery is established.
 
 Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 

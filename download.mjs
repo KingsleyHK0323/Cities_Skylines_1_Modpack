@@ -16,14 +16,15 @@ function canonicalHttps(value) {
 }
 
 export async function downloadCatalogAsset({ policy, data, assetPath, transport,
-  redirectUrls = [], timeoutMs = 5000, maxRedirects = 3 } = {}) {
+  redirectUrls = [], allowRedirect = null, timeoutMs = 5000, maxRedirects = 3 } = {}) {
   const verified = catalogStatus(null, policy, data);
   if (verified.status === 'unavailable') fail('SOURCE_UNAVAILABLE');
   const asset = verified.catalog.files.find(file => file.path === assetPath);
   if (!asset) fail('ASSET_UNAVAILABLE');
   if (typeof transport !== 'function' || !Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30000 ||
     !Number.isInteger(maxRedirects) || maxRedirects < 0 || maxRedirects > 5 ||
-    !Array.isArray(redirectUrls) || redirectUrls.length > 16 || !redirectUrls.every(canonicalHttps)) fail('INVALID_DOWNLOAD_POLICY');
+    !Array.isArray(redirectUrls) || redirectUrls.length > 16 || !redirectUrls.every(canonicalHttps) ||
+    allowRedirect !== null && typeof allowRedirect !== 'function') fail('INVALID_DOWNLOAD_POLICY');
   const allowed = new Set(redirectUrls);
   const controller = new AbortController(); const deadline = performance.now() + timeoutMs;
   let timer;
@@ -43,7 +44,7 @@ export async function downloadCatalogAsset({ policy, data, assetPath, transport,
       const header = name => Object.hasOwn(headers, name) ? headers[name] : undefined;
       if ([301, 302, 303, 307, 308].includes(response.status)) {
         const next = header('location');
-        if (!canonicalHttps(next) || !allowed.has(next)) fail('REDIRECT_REFUSED');
+        if (!canonicalHttps(next) || !allowed.has(next) && allowRedirect?.(url, next) !== true) fail('REDIRECT_REFUSED');
         if (++redirects > maxRedirects) fail('REDIRECT_LIMIT');
         url = next; continue;
       }

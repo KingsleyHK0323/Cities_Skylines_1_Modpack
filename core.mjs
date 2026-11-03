@@ -20,6 +20,7 @@ export function verifyPackage(pkg) {
       !Array.isArray(pkg.files) || !pkg.files.length || pkg.files.length > 256)
     throw new Error('Invalid package contract');
   safeModuleId(pkg.moduleId);
+  if (pkg.publication !== undefined) verifyPublication(pkg.publication);
   const names = new Set();
   let total = 0;
   const result = pkg.files.map(file => {
@@ -38,6 +39,21 @@ export function verifyPackage(pkg) {
       if (names.has(parts.slice(0, i).join('/'))) throw new Error('File and directory overlap');
   }
   return result;
+}
+
+export function verifyPublication(value) {
+  if (!value || !['module-release','modpack-bundle','artifact-branch'].includes(value.provider) || !/^[a-f0-9]{40}$/.test(value.sourceSha) ||
+    (value.provider!=='artifact-branch' && (!Number.isSafeInteger(value.releaseId) || value.releaseId < 1)) || typeof value.publishedAt !== 'string' ||
+    !Number.isFinite(Date.parse(value.publishedAt)) || !value.publishedAt.endsWith('Z') ||
+    !Number.isSafeInteger(value.runId) || value.runId < 1 || !Number.isSafeInteger(value.attempt) || value.attempt < 1)
+    throw new Error('Invalid publication provenance');
+  if(value.provider==='artifact-branch'){
+    if(!/^[a-f0-9]{40}$/.test(value.artifactCommit)||!/^[a-f0-9]{64}$/.test(value.manifestSha256))throw new Error('Invalid artifact provenance');
+    safeRelative(value.artifactBranch);if(!value.artifactBranch.startsWith('Development_Build/'))throw new Error('Invalid artifact branch');
+  }
+  if(value.buildStartedAt!==undefined && (typeof value.buildStartedAt!=='string' || !Number.isFinite(Date.parse(value.buildStartedAt)) || !value.buildStartedAt.endsWith('Z')))
+    throw new Error('Invalid build time provenance');
+  return value;
 }
 
 // Build IDs are opaque identities, not sortable version numbers. The caller

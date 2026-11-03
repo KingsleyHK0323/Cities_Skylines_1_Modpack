@@ -1,0 +1,12 @@
+# Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+desktop/*.exe
+desktop/*.pdb
+desktop/portable/
+desktop/portable-*/
+desktop/qa-release-clarity-*/
+desktop/qa-presentation-*/
+desktop/*Fixture.dll
+.desktop-state.json
+.desktop-state.json.lock
+local-*.json
+*.local.log

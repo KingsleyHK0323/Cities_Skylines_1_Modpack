@@ -1,6 +1,127 @@
 # Change Log
 
+- Distinguish an installed build matching a newly observed candidate from an
+  unavailable source, while keeping the candidate explicitly unverified.
+  Signature: OpenAI-Codex
+
 ## 2026-11-03
+
+- Pin future Windows x64 packages to official Node.js v24.22.2 instead of v24.19.0;
+  verify binary integrity before executing it and use the exact versioned license.
+- Preserve new official license/checksum bytes with `-text` Git attributes, keep
+  notices on LF checkout and document their normalized digest rule. Retain old
+  reference files, archived notice and existing portable outputs without cleanup.
+- Test official pins, legal bytes, Git attribute/filter identity, normalized notice
+  hash and rejection of old/untrusted runtime before any package output is created.
+  Offline older-runtime unit checks do not establish new-runtime package acceptance.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Correct matching-installed-candidate display for the artifact provider without
+  treating discovery as full verification. Keep an established publisher mapping
+  visible during queued checks while preserving unavailable installation actions.
+- Add a test-readiness matrix and publication blockers, distinguishing local
+  implementation, isolated/native probes, remote downloads and game acceptance.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Add actual desktop language/theme selectors: English, Traditional Chinese,
+  Simplified Chinese and Japanese; follow Windows, light and dark. Persist choices
+  through the existing backend while preserving destination and unknown fields.
+- Localize controls, dialogs, statuses, progress, target scopes and friendly errors;
+  retain unrecognized technical diagnostics. Keep update-order translations neutral
+  when one reason is shared by allowed and rejected attempts.
+- Add offline UTF-8 resources and explicit compiler codepage, headless native Unicode
+  and palette probes, Windows preference event updates/unsubscription and system
+  high-contrast colors. Do not claim visual/live-event GUI acceptance.
+- Replace truncating settings writes with cross-process locked atomic transactions,
+  pre-write size validation and backups. Update in-memory destination only after
+  commit; distinguish retained old state from post-commit recovery warnings.
+- Test actual partial-stage and pre-rename failures, the 8185-byte legacy boundary,
+  competing processes, restart persistence, translation keys/placeholders and flat
+  package imports. Keep all new test output in isolated ignored project directories.
+- Preserve both errors in a precommit/lock-release failure, protect lock-identity
+  cleanup and surface first-start committed warnings. Bound settings reads and
+  reject growth. Refuse preference writes after another instance changes the
+  destination; send only the selected preference field. Do not claim automatic
+  lock recovery or interpret a busy lock as proof of an active App instance.
+- Preserve recovery-specific startup errors through a safe whitelist. Show a
+  persistent localized recovery/lock notice until a verified clean save, independent
+  of transient details or module selection. Keep Windows-controlled chrome outside
+  the custom palette acceptance claim.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Expose only independent artifact branches as the player-facing module source;
+  reject legacy source selection at the backend boundary. Keep internal historical
+  providers/tests and owned-installation management without automatic fallback.
+- Show 12 awaiting-publisher mappings and AI Gaming's development pause separately
+  from verified source availability. Clarify that Releases are for App Setup.exe
+  only; module Releases and bundle ZIPs are not player-facing download options.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Document the selected Windows `Setup.exe` Release format: install into a
+  user-selected empty folder, use a separate folder for each new version, and
+  reselect the Mods destination when needed. Classify existing portable outputs
+  as local development/testing artifacts. No publication, cloud installation or
+  in-game acceptance is claimed; Main Session owns installer/Release workflows.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Replace per-module automatic artifact verification with shared matching-ref
+  snapshots and immutable manifest discovery, preserving full pre-install checks.
+- Bound automatic/selected checks and shared hourly API traffic; rotate deferred
+  manifest and update work fairly. Show queued verification and retain GitHub retry
+  state rather than silently accepting unverified candidates or falling back.
+- Cover 15 fully available modules, unchanged checks, all installed updates,
+  low-budget rotation, real pooled hourly windows and changing shared snapshots.
+
+- Default desktop selection, backend and service startup to independent Development
+  build branches. Keep legacy providers as manual migration choices, with no
+  automatic fallback when the default source is missing or invalid. Add a startup
+  behavior regression and explicitly select legacy providers in their own tests.
+
+- Add an independent `Development_Build/<source branch>` provider with a pinned
+  artifact commit, hash-checked manifest, source ancestry/run/DevTools declaration,
+  bounded per-file raw downloads and actual downstream assembly verification.
+- Persist artifact provenance without requiring a release ID; keep prior records
+  removable and retain existing providers during migration. Require artifact and
+  source/build advancement instead of treating different build IDs as newer.
+- Document the exact manifest/publisher contract and cover isolated installation,
+  forward update, older-build refusal, legacy removal and synthetic managed DLLs.
+  No desktop operation, live artifact-branch acceptance or publication is claimed.
+
+- Add a Windows Forms desktop application and versioned portable build recipe
+  using the existing compiler and checksum-pinned Node runtime with official notices.
+- Register all 15 modules; add anonymous HTTPS GitHub transport, shared discovery,
+  hourly idle checks, manual checks, rate-limit cooldown and stale-state handling.
+- Connect single/batch install, forward update and quarantine removal to checked
+  user-selected Mods destinations. Keep active DLLs in direct module children and
+  staging/metadata/backups outside Mods. Preserve unknown or modified files.
+- Check managed assembly names without executing module code; validate bounded
+  archives in memory, including paths, collisions, links, sizes and all checksums.
+- Add the scheduled bundle provider with per-module provenance/run validation and
+  independent availability. Require hash-verified build-info for individual releases;
+  workflow text alone is not DevTools evidence.
+- Resolve changed installed candidates on demand before enabling updates; persist
+  source/build/publication records and refuse older, divergent or unknown ordering.
+- Cover actual HTTP-to-assembly-to-filesystem install/update/rollback/removal and
+  two-module bundle installation with synthetic compiled assemblies and destinations.
+  No actual game loading or real published module installation is claimed.
+- Add player instructions and the publisher integration contract. This local
+  desktop milestone is uncommitted and is not the earlier successful cloud run.
+
+- Add a GitHub-native per-module candidate resolver using explicit module registry
+  mappings, complete release/asset pagination, tag peeling and exact workflow-run
+  attempt/source/asset checks under ordinary trusted HTTPS API assumptions.
+- Separate latest published module build from branch head; keep incomplete,
+  ambiguous, failed or changing observations unknown without guessing Repo Latest.
+- Retain signed-pointer work as optional, unadopted research rather than a required
+  new service. Add synthetic pagination, provenance, tag, race and timeout coverage.
+
+- Add independent per-module source classification with externally pinned Ed25519
+  signatures, catalog/source/build binding and bounded nonce/time/sequence checks.
+- Bind selected published GitHub releases and runtime assets exactly; keep status
+  unknown without trusted freshness or complete evidence. Do not infer latest
+  from repository ordering, titles or prerelease flags.
+- Correct the README's obsolete first-push/cloud statements using the exact
+  committed SHA and successful cloud run; keep new local changes distinguished.
 
 - Warn when planning a first development installation alongside an existing
   stable copy, even before the development directory exists. Keep this warning

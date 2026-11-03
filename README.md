@@ -1,8 +1,90 @@
 # Cities Skylines 1 Modpack Dev Manager
 
-Dependency-free local prototype: package preflight and an isolated filesystem
-executor. Run `node --test core.test.mjs filesystem.test.mjs` using an installed
-Node.js runtime. The filesystem tests create synthetic temporary directories.
+Windows x64 desktop application for independently checking, installing, updating
+and removing Development modules. The selected GitHub Release format is Windows
+`Setup.exe`, which installs the App into a user-selected empty folder. Each new
+version uses a separate empty folder; users may need to select their existing
+Mods destination again. The installed App includes its Node runtime and opens
+through `DevManager.exe`, without a separate Node installation or development
+toolchain. Windows .NET Framework is required.
+
+Existing portable outputs are for local development/testing. The installer format
+decision is not a claim that an installer has been published or that cloud
+installation or in-game acceptance has completed. Main Session owns installer
+packaging and Release workflows.
+The current packaging recipe pins the official Node.js v24.22.2 Windows x64
+runtime and its exact upstream license bytes. Old v24.19.0 references and local
+packages are retained as historical outputs, not updated in place. Changing the
+recipe is not evidence that a new-runtime local/cloud package was built or tested.
+See `THIRD-PARTY.md` in the package root (`desktop/THIRD-PARTY.md` in the source
+checkout) for official hashes and provenance. Local tests on an older runtime
+must remain offline; runtime/package
+acceptance on v24.22.2 is a separate validation step.
+See [test readiness](TEST-READINESS.md) for implemented scope, evidence layers and
+the current publication/module-source blockers before interpreting this as a
+downloadable end-to-end test build.
+
+The desktop supports English, Traditional Chinese, Simplified Chinese and Japanese,
+plus Windows-following, light and dark themes. Top-level selectors save preferences
+across restarts without replacing destination or unknown settings. High contrast
+uses Windows system colors; system preference events update the palette and are
+unsubscribed when the form is disposed. Flat offline `translations.json` resources
+cover normal controls and backend-facing messages; unrecognized diagnostics retain
+their original text beside a translated explanation.
+
+Settings use an exclusive cross-process transaction: merge under lock, validate the
+8192-byte serialized limit, back up, stage/fsync and atomically replace. In-memory
+destinations change only after commit; interrupted staging preserves the old file.
+Reads check file size before a bounded 8193-byte read and reject growth/races.
+Lock identity failures close the descriptor and retain the unverified lock;
+simultaneous operation/cleanup failures preserve both original errors and report
+recovery required. First-start and post-commit warnings retain the committed
+outcome and do not claim rollback or automatic recovery. Preference saves reject
+another instance's changed destination instead of silently adopting it.
+Read the [user guide](USER-GUIDE.md) for save/inspection behavior. Headless probes
+and isolated tests are not live GUI, installer or gameplay acceptance.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+Read the [user guide](USER-GUIDE.md) and [publisher contract](PUBLISHER-CONTRACT.md).
+The new [artifact branch contract](ARTIFACT-CONTRACT.md) implements independent
+`Development_Build/<source branch>` downloads without module Releases or ZIPs.
+**Independent Development build branches** is the startup default. Unavailable
+artifact sources never trigger automatic fallback. It is the only player-facing
+module source. GitHub Releases are reserved for Dev Manager `Setup.exe`, not module
+Releases or modpack ZIPs; real published branch acceptance is pending.
+Automatic artifact checks use shared ref snapshots and cached immutable manifests,
+with bounded rotating verification and a shared rolling-hour request budget.
+Discovery remains separate from full pre-install source/run/file validation.
+The desktop registers all 15 project modules. Missing published sources stay
+unavailable; registry membership is not a promise that a module can be downloaded.
+The current registry shows 12 modules awaiting publisher configuration and AI Gaming
+with development paused. Valid artifact manifests can establish pending mappings.
+Pause is informational and does not prevent managing intact owned installations.
+The existing static browser preview below remains a separate synthetic demo.
+
+The desktop uses anonymous HTTPS GitHub requests, shared artifact-ref discovery,
+verified source runs, hashed runtime assets and DevTools provenance declarations.
+Legacy Release/bundle code and tests remain internal for historical compatibility.
+They are not exposed by the desktop source control or backend source selection.
+Normal button clicks
+start single/batch operations; no additional confirmation dialog is required.
+Select an existing Mods destination first. No game folder is accessed by default.
+
+An installed build matching the observed candidate is shown separately from an
+unavailable source; the candidate still requires verification. Signature: OpenAI-Codex
+
+Active modules are direct children `Mods/CS1DevManager-<module>/`. Staging,
+ownership records and retained backups are outside Mods in a sibling
+`CS1DevManagerData-<identifier>` directory. Unknown or changed files are preserved.
+Prepared batches are verified before mutation, but commits are per module: a later
+failure keeps earlier successful modules and stops the remainder. Removal retains
+the owned directory as a backup rather than permanently deleting it.
+
+Run `node --test core.test.mjs filesystem.test.mjs` for development checks.
+Filesystem tests use synthetic temporary destinations and compiled synthetic DLLs.
+These checks do not prove actual subscribed-game loading or gameplay stability.
+The current desktop work is local and is not covered by the earlier pushed CI run.
 
 ## Local interface preview
 
@@ -40,6 +122,89 @@ remains pending. Tests are included in the existing `core.test.mjs` command.
 Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 ## Verification and execution boundaries
+
+### Historical internal GitHub Release candidates
+
+This retained implementation is not a player-facing source. Module distribution
+uses independent artifact branches; the section documents internal legacy tests.
+
+`github-source.mjs` provides `detectGitHubModule({policy, installed, request,
+nowMs, timeoutMs})`. The normal source assumption is a trusted HTTPS GitHub API
+adapter, not an additional signing service. The adapter is injectable for tests;
+`https-source.mjs` configures the real desktop transport. Its GET response contract is explicit
+status/URL/redirect state, a complete lowercase-header record (including Link)
+and decoded JSON `body`. Requests omit credentials, reject redirects and request
+`cache:'no-store'`. This is API metadata trust, not independent signatures or
+cryptographic freshness. Desktop install controls invoke the resolver before downloads.
+
+The trusted module registry supplies `moduleId`, `repository`, `branch`,
+`assembly`, `workflowPath`, `releaseTagPrefix` and a complete `runtimeAssetNames`
+allowlist. The supported explicit convention is `<releaseTagPrefix><runId>-<attempt>`;
+unconfigured/legacy conventions stay unknown rather than being guessed.
+
+The resolver reads the exact branch ref, follows every release Link page, filters
+only the module prefix and selects the unambiguous most recently **published**
+non-draft module release by `published_at`. It resolves lightweight or annotated
+tag refs to commits, checks the exact successful Actions run attempt, repository,
+head repository, branch, SHA and workflow path, and follows all release-asset pages.
+Required runtime assets must have unique IDs/names, expected names, uploaded state,
+bounded sizes, SHA-256 metadata and exact repository asset/download URLs. Missing
+dependencies, unexpected DLLs or an unverifiable newer candidate yield unknown;
+the resolver does not silently fall back to an older build.
+
+`latestPublished` and `branchHead` are separate. A different SHA means
+`different-commit`, not behind/ahead without ancestry evidence. `status` compares
+the installed record's opaque `buildId` with the selected full tag; an unknown
+installation record keeps comparison unknown even when a published candidate is
+identified. Repository-wide Latest, release titles and prerelease flags do not
+select builds. A draft-only module has no usable published candidate.
+
+Bounds are ten pages of up to 100 records per release/asset collection, five tag
+objects, 4 MiB per decoded response, 32 MiB per declared runtime asset and 64 MiB
+per runtime set. One 1 ms–30 second deadline covers all requests (default five
+seconds). Incomplete/unsafe pagination, API errors, stalls, ambiguous publication
+times or inconsistent repeat reads yield unknown. The first release page, chosen
+release, tag and branch are rechecked; volatile request headers are not compared.
+GitHub pagination is not an atomic snapshot, and repeat checks cannot prove the
+absence of every concurrent mutation. Results are observations at fetch time;
+they do not prove actual DLL identity, source-to-binary provenance or future
+freshness. Publication is not compilation or subscribed-game acceptance.
+
+See the [official releases API](https://docs.github.com/en/rest/releases/releases),
+[pagination](https://docs.github.com/en/rest/using-the-rest-api/using-pagination-in-the-rest-api),
+[workflow runs](https://docs.github.com/en/rest/actions/workflow-runs) and
+[Git references](https://docs.github.com/en/rest/git/refs). `target_commitish` can
+be a branch and is ignored when its tag already exists, so this resolver uses the
+resolved tag commit rather than treating that field as commit proof.
+
+### Optional signed-pointer research
+
+`sources.mjs` adds pure `classifyModuleSource(input)` for a proposed signed,
+per-module latest-published-development pointer. This is optional, unadopted
+research; it is not a prerequisite for GitHub-native update detection. It does not poll GitHub or infer
+latest from repository ordering, titles, timestamps or `prerelease`. Missing
+authentication, freshness, installation knowledge or release binding returns
+`status:'unknown'`, with no install permission or usable package.
+
+The caller independently pins an Ed25519 public key in `policy.freshnessPublicKey`,
+supplies exact catalog bytes, a signed pointer, a fresh unpredictable request
+`nonce`, trusted `nowMs`, per-module persistent `minimumSequence`, and GitHub-shaped
+`releases`. The verifier binds module/branch/assembly/workflow/build/source SHA,
+catalog hash, release ID/tag and development channel. A pointer must match the
+nonce, not fall below the sequence floor and be within its signed validity window
+(at most five minutes). The selected non-draft published release must match exact
+repository URLs, target SHA and runtime asset IDs, names, sizes, digests and URLs.
+Unrelated candidates and their Latest/prerelease flags cannot replace it.
+
+Valid results compare opaque build identities (`current`, `different-build` or
+`not-installed`) under the authenticated pointer's stated scope. `different-build`
+still does not establish version ordering. Signing proves the pinned key's
+statement, not live branch ancestry, actual DLL identity or workflow execution.
+There is no production signer, key distribution/rotation/revocation, fresh nonce
+exchange, trusted clock or persisted anti-rollback state configured. Reusing a
+nonce or resetting the sequence floor can weaken replay protection; the caller
+must manage both. API data alone cannot satisfy this optional signature contract. The UI,
+batch preparation and actual installation are not wired to this verifier yet.
 
 `planning.mjs` adds a pure `planModuleOperations({requests, observation, rules})`
 preflight for one or up to 16 selected install/uninstall requests. It never reads
@@ -106,15 +271,15 @@ of this preparation API. Synthetic integration tests connect assessment records
 to the preview selection model; the browser page still uses explicit fixtures.
 
 `downloadCatalogAsset` in `download.mjs` is a transport-injected integrity core,
-not a configured network downloader. It first validates exact catalog bytes
+used by the configured desktop network downloader. It first validates exact catalog bytes
 against the external policy pin, then selects one exact allowlisted asset path.
-It never discovers releases, calls `fetch` or writes files. No UI control calls it.
+It never discovers releases, calls `fetch` or writes files itself. Desktop controls call it.
 
 The injected adapter receives `GET`, `redirect:'manual'`, `credentials:'omit'`
 and an `AbortSignal`. Responses must declare their exact requested URL,
 `redirected:false`, numeric status, lowercase-header record and async byte stream.
 An actual adapter must honor manual redirects and abort/close all outstanding
-response bodies; such an adapter has not been implemented or tested here.
+response bodies; the desktop HTTPS adapter supplies this behavior.
 Source URLs come only from the validated module catalog. Redirects are denied
 unless each complete canonical HTTPS target is explicitly allowed by a separate
 trusted caller policy; no CDN or origin is implicitly trusted. At most five
@@ -136,10 +301,10 @@ live trusted pin delivery, freshness and actual transport behavior remain
 unimplemented. Cooperative abort cannot preempt malicious synchronous adapter
 code; production resource isolation remains a separate requirement.
 
-This is not yet a desktop application. There is no network downloader, archive
-extractor, authenticated latest catalog, assembly inspector or game-process detector.
-Tests use synthetic bytes, not real module DLLs. A matching SHA-256 proves that
-bytes match the supplied contract; it does not authenticate a publisher or module.
+The desktop adds a network downloader, bounded in-memory archive reader,
+reflection-only assembly-name inspector and game-process check. Tests use synthetic
+compiled assemblies, not real module DLLs. A matching SHA-256 proves that bytes
+match the supplied GitHub contract; it is not independent publisher authentication.
 
 `catalogStatus(installed, policy, data)` now validates a proposed offline,
 per-module catalog contract before comparing opaque build IDs. `data` is the
@@ -194,24 +359,31 @@ junction and hard-link substitution. Tests include injected junction changes bef
 activation and after backup. These JavaScript path checks do **not** establish an
 atomic Windows handle-relative security boundary against a hostile concurrent
 process. Other Windows reparse-point types, power-loss durability and production
-permissions need native validation before real game installation is enabled.
+permissions remain residual risks. The practical checked-path destination factory
+is enabled without claiming a hostile-process-proof native security boundary.
 
 Stable/development coexistence produces only a warning; no subscription,
-enablement or loading change is authorized by detection. Bulk execution, real
-operation progress, actual game-root integration and real download/installation acceptance
-remain future work. See [source contract assessment](SOURCE-CONTRACT.md).
+enablement or loading change is authorized by detection. The desktop supports
+bulk execution and progress with an explicit Mods destination. Real module
+download/game-loading acceptance remains separate. See [publisher contract](PUBLISHER-CONTRACT.md).
 
 Code and original documentation use [PolyForm Noncommercial 1.0.0](LICENSE).
 Copyright Kingsley. This is source-available software with noncommercial
 restrictions. The unmodified official text was obtained from the PolyForm Project
 [versioned repository](https://github.com/polyformproject/polyform-licenses/blob/1.0.0/PolyForm-Noncommercial-1.0.0.md).
 The upstream LICENSE is kept unmodified; authorship of this implementation is
-recorded here and in source files. No dependency was installed, and no commit,
-push, public release or Workshop operation has been performed by this session.
+recorded here and in source files. No dependency was installed and no public
+release or Workshop operation was performed for this application.
 
 Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 The `Dev Manager checks` workflow is configured to run the isolated Node.js tests
 on GitHub's Windows runner for this project's own branch. It does not install
-dependencies, publish a release or access game files. Its cloud result has not
-been verified before the first branch push. Signature: OpenAI-Codex.
+dependencies, publish a release or access game files. Commit
+[`6ce59fdbecdbc1789732ef58c673e573e30fc813`](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/commit/6ce59fdbecdbc1789732ef58c673e573e30fc813)
+was pushed to the independent application branch. On 2026-11-03, read-only API
+verification confirmed [run 41535446517](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/actions/runs/41535446517)
+completed successfully for that exact SHA. That committed milestone had 70 local
+synthetic tests; subsequent local source-classification changes are not included
+in that run. This is cloud test evidence, not browser or game acceptance.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager.

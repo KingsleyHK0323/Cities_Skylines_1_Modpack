@@ -4,12 +4,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { createHash, randomUUID } from 'node:crypto';
-import { safeRelative, safeModuleId, verifyPackage } from './core.mjs';
+import { safeRelative, safeModuleId, verifyPackage, verifyPublication } from './core.mjs';
 
 const digest = data => createHash('sha256').update(data).digest('hex');
 const exists = p => { try { fs.lstatSync(p); return true; } catch (e) { if (e.code === 'ENOENT') return false; throw e; } };
 const sameIdentity = (a, b) => a.dev === b.dev && a.ino === b.ino;
 const marker = 'CS1_DEV_MANAGER_ISOLATED_V1\n';
+const selectedModsAuthority = Symbol('explicit-user-selected-mods');
+export function metadataForModsDirectory(modsRoot) {
+  const root = path.resolve(modsRoot);
+  const identity = process.platform === 'win32' ? root.toLowerCase() : root;
+  return path.join(path.dirname(root), `CS1DevManagerData-${digest(Buffer.from(identity)).slice(0, 16)}`);
+}
 
 function inspect(p, directory) {
   const stat = fs.lstatSync(p, { bigint: true });
@@ -100,16 +106,36 @@ function verifyTree(directory, record) {
 }
 
 export class IsolatedInstaller {
-  constructor(root, { fault = () => {} } = {}) {
+  static forModsDirectory(modsRoot, { confirmed = false, create = false, fault = () => {} } = {}) {
+    if (!confirmed || typeof modsRoot !== 'string' || !path.isAbsolute(modsRoot) || modsRoot.startsWith('\\\\'))
+      throw new Error('Explicit local Mods-directory confirmation is required');
+    const parent = path.resolve(modsRoot);
+    if (parent === path.parse(parent).root) throw new Error('A volume root cannot be a Mods destination');
+    directoryChain(parent);
+    const metadata = metadataForModsDirectory(parent);
+    if (exists(metadata)) {
+      directoryChain(metadata);
+      if (readRegular(path.join(metadata, 'marker')).toString() !== marker)
+        throw new Error('Unknown existing manager directory; preserving files');
+    } else {
+      if (fs.readdirSync(parent).some(name => name.toLowerCase().startsWith('cs1devmanager-')))
+        throw new Error('Unknown manager-prefixed directory; preserving files');
+      if (!create) return null;
+    }
+    return new IsolatedInstaller(parent, { fault, authority: selectedModsAuthority });
+  }
+
+  constructor(root, { fault = () => {}, authority = null } = {}) {
     if (typeof root !== 'string' || !path.isAbsolute(root)) throw new Error('Explicit absolute root required');
     this.root = path.resolve(root);
-    // This batch is intentionally unusable against actual game or Steam roots.
-    if (path.dirname(this.root) !== path.resolve(os.tmpdir()) ||
-        !/^cs1-dev-manager-test-[A-Za-z0-9]+$/.test(path.basename(this.root)))
+    // Ordinary construction stays isolated; production requires the explicit factory.
+    if (authority !== selectedModsAuthority && (path.dirname(this.root) !== path.resolve(os.tmpdir()) ||
+        !/^cs1-dev-manager-test-[A-Za-z0-9]+$/.test(path.basename(this.root))))
       throw new Error('Only an isolated manager test directory under the current temporary root is supported');
     directoryChain(this.root);
     this.rootIdentity = inspect(this.root, true);
-    this.meta = path.join(this.root, '.dev-manager');
+    this.directoryPrefix = authority === selectedModsAuthority ? 'CS1DevManager-' : '';
+    this.meta = authority === selectedModsAuthority ? metadataForModsDirectory(this.root) : path.join(this.root, '.dev-manager');
     this.fault = fault;
     const fresh = !exists(this.meta);
     if (fresh) fs.mkdirSync(this.meta);
@@ -129,6 +155,7 @@ export class IsolatedInstaller {
 
   check() {
     directoryChain(this.root);
+    directoryChain(this.meta);
     if (!sameIdentity(inspect(this.root, true), this.rootIdentity) ||
         !sameIdentity(inspect(this.meta, true), this.metaIdentity)) throw new Error('Root identity changed');
     for (const sub of ['staging', 'backups']) inspect(path.join(this.meta, sub), true);
@@ -143,6 +170,7 @@ export class IsolatedInstaller {
       throw new Error('Invalid ownership state');
     for (const [id, record] of Object.entries(state.modules)) {
       safeModuleId(id);
+      if (record.publication !== undefined) verifyPublication(record.publication);
       if (record.moduleId !== id || typeof record.buildId !== 'string' || !Array.isArray(record.files) ||
           !record.files.length || record.files.length > 256) throw new Error('Invalid module ownership state');
       const seen = new Set();
@@ -160,6 +188,18 @@ export class IsolatedInstaller {
     return Object.hasOwn(this.state.modules, id) ? structuredClone(this.state.modules[id]) : null;
   }
 
+  audit(id) {
+    safeModuleId(id); this.load();
+    const record = Object.hasOwn(this.state.modules, id) ? this.state.modules[id] : null;
+    const folder = this.directoryPrefix + id;
+    const occupied = fs.readdirSync(this.root).filter(name => name.toLowerCase() === folder.toLowerCase());
+    if (record) {
+      if (occupied.length !== 1 || occupied[0] !== folder) throw new Error('Owned module directory is missing or ambiguous');
+      verifyTree(path.join(this.root, folder), record);
+    } else if (occupied.length) throw new Error('Unknown existing module directory; preserving files');
+    return { moduleId: id, installed: record ? structuredClone(record) : null };
+  }
+
   install(pkg) { return this.transact('install', pkg.moduleId, pkg); }
   update(pkg) { return this.transact('update', pkg.moduleId, pkg); }
   uninstall(id) { return this.transact('uninstall', id); }
@@ -167,9 +207,9 @@ export class IsolatedInstaller {
   transact(operation, id, input) {
     safeModuleId(id);
     // Snapshot caller buffers; later callbacks cannot substitute bytes after verification.
-    const pkg = input && { moduleId: id, buildId: input.buildId,
+    const pkg = input && { moduleId: id, buildId: input.buildId, ...(input.publication ? { publication: structuredClone(input.publication) } : {}),
       files: input.files?.map(f => ({ ...f, bytes: Buffer.isBuffer(f.bytes) ? Buffer.from(f.bytes) : f.bytes })) };
-    const record = pkg && { moduleId: id, buildId: pkg.buildId, files: verifyPackage(pkg) };
+    const record = pkg && { moduleId: id, buildId: pkg.buildId, files: verifyPackage(pkg), ...(pkg.publication ? { publication: pkg.publication } : {}) };
     this.check();
     const lock = path.join(this.meta, 'lock'); const token = randomUUID();
     let lockMayRemain = false;
@@ -185,15 +225,16 @@ export class IsolatedInstaller {
     let backedUp = false; let activated = false; let committed = false; let journalCreated = false;
     let journalMayRemain = false;
     const errors = []; let result; let lockReleaseFailed = false;
-    const active = path.join(this.root, id);
+    const folder = this.directoryPrefix + id;
+    const active = path.join(this.root, folder);
     const stage = path.join(this.meta, 'staging', token);
     const backup = path.join(this.meta, 'backups', token);
     try {
       if (exists(journal)) throw new Error('Incomplete transaction requires manual recovery');
       this.load();
       const old = Object.hasOwn(this.state.modules, id) ? this.state.modules[id] : null;
-      const occupied = fs.readdirSync(this.root).filter(name => name.toLowerCase() === id);
-      if (operation === 'install' ? old || occupied.length : !old || occupied.length !== 1 || occupied[0] !== id)
+      const occupied = fs.readdirSync(this.root).filter(name => name.toLowerCase() === folder.toLowerCase());
+      if (operation === 'install' ? old || occupied.length : !old || occupied.length !== 1 || occupied[0] !== folder)
         throw new Error('Existing or unowned module destination');
       if (old) verifyTree(active, old);
       if (pkg) {
