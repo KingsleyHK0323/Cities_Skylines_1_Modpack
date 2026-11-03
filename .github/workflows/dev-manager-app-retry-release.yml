@@ -1,0 +1,63 @@
+# Signature: OpenAI-Codex
+name: Dev Manager retry existing App Release
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Original build workflow run ID
+        required: true
+        type: string
+      attempt:
+        description: Original build attempt
+        required: true
+        type: string
+      artifact_id:
+        description: Original build artifact ID
+        required: true
+        type: string
+      release_id:
+        description: Existing App Release ID
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: dev-manager-app-release
+  cancel-in-progress: false
+jobs:
+  retry:
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.actor == github.repository_owner && github.triggering_actor == github.repository_owner && github.ref == 'refs/heads/Modpack_Website'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RETRY_RUN_ID: ${{ inputs.run_id }}
+      RETRY_ATTEMPT: ${{ inputs.attempt }}
+      RETRY_ARTIFACT_ID: ${{ inputs.artifact_id }}
+      RETRY_RELEASE_ID: ${{ inputs.release_id }}
+    steps:
+      - name: Check out the recovery controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check recovery and publication contracts
+        run: python3 -B -m unittest discover -s tools/dev-manager-release -p 'test_*.py' -v
+      - name: Verify the original successful build and existing Release
+        run: python3 -B tools/dev-manager-release/retry_release.py preflight
+      - name: Receive the original verified build artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          artifact-ids: ${{ inputs.artifact_id }}
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.run_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/dev-manager-original-build
+      - name: Resume only the existing App Release
+        run: >-
+          python3 -B tools/dev-manager-release/retry_release.py publish
+          '${{ runner.temp }}/dev-manager-original-build/Cities_Skylines_1_Modpack_Dev_Manager_Setup.exe'
+          '${{ runner.temp }}/dev-manager-original-build/internal-app-payload.zip'
+          '${{ runner.temp }}/dev-manager-original-build/build-identity.json'

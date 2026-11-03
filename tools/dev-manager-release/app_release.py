@@ -13,6 +13,8 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from urllib.parse import quote
 import zipfile
 
@@ -43,6 +45,13 @@ FIXED_FILES = {"DevManager.exe", "runtime/node.exe", "runtime/LICENSE_NODE.txt",
 
 class PublicationError(Exception):
     """The package, source or remote Release state could not be verified."""
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Never forward the upload credential to a redirected endpoint."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 def require(condition, message):
@@ -295,13 +304,15 @@ def prepare_draft(ctx, payload, setup, api, *, runtime_sha=NODE_SHA, license_sha
     })
 
 
-def _verify_draft(release, release_id, ctx, payload, setup, api):
+def _verify_draft(release, release_id, ctx, payload, setup, api, *, allow_empty=False):
     tag = _context(ctx)
     require(isinstance(release, dict) and release.get("id") == release_id and release.get("tag_name") == tag and
             release.get("target_commitish") == ctx["sourceSha"] and release.get("name") == _pending_title(ctx) and
             release.get("body") == _body(ctx, hashlib.sha256(payload).hexdigest(), hashlib.sha256(setup).hexdigest()) and
             release.get("draft") is True and release.get("prerelease") is True and
-            isinstance(release.get("assets"), list) and len(release["assets"]) == 1 and _asset_matches(release["assets"][0], setup),
+            isinstance(release.get("assets"), list) and
+            ((allow_empty and len(release["assets"]) == 0) or
+             (len(release["assets"]) == 1 and _asset_matches(release["assets"][0], setup))),
             "Draft App Release identity or installer changed")
     tag_commit = api.tag_commit(tag)
     require(tag_commit is None or tag_commit == ctx["sourceSha"], "Draft App tag points elsewhere")
@@ -315,6 +326,9 @@ def publish(ctx, payload, setup, api, *, runtime_sha=NODE_SHA, license_sha=NODE_
     if release["draft"]:
         require(len(release["assets"]) <= 1, "Unexpected draft assets")
         if not release["assets"]:
+            observed = api.release(release_id)
+            _verify_draft(observed, release_id, ctx, payload, setup, api, allow_empty=True)
+            require(not observed["assets"], "Draft gained an asset before upload")
             api.upload(release_id, setup)
         release = api.release(release_id)
         _verify_draft(release, release_id, ctx, payload, setup, api)
@@ -419,8 +433,26 @@ class GitHubGateway:
         return self._call("POST", self.base + "/releases", body)
 
     def upload(self, release_id, data):
+        require(type(release_id) is int and release_id > 0, "Invalid App Release ID")
+        verify_setup(data)
+        token = os.environ.get("GH_TOKEN")
+        require(isinstance(token, str) and bool(token) and not re.search(r"[\x00-\x20\x7f]", token),
+                "GitHub upload credential is unavailable")
         endpoint = "https://uploads.github.com/" + self.base + "/releases/" + str(release_id) + "/assets?name=" + quote(ASSET_NAME, safe="")
-        self._call("POST", endpoint, binary=data)
+        request = urllib.request.Request(endpoint, data=data, method="POST", headers={
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/octet-stream",
+            "Content-Length": str(len(data)),
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        })
+        try:
+            with urllib.request.build_opener(NoRedirect()).open(request, timeout=120) as response:
+                require(response.status == 201, "GitHub upload returned an unexpected status")
+        except urllib.error.HTTPError as exc:
+            raise PublicationError("GitHub upload failed (HTTP " + str(exc.code) + ")") from exc
+        except (urllib.error.URLError, OSError, TimeoutError) as exc:
+            raise PublicationError("GitHub upload request failed") from exc
 
     def release(self, release_id):
         return self._call("GET", self.base + "/releases/" + str(release_id))

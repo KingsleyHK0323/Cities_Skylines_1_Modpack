@@ -2,6 +2,10 @@
 
 ## Unreleased — Development delivery migration
 
+- Set an explicit byte length for installer uploads and add an owner-only
+  recovery workflow that resumes an existing App Release using its original
+  successful cloud build. Recheck empty draft identity before uploading.
+  Signature: OpenAI-Codex.
 - Prepare player-facing Development download guidance and historical labels for
   older module Release links. Website deployment is tracked separately.
   Signature: OpenAI-Codex.

@@ -18,6 +18,11 @@ may be unavailable and that game launch and coexistence checks remain incomplete
 Automatic Release title transitions are best effort because GitHub updates are
 not conditional atomic writes; manual changes require review. The workflow's
 actual build and publication results must be checked separately. <!-- Signature: OpenAI-Codex -->
+If publication fails after a successful build, an owner-only recovery workflow
+can reuse that exact unexpired build artifact and existing App Release ID. It
+validates the original run, build job, artifact, package and draft before
+uploading; it cannot create a replacement Release or overwrite an asset.
+<!-- Signature: OpenAI-Codex -->
 The default-branch dispatch registration does not build or publish a module;
 choose the module branch to run its independently owned Development workflow.
 <!-- Signature: OpenAI-Codex -->

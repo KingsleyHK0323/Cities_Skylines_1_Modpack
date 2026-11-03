@@ -7,7 +7,9 @@ import hashlib
 import io
 import json
 import copy
+import os
 import unittest
+import urllib.error
 import zipfile
 from unittest import mock
 
@@ -126,6 +128,50 @@ class FakeGateway:
     def rename(self, release_id, title):
         self.calls.append(("rename", release_id, title))
         self.release(release_id)["name"] = title
+
+
+class UploadTransportTests(unittest.TestCase):
+    def test_upload_uses_exact_content_length_without_redirects(self):
+        response = mock.MagicMock()
+        response.__enter__.return_value.status = 201
+        opener = mock.Mock()
+        opener.open.return_value = response
+        with mock.patch.dict(os.environ, {"GH_TOKEN": "synthetic-secret"}, clear=True), \
+             mock.patch.object(app_release.urllib.request, "build_opener", return_value=opener) as build:
+            app_release.GitHubGateway().upload(101, SETUP)
+        request = opener.open.call_args.args[0]
+        self.assertEqual(request.data, SETUP)
+        self.assertEqual(request.get_header("Content-length"), str(len(SETUP)))
+        self.assertEqual(request.get_header("Content-type"), "application/octet-stream")
+        self.assertEqual(request.get_header("Authorization"), "Bearer synthetic-secret")
+        self.assertEqual(request.full_url,
+                         "https://uploads.github.com/repos/" + app_release.REPOSITORY +
+                         "/releases/101/assets?name=" + app_release.ASSET_NAME)
+        self.assertIsInstance(build.call_args.args[0], app_release.NoRedirect)
+
+    def test_upload_failure_reports_only_the_http_status(self):
+        opener = mock.Mock()
+        opener.open.side_effect = urllib.error.HTTPError('https://example.invalid', 403,
+                                                         'synthetic-secret', None, None)
+        with mock.patch.dict(os.environ, {"GH_TOKEN": "synthetic-secret"}, clear=True), \
+             mock.patch.object(app_release.urllib.request, "build_opener", return_value=opener):
+            with self.assertRaises(app_release.PublicationError) as caught:
+                app_release.GitHubGateway().upload(101, SETUP)
+        self.assertIn('403', str(caught.exception))
+        self.assertNotIn('synthetic-secret', str(caught.exception))
+
+    def test_changed_empty_draft_is_not_uploaded(self):
+        class ChangedDraft(FakeGateway):
+            def release(self, release_id):
+                draft = super().release(release_id)
+                draft['name'] = 'Owner changed this title'
+                return draft
+        api = ChangedDraft()
+        payload, runtime_sha, license_sha = package()
+        with mock.patch.object(app_release, 'THIRD_PARTY_NOTICE_SHA', hashlib.sha256(b'third party notices').hexdigest()):
+            with self.assertRaises(app_release.PublicationError):
+                app_release.publish(context(), payload, SETUP, api, runtime_sha=runtime_sha, license_sha=license_sha)
+        self.assertFalse(any(call[0] in ('upload', 'publish') for call in api.calls))
 
 
 class NoticeFixtureMixin:
