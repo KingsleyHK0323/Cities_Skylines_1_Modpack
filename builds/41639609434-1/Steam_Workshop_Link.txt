@@ -1,0 +1,7 @@
+Stable editions recorded in project source (not a live Steam status check):
+AI Improve: https://steamcommunity.com/sharedfiles/filedetails/?id=3782858610
+Automated Public Transport Planning: https://steamcommunity.com/sharedfiles/filedetails/?id=3823739383
+AI Gaming: https://steamcommunity.com/sharedfiles/filedetails/?id=3823740106
+Required Harmony provider: https://steamcommunity.com/sharedfiles/filedetails/?id=2040656402
+
+Signature: OpenAI-Codex_Responsible: AI_Improve

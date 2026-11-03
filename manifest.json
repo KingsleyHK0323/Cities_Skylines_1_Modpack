@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "sourceKind": "artifact-branch",
+  "moduleId": "ai-improve",
+  "repository": "KingsleyHK0323/Cities_Skylines_1_Modpack",
+  "sourceBranch": "AI_Improve",
+  "artifactBranch": "Development_Build/AI_Improve",
+  "sourceSha": "0fd60bcdd986e6e2ae40d162c326f1232c1bf639",
+  "assembly": "AIImprove",
+  "workflowPath": ".github/workflows/cloud-compile-test.yml",
+  "runId": 41639609434,
+  "attempt": 1,
+  "buildId": "AI_Improve-dev-41639609434-1",
+  "devTools": true,
+  "files": [
+    {
+      "path": "builds/41639609434-1/AIImprove.dll",
+      "name": "AIImprove.dll",
+      "size": 306176,
+      "sha256": "ff120b04d43fad7ba228d922def75e633a98d1ee94212edf089ce9fc928b83e1",
+      "assemblyName": "AIImprove"
+    },
+    {
+      "path": "builds/41639609434-1/CitiesHarmony.API.dll",
+      "name": "CitiesHarmony.API.dll",
+      "size": 15360,
+      "sha256": "dd25afca06ede82c433c9a5fefbf30426bb713d646ab6a452bbb65aa11a0fd3b",
+      "assemblyName": "CitiesHarmony.API"
+    },
+    {
+      "path": "builds/41639609434-1/README.md",
+      "name": "README.md",
+      "size": 4645,
+      "sha256": "f3f16daaed77d4aa16d97511325d138afbd1ad8151edbe49c419900c788231a9",
+      "assemblyName": null
+    },
+    {
+      "path": "builds/41639609434-1/LICENSE",
+      "name": "LICENSE",
+      "size": 4779,
+      "sha256": "6bdbfc0d004ce71b13a4fd6dc981e79d48e069d88b87d37b768e4cbc09fb980b",
+      "assemblyName": null
+    },
+    {
+      "path": "builds/41639609434-1/CitiesHarmony-LICENSE.txt",
+      "name": "CitiesHarmony-LICENSE.txt",
+      "size": 1070,
+      "sha256": "93d48eb29e43a507418f2d7931d44593e867f0b1af59b08676bc71c29f30bac0",
+      "assemblyName": null
+    },
+    {
+      "path": "builds/41639609434-1/THIRD-PARTY-NOTICES.md",
+      "name": "THIRD-PARTY-NOTICES.md",
+      "size": 827,
+      "sha256": "a09f2640ad6bd4eed4587a9da655c6504dcfe06806b15840fb7e383f339e8bfc",
+      "assemblyName": null
+    },
+    {
+      "path": "builds/41639609434-1/Steam_Workshop_Link.txt",
+      "name": "Steam_Workshop_Link.txt",
+      "size": 483,
+      "sha256": "9af3be47087172e39377dfce9faea6ec2b277fa946c8a2e2b6e9fa657464aec8",
+      "assemblyName": null
+    },
+    {
+      "path": "builds/41639609434-1/build-info.json",
+      "name": "build-info.json",
+      "size": 295,
+      "sha256": "76864391e2f397b01f76e2e2a42bfc39d5fdff760b26d5bcc482b55c30ee124c",
+      "assemblyName": null
+    }
+  ],
+  "signature": "OpenAI-Codex"
+}
