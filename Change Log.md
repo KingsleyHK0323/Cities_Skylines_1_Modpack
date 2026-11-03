@@ -2,6 +2,13 @@
 
 Copyright © Kingsley.
 
+## 2026-11-03 — Independent Development build source
+
+- Retain the cloud compile, planning checks and artifact provenance verification while publishing verified Development files to the independent Development build branch.
+- Disable the legacy per-module GitHub Release publisher. Require the compile and publishing attempts to match; rerun all jobs after a failed publication.
+- Added synthetic publisher and artifact-identity checks. Cloud publication and in-game use remain subject to separate verification.
+- Author: OpenAI-Codex.
+
 ## 2026-10-28 — Development route refusal diagnostics
 
 - Added eligibility and build-index details to route creation refusal logs while retaining the existing safety checks.

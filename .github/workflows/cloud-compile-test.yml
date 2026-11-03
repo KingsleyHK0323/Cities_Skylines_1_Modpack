@@ -30,6 +30,14 @@ jobs:
         run: |
           python -B -m unittest discover -s Tests -p test_release_provenance.py -v
           exit $LASTEXITCODE
+      # Signature: OpenAI-Codex
+      - name: Check independent Development build publisher contracts
+        shell: pwsh
+        run: |
+          python -B tools/test_dev_build_publisher.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -B tools/test_publish_aptp_development.py
+          exit $LASTEXITCODE
       - name: Check out pinned encrypted references and restore helper
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -89,7 +97,7 @@ jobs:
         shell: pwsh
         run: ./.github/scripts/Prepare-Release.ps1
       - name: Transfer only public assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         id: public-assets
         with:
           name: aptp-public-assets-${{ github.run_id }}-${{ github.run_attempt }}
@@ -98,7 +106,7 @@ jobs:
           retention-days: 1
   publish:
     needs: compile
-    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Automated_Public_Transport_Planning'
+    if: false && github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Automated_Public_Transport_Planning'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -116,7 +124,7 @@ jobs:
         run: |
           [[ "$RELEASE_ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]] || exit 1
           [[ "$RELEASE_BUILD_ATTEMPT" =~ ^[1-9][0-9]*$ ]] || exit 1
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           artifact-ids: ${{ needs.compile.outputs.artifact-id }}
           github-token: ${{ github.token }}
@@ -129,3 +137,38 @@ jobs:
           RELEASE_ARTIFACT_ID: ${{ needs.compile.outputs.artifact-id }}
           RELEASE_BUILD_ATTEMPT: ${{ needs.compile.outputs.build-attempt }}
         run: python3 .github/scripts/Publish-Release.py
+
+  # Signature: OpenAI-Codex
+  publish-development-build:
+    needs: compile
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/Automated_Public_Transport_Planning'
+    concurrency:
+      group: development-build-automated-public-transport-planning
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out the publisher at the built source commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts
+            tools
+      - name: Receive the exact allowlisted compile artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          artifact-ids: ${{ needs.compile.outputs.artifact-id }}
+          github-token: ${{ github.token }}
+          run-id: ${{ github.run_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/aptp-release-assets
+      - name: Verify provenance and publish the independent Development build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ARTIFACT_ID: ${{ needs.compile.outputs.artifact-id }}
+          RELEASE_BUILD_ATTEMPT: ${{ needs.compile.outputs.build-attempt }}
+        run: python3 -B tools/publish_aptp_development.py '${{ runner.temp }}/aptp-release-assets'

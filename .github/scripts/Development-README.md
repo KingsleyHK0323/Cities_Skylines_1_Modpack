@@ -21,7 +21,7 @@ Back up saves and use a disposable copy. Development tools can damage saves. Nev
 | LICENSE | Original PolyForm Noncommercial License 1.0.0 |
 | build-info.txt | Exact source and build provenance |
 | Steam_Workshop_Link.txt | Stable item links recorded in source |
-| SHA256SUMS | SHA-256 hashes of the other five assets |
+| manifest.json | Independent source and integrity metadata, stored at the Development build branch root |
 
 ## Installation Instructions
 
@@ -65,7 +65,9 @@ Close the game and remove this Development copy from the Mods folder. Removing t
 
 ## License, Dependencies, and Integrity Verification
 
-Copyright Kingsley. LICENSE contains the unchanged PolyForm Noncommercial License 1.0.0. No game references, PDBs or public ZIP assets are distributed. The mod requires a compatible Cities: Skylines installation. Workshop links are source records, not a live Steam visibility check. Use SHA256SUMS to verify downloaded files, for example `Get-FileHash AutomatedPublicTransportPlanning.dll -Algorithm SHA256` in PowerShell, and compare the exact digest.
+Copyright Kingsley. LICENSE contains the unchanged PolyForm Noncommercial License 1.0.0. No game references, PDBs or public ZIP assets are distributed. The mod requires a compatible Cities: Skylines installation. Workshop links are source records, not a live Steam visibility check. The compile artifact's SHA256SUMS is verified before publication; the independent Development build branch records each distributed file's SHA-256 in its root manifest.json. For manual verification, compare `Get-FileHash AutomatedPublicTransportPlanning.dll -Algorithm SHA256` in PowerShell with that manifest.
+
+Signature: OpenAI-Codex
 
 Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
 

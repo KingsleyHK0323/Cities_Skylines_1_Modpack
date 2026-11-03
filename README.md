@@ -143,3 +143,9 @@ Signature: OpenAI-Codex_Automated_Public_Transport_Planning
 Each route preview now explains whether its copied stop list passes the existing data checks. Refusals identify missing segment/lane, non-finite coordinates, duplicate segment/lane pairs, unsupported stop counts or the existing 2.5 metre spacing rule; stop numbers are one-based positions in the displayed list. The eligibility boolean and preview explanation share one validator, preventing separate display-only rules. Passing means copied-data checks only: manual confirmation and live revalidation remain required, and connectivity/shared-stop permission is not established.
 
 The in-memory synthetic suite now passes 33 assertions, including refusal explanations, after a missing-list explanation failed against the initial stub. Full preview rendering assertions are also prepared in PlanningEngineChecks but have not run with game references. Earlier local 18-assertion evidence remains historical. No workflow, Vehicle Management dependency or game mutation was added.
+
+### Independent Development build publication (2026-11-03)
+
+The cloud workflow retains the existing compile, planning checks and artifact provenance verification, and publishes verified Development files to the independent `Development_Build/Automated_Public_Transport_Planning` branch. The legacy per-module GitHub Release job is disabled. A failed publish must be retried by rerunning all jobs, so the build and publishing attempts match. The branch manifest records file hashes and source identity; actual cloud publication and in-game behavior require separate verification.
+
+Signature: OpenAI-Codex
