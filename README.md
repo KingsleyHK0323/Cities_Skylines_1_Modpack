@@ -1,5 +1,28 @@
 # Cities: Skylines 1 Modpack
 
+## Development delivery migration
+
+The scheduled combined Development Release is disabled while individual
+artifact-branch sources are prepared for Dev Manager. Earlier bundle and
+individual module Release download guidance is historical during this migration.
+<!-- Signature: OpenAI-Codex -->
+
+An owner-triggered cloud workflow supports an App-only
+Dev Manager Windows installer. Its default is a build and installation check
+without publication; choosing publication verifies the App payload and installer
+before publishing one installer asset per version, labelling the latest and
+historical App Releases. No App Release is created merely by editing this file.
+The candidate checks an exact App file allowlist, approved runtime notices and
+draft identity before publication. Release notes disclose that module sources
+may be unavailable and that game launch and coexistence checks remain incomplete.
+Automatic Release title transitions are best effort because GitHub updates are
+not conditional atomic writes; manual changes require review. The workflow's
+actual build and publication results must be checked separately. <!-- Signature: OpenAI-Codex -->
+The default-branch dispatch registration does not build or publish a module;
+choose the module branch to run its independently owned Development workflow.
+<!-- Signature: OpenAI-Codex -->
+<!-- Signature: OpenAI-Codex -->
+
 The [dated module status index](https://kingsleyhk0323.github.io/Cities_Skylines_1_Modpack/wiki/project/status/) lists 15 modules and 22 confirmed replacement directions, separating design, source implementation, artifacts, public availability and subscribed-game acceptance. AI Gaming development is paused. Independent operation and compatibility are design goals rather than verified guarantees. <!-- OpenAI-Codex_Responsible: Modpack_Website --> <!-- Updated by OpenAI-Codex. -->
 
 Visit the [Cities: Skylines 1 Modpack website](https://kingsleyhk0323.github.io/Cities_Skylines_1_Modpack/) for project information, documentation, and updates.

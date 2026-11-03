@@ -1,0 +1,162 @@
+# Signature: OpenAI-Codex
+name: Dev Manager Windows installer build and release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'App version, for example v0.1.0-beta.1'
+        required: true
+        type: string
+      publish:
+        description: 'Publish the verified installer as a GitHub Release'
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: dev-manager-app-release
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.actor == github.repository_owner && github.triggering_actor == github.repository_owner && github.ref == 'refs/heads/Modpack_Website'
+    runs-on: ubuntu-latest
+    outputs:
+      source-sha: ${{ steps.identity.outputs.source_sha }}
+    steps:
+      - name: Check out the release controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the App-only publication contracts
+        run: python3 -B tools/dev-manager-release/test_app_release.py
+      - name: Pin the App branch and validate the version
+        id: identity
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          APP_SOURCE_SHA=$(gh api repos/KingsleyHK0323/Cities_Skylines_1_Modpack/git/ref/heads/Cities_Skylines_1_Modpack_Dev_Manager --jq '.object.sha')
+          export APP_SOURCE_SHA
+          python3 -B -c 'import os,sys; sys.path.insert(0,"tools/dev-manager-release"); import app_release as p; p._context({"repository":os.environ["GITHUB_REPOSITORY"],"sourceSha":os.environ["APP_SOURCE_SHA"],"version":os.environ["APP_VERSION"],"runId":int(os.environ["GITHUB_RUN_ID"]),"attempt":int(os.environ["GITHUB_RUN_ATTEMPT"])})'
+          printf 'source_sha=%s\n' "$APP_SOURCE_SHA" >> "$GITHUB_OUTPUT"
+  build:
+    needs: validate
+    runs-on: windows-2022
+    timeout-minutes: 20
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      build-attempt: ${{ steps.identity.outputs.attempt }}
+    env:
+      APP_SOURCE_SHA: ${{ needs.validate.outputs.source-sha }}
+      APP_VERSION: ${{ inputs.version }}
+    steps:
+      - name: Check out the exact App source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.validate.outputs.source-sha }}
+          persist-credentials: false
+      - name: Check out the exact release controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: release-controller
+          persist-credentials: false
+      - name: Obtain and verify the official portable Node runtime
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $nodeDir = Join-Path $env:RUNNER_TEMP 'dev-manager-node'
+          New-Item -ItemType Directory -Path $nodeDir -ErrorAction Stop | Out-Null
+          $node = Join-Path $nodeDir 'node.exe'
+          Invoke-WebRequest -Uri 'https://nodejs.org/dist/v24.22.2/win-x64/node.exe' -OutFile $node
+          if ((Get-FileHash -LiteralPath $node -Algorithm SHA256).Hash.ToLowerInvariant() -ne '1c331340fa6cac5e4294725959070a143fa0507195a78ad77eed7943f719aac9') { throw 'Node runtime checksum mismatch.' }
+          "$nodeDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Run the App's isolated tests
+        shell: pwsh
+        run: |
+          $node = Join-Path $env:RUNNER_TEMP 'dev-manager-node/node.exe'
+          & $node --test core.test.mjs filesystem.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build the App and its Windows installer
+        id: identity
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $node = Join-Path $env:RUNNER_TEMP 'dev-manager-node/node.exe'
+          $package = Join-Path $env:RUNNER_TEMP 'dev-manager-portable'
+          $transfer = Join-Path $env:RUNNER_TEMP 'dev-manager-transfer'
+          New-Item -ItemType Directory -Path $transfer -ErrorAction Stop | Out-Null
+          & ./desktop/Build-Portable.ps1 -NodePath $node -OutputDirectory $package
+          $payload = Join-Path $transfer 'internal-app-payload.zip'
+          Compress-Archive -Path (Join-Path $package '*') -DestinationPath $payload -CompressionLevel Optimal
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          if (-not (Test-Path -LiteralPath $iscc -PathType Leaf)) { throw 'The expected Inno Setup compiler is unavailable.' }
+          $script = Join-Path $env:GITHUB_WORKSPACE 'release-controller/tools/dev-manager-release/DevManager.iss'
+          & $iscc "/DPackageDir=$package" "/DOutputDir=$transfer" "/DAppVersion=$env:APP_VERSION" $script
+          if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
+          $setup = Join-Path $transfer 'Cities_Skylines_1_Modpack_Dev_Manager_Setup.exe'
+          if (-not (Test-Path -LiteralPath $setup -PathType Leaf)) { throw 'Installer output is missing.' }
+
+          # Test in the disposable cloud runner, never in the user's game directory.
+          $collision = Join-Path $env:RUNNER_TEMP 'dev-manager-nonempty-destination'
+          New-Item -ItemType Directory -Path $collision -ErrorAction Stop | Out-Null
+          $sentinel = Join-Path $collision 'existing-user-file.txt'
+          Set-Content -LiteralPath $sentinel -Value 'preserve this file' -Encoding utf8
+          $rejected = Start-Process -FilePath $setup -WindowStyle Hidden -Wait -PassThru -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=`"$collision`"")
+          if ($rejected.ExitCode -eq 0 -or (Get-Content -LiteralPath $sentinel -Raw).Trim() -ne 'preserve this file' -or (Test-Path -LiteralPath (Join-Path $collision 'DevManager.exe'))) { throw 'Installer did not reject a nonempty destination.' }
+          $installed = Join-Path $env:RUNNER_TEMP 'dev-manager-fresh-destination'
+          if (Test-Path -LiteralPath $installed) { throw 'Installation test destination already exists.' }
+          $accepted = Start-Process -FilePath $setup -WindowStyle Hidden -Wait -PassThru -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=`"$installed`"")
+          if ($accepted.ExitCode -ne 0) { throw 'The installer did not complete successfully.' }
+          Get-ChildItem -LiteralPath $package -File -Recurse -Force | ForEach-Object {
+            $relative = $_.FullName.Substring($package.Length).TrimStart('\')
+            $actual = Join-Path $installed $relative
+            if (-not (Test-Path -LiteralPath $actual -PathType Leaf) -or (Get-FileHash -LiteralPath $actual -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash) { throw "Installed App content differs: $relative" }
+          }
+          @{ repository=$env:GITHUB_REPOSITORY; sourceSha=$env:APP_SOURCE_SHA; version=$env:APP_VERSION; runId=[long]$env:GITHUB_RUN_ID; attempt=[int]$env:GITHUB_RUN_ATTEMPT; payloadSha256=(Get-FileHash -LiteralPath $payload -Algorithm SHA256).Hash.ToLowerInvariant(); setupSha256=(Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash.ToLowerInvariant() } | ConvertTo-Json -Compress | Set-Content -LiteralPath (Join-Path $transfer 'build-identity.json') -Encoding utf8
+          "attempt=$env:GITHUB_RUN_ATTEMPT" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - name: Transfer the exact App build to the publisher
+        id: upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dev-manager-app-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/dev-manager-transfer/*
+          if-no-files-found: error
+          retention-days: 1
+  publish:
+    needs: [validate, build]
+    if: ${{ inputs.publish == true }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    env:
+      APP_SOURCE_SHA: ${{ needs.validate.outputs.source-sha }}
+      APP_VERSION: ${{ inputs.version }}
+      BUILD_ATTEMPT: ${{ needs.build.outputs.build-attempt }}
+      BUILD_ARTIFACT_ID: ${{ needs.build.outputs.artifact-id }}
+    steps:
+      - name: Check out the release controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate the producing build identity
+        shell: bash
+        run: |
+          [[ "$BUILD_ATTEMPT" =~ ^[1-9][0-9]*$ ]] || exit 1
+          [[ "$BUILD_ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]] || exit 1
+      - name: Receive the exact App build artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          github-token: ${{ github.token }}
+          run-id: ${{ github.run_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/dev-manager-transfer
+      - name: Publish and label Dev Manager App Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B tools/dev-manager-release/app_release.py '${{ runner.temp }}/dev-manager-transfer/Cities_Skylines_1_Modpack_Dev_Manager_Setup.exe' '${{ runner.temp }}/dev-manager-transfer/internal-app-payload.zip' '${{ runner.temp }}/dev-manager-transfer/build-identity.json'

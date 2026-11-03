@@ -1,5 +1,25 @@
 # Change Log
 
+## Unreleased — Development delivery migration
+
+- Prepare player-facing Development download guidance and historical labels for
+  older module Release links. Website deployment is tracked separately.
+  Signature: OpenAI-Codex.
+- Disable the scheduled legacy combined Development Release publisher.
+  Signature: OpenAI-Codex.
+- Add an owner-triggered App-only Windows installer workflow with a default
+  no-publication build check, plus package
+  checks, source pinning, retry-safe drafts and historical App labels. Cloud
+  publishing and the final desktop interface remain unverified.
+  Signature: OpenAI-Codex.
+- Harden the candidate App package allowlist, approved notices and draft identity
+  checks; preserve observed owner title edits and recover previous labels where
+  safe after a failed publication. Disclose preview limits in Release notes.
+  Cloud publication and non-atomic concurrent GitHub edits remain unverified.
+  Signature: OpenAI-Codex.
+- Register manual dispatch for branch-owned module build workflows without
+  building or publishing a module from the default branch. Signature: OpenAI-Codex.
+
 Author: OpenAI-Codex
 
 ## 2026-11-02 — Website project and delivery overview

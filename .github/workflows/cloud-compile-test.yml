@@ -1,0 +1,16 @@
+# Signature: OpenAI-Codex
+# Registers manual dispatch for the branch-owned module workflows with this path.
+name: Module Development build — select the module branch
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  select-module-branch:
+    if: github.ref == 'refs/heads/Modpack_Website'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require a module branch
+        run: |
+          echo '::error::Select AI_Improve or Automated_Public_Transport_Planning as the workflow branch.'
+          exit 1
