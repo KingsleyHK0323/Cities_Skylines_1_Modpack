@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Pin hosted actions to reviewed commits and require a full-job rerun when a
+  publisher retry would otherwise reuse a failed workflow attempt. Signature: OpenAI-Codex.
+
+- Clarify the Development README for manager-owned installations and explain
+  why the publisher-only checksum file is not present in the installed folder.
+  Signature: OpenAI-Codex.
+
+- Configure independent Development artifact-branch publication and disable the
+  legacy module Release job. Validate the source,
+  build metadata, allowlisted files and checksums before a non-force update.
+  The remote workflow and game runtime remain unverified. Signature: OpenAI-Codex.
+
 - Wire the developer boundary validator and unittest discovery into an independent
   GitHub-hosted source-check job with Python 3.12, full baseline history and explicit
   prerequisite diagnostics, and the same required pre-compilation validation job

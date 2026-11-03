@@ -1,5 +1,16 @@
 # AI Improve
 
+## Development delivery migration
+
+The Development workflow is configured to publish verified build files and their
+manifest to `Development_Build/AI_Improve`, for the Dev Manager to retrieve
+individually. The earlier module prerelease publisher is disabled in this workflow.
+Older release sections are historical; check the corresponding Actions run for
+actual publication status. A successful build does not establish game acceptance.
+For manual dispatch, select the `AI_Improve` branch. If publication fails,
+rerun all jobs so the build and publisher use the same workflow attempt.
+<!-- Signature: OpenAI-Codex -->
+
 ## Developer boundary inventory
 
 `tools/migration/feature-boundaries.json` records the fire-dispatch and transit-dwell

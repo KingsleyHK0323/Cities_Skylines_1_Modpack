@@ -1,4 +1,4 @@
-name: AI Improve Development build and prerelease
+name: AI Improve Development build
 on:
   workflow_dispatch:
   push:
@@ -51,6 +51,11 @@ jobs:
         shell: bash
         run: python3 -B -m unittest discover -s tools/migration -p 'test_feature_boundaries.py' -v
 
+      # Signature: OpenAI-Codex
+      - name: Check independent Development build publication contracts
+        shell: bash
+        run: python3 -B tools/test_dev_build_publisher.py
+
   compile:
     needs: migration-boundaries
     # Signature: OpenAI-Codex_release_format_audit
@@ -78,7 +83,7 @@ jobs:
             build-references/cs1/v1
             tools/build-references
           persist-credentials: false
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5
         with:
           dotnet-version: '10.0.x'
       - name: Restore verified game references
@@ -107,7 +112,7 @@ jobs:
         shell: pwsh
         run: ./tools/Prepare-DevelopmentRelease.ps1 -OutputDirectory '${{ runner.temp }}/ai-improve-release'
       - name: Transfer only allowlisted release files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         id: public-assets
         with:
           name: ai-improve-release-${{ github.run_id }}-${{ github.run_attempt }}
@@ -116,7 +121,8 @@ jobs:
           retention-days: 1
   publish:
     needs: compile
-    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/AI_Improve'
+    # Legacy GitHub Release publishing remains disabled during the source migration.
+    if: false && github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/AI_Improve'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -129,7 +135,7 @@ jobs:
           persist-credentials: false
           sparse-checkout: tools
       - name: Receive allowlisted release files
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           artifact-ids: ${{ needs.compile.outputs.artifact-id }}
           github-token: ${{ github.token }}
@@ -142,5 +148,37 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_BUILD_ATTEMPT: ${{ needs.compile.outputs.build-attempt }}
         run: ./tools/Publish-DevelopmentRelease.ps1 -AssetDirectory '${{ runner.temp }}/ai-improve-release'
+
+  # Signature: OpenAI-Codex
+  publish-development-build:
+    needs: compile
+    if: github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' && github.ref == 'refs/heads/AI_Improve'
+    concurrency:
+      group: development-build-ai-improve
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Check out the publisher at the built source commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: tools
+      - name: Receive the exact allowlisted compile artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          artifact-ids: ${{ needs.compile.outputs.artifact-id }}
+          github-token: ${{ github.token }}
+          run-id: ${{ github.run_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/ai-improve-release
+      - name: Publish the complete Development build to its independent branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_BUILD_ATTEMPT: ${{ needs.compile.outputs.build-attempt }}
+        run: python3 -B tools/dev_build_publisher.py '${{ runner.temp }}/ai-improve-release'
 # Signature: OpenAI-Codex_Responsible: AI_Improve
 # Migration validation gate: OpenAI-Codex_AI_Improve.

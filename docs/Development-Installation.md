@@ -1,5 +1,13 @@
 # AI Improve — Development Build
 
+> **Dev Manager distribution:** When an independent Development build is
+> available, use the Dev Manager to install, update or remove its own module
+> files. The publisher verifies `SHA256SUMS` before publication; the manager
+> checks the individual files against the build manifest, so `SHA256SUMS` is
+> not included in its installed folder. The individual-prerelease download and
+> manual-install steps below describe the earlier distribution method.
+> <!-- Signature: OpenAI-Codex -->
+
 ## Module Overview
 
 AI Improve adjusts traffic, citizen and service vehicle decision-making in
