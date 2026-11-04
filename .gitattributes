@@ -1,5 +1,6 @@
 # Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 # Official reference bytes must survive checkout without newline conversion.
+desktop/DevManager.ico -text
 desktop/Node-v24.19.0-LICENSE.txt -text
 desktop/Node-v24.19.0-SHASUMS256.txt -text
 desktop/Node-v24.22.2-LICENSE.txt -text

@@ -47,6 +47,16 @@ and isolated tests are not live GUI, installer or gameplay acceptance.
 Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 Read the [user guide](USER-GUIDE.md) and [publisher contract](PUBLISHER-CONTRACT.md).
+The next native and portable builds require the App icon at
+`desktop/DevManager.ico`. Both build scripts embed those ICO bytes into the EXE;
+the desktop form uses the icon extracted from its own executable for the window
+and taskbar. Developer-shell cache identity includes the source, icon, compiler
+and build script hashes, so changing the icon selects a different cached EXE.
+Missing input stops the build; earlier executables and incomplete new build
+outputs are preserved. Identity-only checks do not validate or create an image.
+An existing isolated `OutputDirectory` can be supplied for developer builds.
+The icon asset is included; visual acceptance remains pending.
+
 The new [artifact branch contract](ARTIFACT-CONTRACT.md) implements independent
 `Development_Build/<source branch>` downloads without module Releases or ZIPs.
 **Independent Development build branches** is the startup default. Unavailable

@@ -10,6 +10,38 @@ const bytes = Buffer.from('synthetic fixture, not a game DLL');
 const sha256 = createHash('sha256').update(bytes).digest('hex');
 const pkg = () => ({ moduleId: 'example', buildId: 'build-a', files: [{ path: 'mod.dll', bytes, sha256 }] });
 
+test('native and portable build contracts require and embed the shared app icon',()=>{
+  const native=readFileSync('desktop/Build-Native.ps1','utf8');const portable=readFileSync('desktop/Build-Portable.ps1','utf8');const app=readFileSync('desktop/DevManager.cs','utf8');
+  assert.match(native,/DevManager\.ico/);assert.match(native,/\/win32icon:/);assert.match(portable,/DevManager\.ico/);assert.match(portable,/\/win32icon:/);
+  assert.match(app,/ExtractAssociatedIcon\(Application\.ExecutablePath\)/);
+});
+
+test('native build identity changes for different icon input without generating images or compiling',{skip:process.platform!=='win32'},async()=>{
+  const fs=await import('node:fs');const os=await import('node:os');const path=await import('node:path');const {execFileSync}=await import('node:child_process');
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'cs1-dev-manager-test-'));const source=path.join(root,'source.txt');const source2=path.join(root,'source-other.txt');const a=path.join(root,'input-a.bin');const b=path.join(root,'input-b.bin');
+  fs.writeFileSync(source,'synthetic source identity');fs.writeFileSync(source2,'changed synthetic source identity');fs.writeFileSync(a,'not an image: first identity');fs.writeFileSync(b,'not an image: second identity');
+  const identity=(sourcePath,iconPath)=>execFileSync('pwsh',['-NoLogo','-NoProfile','-NonInteractive','-File',path.resolve('desktop/Build-Native.ps1'),'-IdentityOnly','-IdentitySourcePath',sourcePath,'-IdentityIconPath',iconPath,'-OutputDirectory',root],{encoding:'utf8',windowsHide:true,timeout:15000,stdio:['pipe','pipe','pipe']}).trim();
+  const first=identity(source,a),again=identity(source,a),changedIcon=identity(source,b),changedSource=identity(source2,a);
+  assert.equal(first,again);assert.notEqual(first,changedIcon);assert.notEqual(first,changedSource);assert.match(path.basename(first),/^DevManager-dev-[a-f0-9]{64}\.exe$/);
+  assert.equal(path.dirname(first).toLowerCase(),root.toLowerCase());
+  assert.equal(fs.existsSync(first),false);assert.equal(fs.existsSync(changedIcon),false);
+  let failure;try{identity(source,path.join(root,'missing-input.bin'));}catch(error){failure=error;}assert.ok(failure);assert.match(String(failure.stderr),/Required app icon is missing/);
+  const attributes=execFileSync('git',['check-attr','text','--','desktop/DevManager.ico'],{encoding:'utf8',windowsHide:true});assert.match(attributes,/: unset\s*$/);
+});
+
+test('native identity refuses an input held for exclusive writing',{skip:process.platform!=='win32'},async()=>{
+  const fs=await import('node:fs');const os=await import('node:os');const path=await import('node:path');const {spawn,execFileSync}=await import('node:child_process');
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'cs1-dev-manager-test-'));const source=path.join(root,'source.txt');const sample=path.join(root,'not-an-image.bin');const helper=path.join(root,'hold-input.ps1');
+  fs.writeFileSync(source,'synthetic source');fs.writeFileSync(sample,'not an image');fs.writeFileSync(helper,"# Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager\nparam([string]$FilePath)\n$stream=[IO.File]::Open($FilePath,[IO.FileMode]::Open,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None)\ntry { [Console]::WriteLine('LOCKED'); [Console]::Out.Flush(); $null=[Console]::In.ReadLine() } finally { $stream.Dispose() }\n");
+  const child=spawn('pwsh',['-NoLogo','-NoProfile','-NonInteractive','-File',helper,'-FilePath',sample],{windowsHide:true,stdio:['pipe','pipe','pipe']});
+  const completed=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',code=>code===0?resolve():reject(new Error(`Lock helper exited ${code}`)));});
+  const ready=new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Lock helper did not start')),8000);child.stdout.on('data',data=>{if(data.toString().includes('LOCKED')){clearTimeout(timer);resolve();}});child.once('error',error=>{clearTimeout(timer);reject(error);});});
+  try{
+    await ready;let failure;try{execFileSync('pwsh',['-NoLogo','-NoProfile','-NonInteractive','-File',path.resolve('desktop/Build-Native.ps1'),'-IdentityOnly','-IdentitySourcePath',source,'-IdentityIconPath',sample,'-OutputDirectory',root],{encoding:'utf8',windowsHide:true,timeout:15000,stdio:['pipe','pipe','pipe']});}catch(error){failure=error;}
+    assert.ok(failure);assert.equal(String(failure.stdout).trim(),'');
+  }finally{child.stdin.end('\n');await completed;}
+});
+
 test('future portable packages pin official Node 24.22.2 and preserve legal reference bytes',async()=>{
   const script=readFileSync('desktop/Build-Portable.ps1','utf8');assert.ok(script.includes("$version -ne 'v24.22.2'"));
   assert.ok(script.includes('1c331340fa6cac5e4294725959070a143fa0507195a78ad77eed7943f719aac9'));

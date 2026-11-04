@@ -144,6 +144,8 @@ sealed class ManagerForm : Form {
     }
     public ManagerForm() {
         try { Presentation.Load(Path.Combine(ResourceRoot(),"translations.json")); } catch { catalogUnavailable=true; }
+        Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        ShowIcon = true; ShowInTaskbar = true;
         Text = "Cities Skylines 1 Modpack Dev Manager"; Width = 1320; Height = 850; MinimumSize = new Size(980, 680);
         Font = new Font("Segoe UI", 10F); AutoScaleMode = AutoScaleMode.Dpi; BackColor = Color.FromArgb(245,247,250);
         var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 9, Padding = new Padding(22), BackColor = BackColor };mainLayout=layout;

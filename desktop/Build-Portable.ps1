@@ -16,10 +16,18 @@ if ($LASTEXITCODE -ne 0 -or $version -ne 'v24.22.2') { throw 'This portable reci
 if ((Get-FileHash -LiteralPath (Join-Path $PSScriptRoot 'Node-v24.22.2-LICENSE.txt') -Algorithm SHA256).Hash.ToLowerInvariant() -ne '5888dbb9a1d2b18f2c3e6c5f6af1b39de658372b402a0577b002777f14c62ace') { throw 'Node license does not match the verified official text.' }
 $checksums = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'Node-v24.22.2-SHASUMS256.txt'), [Text.Encoding]::UTF8)
 if ($checksums -notmatch ('(?m)^' + $expectedRuntime + '  win-x64/node\.exe\r?$')) { throw 'Official checksum reference does not match the pinned runtime.' }
+$icon = Join-Path $PSScriptRoot 'DevManager.ico'
+if (-not (Test-Path -LiteralPath $icon -PathType Leaf)) { throw 'Required app icon is missing: desktop/DevManager.ico.' }
+$iconLease = [IO.File]::Open($icon,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+try {
+$iconHash = (Get-FileHash -InputStream $iconLease -Algorithm SHA256).Hash
+$iconLease.Position = 0
 New-Item -ItemType Directory -Force -Path $runtime | Out-Null
 $exe = Join-Path $output 'DevManager.exe'
-& $compiler /nologo /codepage:65001 /target:winexe /optimize+ /platform:anycpu /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.IO.Compression.dll "/out:$exe" (Join-Path $PSScriptRoot 'DevManager.cs')
+& $compiler /nologo /codepage:65001 /target:winexe /optimize+ /platform:anycpu /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.IO.Compression.dll "/win32icon:$icon" "/out:$exe" (Join-Path $PSScriptRoot 'DevManager.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Desktop compilation failed.' }
+$iconLease.Position = 0
+if ((Get-FileHash -InputStream $iconLease -Algorithm SHA256).Hash -ne $iconHash) { throw 'App icon changed during compilation; incomplete output is retained for inspection.' }
 if ($RuntimeCachePath) {
   if ((Get-FileHash -LiteralPath $RuntimeCachePath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedRuntime) { throw 'Unverified runtime cache.' }
   New-Item -ItemType HardLink -Path (Join-Path $runtime 'node.exe') -Target $RuntimeCachePath | Out-Null
@@ -38,3 +46,4 @@ foreach ($name in $sources) { $manifest.files[$name] = (Get-FileHash (Join-Path 
 $manifest | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $output 'package-manifest.json') -Encoding utf8
 'Portable folder ready: ' + $output
 'Open DevManager.exe directly; no separate Node installation is required on the destination Windows PC.'
+} finally { $iconLease.Dispose() }

@@ -6,6 +6,16 @@
 
 ## 2026-11-03
 
+- Prepare Windows native and portable builds to embed the same required
+  `desktop/DevManager.ico`; the desktop form selects its executable's associated
+  icon for the window and taskbar. Preserve ICO bytes across Git checkout.
+- Key the developer-shell cache by source, icon, build script and compiler hashes.
+  Read-lock the source/icon during selection and compilation; build into a new
+  staging EXE and promote only after verifying inputs remained unchanged.
+  Missing inputs and failed builds do not replace existing executables. Local
+  test executables contain the icon; visual acceptance remains pending.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 - Pin future Windows x64 packages to official Node.js v24.22.2 instead of v24.19.0;
   verify binary integrity before executing it and use the exact versioned license.
 - Preserve new official license/checksum bytes with `-text` Git attributes, keep
