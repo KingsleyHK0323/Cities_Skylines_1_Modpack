@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased — Development artifact diagnostics
+
+- Report a fixed safe publication failure category and numeric HTTP status
+  without exposing GitHub response bodies, credentials or request data.
+  Signature: OpenAI-Codex.
+
 Copyright © Kingsley.
 
 ## Unreleased — Release preview candidate

@@ -193,6 +193,19 @@ class RefUpdateTests(unittest.TestCase):
 
 
 class GitHubGatewayTests(unittest.TestCase):
+    def test_failed_write_exposes_only_safe_operation_and_http_status(self):
+        gateway = publisher.GitHubGateway(context())
+        for stderr, expected in (
+            ("gh: sensitive-example-value (HTTP 403)", "GitHub API write-blob failed (HTTP 403)"),
+            ("sensitive-example-value", "GitHub API write-blob failed (HTTP unknown)"),
+        ):
+            response = SimpleNamespace(returncode=1, stdout="sensitive-example-value", stderr=stderr)
+            with self.subTest(stderr=stderr), patch.object(publisher.subprocess, "run", return_value=response):
+                with self.assertRaises(publisher.PublicationError) as caught:
+                    gateway.write_blob(b"fixture")
+                self.assertEqual(str(caught.exception), expected)
+                self.assertNotIn("sensitive-example-value", str(caught.exception))
+
     def test_ref_updates_never_allow_force(self):
         gateway = publisher.GitHubGateway(context())
         with patch.object(gateway, "_call", return_value={}) as call:

@@ -223,6 +223,20 @@ class GitHubGateway:
         self.base = "repos/" + REPOSITORY
 
     def _call(self, method, suffix, body=None, allow_missing=False):
+        operations = {
+            ("POST", "/git/blobs"): "write-blob",
+            ("POST", "/git/trees"): "write-tree",
+            ("POST", "/git/commits"): "write-commit",
+            ("POST", "/git/refs"): "create-ref",
+        }
+        operation = operations.get((method, suffix), "read" if method == "GET" else "other")
+        if method == "PATCH" and suffix.startswith("/git/refs/heads/"):
+            operation = "update-ref"
+
+        def failure(stderr=""):
+            status = re.search(r"\bHTTP ([1-5][0-9]{2})\b", stderr)
+            return PublicationError(f"GitHub API {operation} failed (HTTP {status.group(1) if status else 'unknown'})")
+
         cmd = ["gh", "api", "--method", method, "-H", "Accept: application/vnd.github+json", self.base + suffix]
         encoded = None
         if body is not None:
@@ -231,11 +245,11 @@ class GitHubGateway:
         try:
             result = subprocess.run(cmd, input=encoded, capture_output=True, text=True, timeout=60, check=False)
         except (OSError, subprocess.TimeoutExpired) as exc:
-            raise PublicationError("GitHub request failed") from exc
+            raise failure() from exc
         if result.returncode:
             if allow_missing and "HTTP 404" in result.stderr:
                 return None
-            raise PublicationError("GitHub request failed")
+            raise failure(result.stderr)
         try:
             return json.loads(result.stdout)
         except ValueError as exc:

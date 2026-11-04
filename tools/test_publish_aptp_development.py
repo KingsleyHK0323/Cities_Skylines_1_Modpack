@@ -6,6 +6,7 @@ Signature: OpenAI-Codex
 import copy
 import hashlib
 import importlib
+import io
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / '.github' / 'scripts'))
 from Release_Provenance import BRANCH, REPOSITORY, SHARED_REFS
 from test_dev_build_publisher import FakeGateway, context, payload
+
+UNSPECIFIED = object()
 
 
 class FakeFile:
@@ -61,10 +64,10 @@ class PublishAptpChecks(unittest.TestCase):
         self.artifact = dict(id=456, name='aptp-public-assets-123-2', expired=False,
                              workflow_run=dict(id=123, head_sha='a' * 40, head_branch=BRANCH))
 
-    def invoke(self, env=None, metadata=None, artifact=None):
+    def invoke(self, env=None, metadata=None, artifact=UNSPECIFIED):
         selected_env = self.env if env is None else env
         selected_metadata = self.metadata if metadata is None else metadata
-        selected_artifact = self.artifact if artifact is None else artifact
+        selected_artifact = self.artifact if artifact is UNSPECIFIED else artifact
         with patch.dict(os.environ, selected_env, clear=True), \
              patch.object(sys, 'argv', ['publish_aptp_development.py', 'artifact']), \
              patch('pathlib.Path.read_text', return_value=selected_metadata), \
@@ -75,6 +78,45 @@ class PublishAptpChecks(unittest.TestCase):
             finally:
                 self.api = api
                 self.publish = publish
+
+    def test_diagnostics_allow_only_fixed_safe_publication_details(self):
+        safe = self.module.publisher.PublicationError('GitHub API write-blob failed (HTTP 403)')
+        self.assertIn('GitHub API write-blob failed (HTTP 403)', self.module.failure_message(safe))
+        for error in (ValueError('private-example-value'),
+                      self.module.publisher.PublicationError('private-example-value'),
+                      self.module.publisher.PublicationError('GitHub API write-blob failed (HTTP 403) private-example-value')):
+            self.assertNotIn('private-example-value', self.module.failure_message(error))
+
+    def test_failed_artifact_query_captures_stderr_and_emits_no_private_details(self):
+        failure = self.module.subprocess.CalledProcessError(1, ['gh'], stderr='private-example-value')
+        with patch.dict(os.environ, self.env, clear=True), \
+             patch.object(sys, 'argv', ['publish_aptp_development.py', 'artifact']), \
+             patch('pathlib.Path.read_text', return_value=self.metadata), \
+             patch.object(self.module.subprocess, 'check_output', side_effect=failure) as api, \
+             patch.object(self.module.publisher, 'main') as publish, \
+             patch('sys.stderr', new_callable=io.StringIO) as output:
+            self.assertEqual(self.module.entrypoint(), 1)
+            self.assertEqual(api.call_args.kwargs.get('stderr'), self.module.subprocess.PIPE)
+            self.assertNotIn('private-example-value', output.getvalue())
+            self.assertNotIn('Traceback', output.getvalue())
+            publish.assert_not_called()
+
+    def test_malformed_artifact_response_and_unexpected_errors_fail_safely(self):
+        for artifact in ([], None, 'unexpected'):
+            with self.subTest(artifact=artifact), self.assertRaises(ValueError):
+                self.invoke(artifact=artifact)
+            self.publish.assert_not_called()
+        with patch.dict(os.environ, self.env, clear=True), \
+             patch.object(sys, 'argv', ['publish_aptp_development.py', 'artifact']), \
+             patch('pathlib.Path.read_text', return_value=self.metadata), \
+             patch.object(self.module.subprocess, 'check_output', return_value=json.dumps(self.artifact)), \
+             patch.object(self.module, 'verify_provenance', side_effect=RuntimeError('private-example-value')), \
+             patch.object(self.module.publisher, 'main') as publish, \
+             patch('sys.stderr', new_callable=io.StringIO) as output:
+            self.assertEqual(self.module.entrypoint(), 1)
+            self.assertNotIn('private-example-value', output.getvalue())
+            self.assertNotIn('Traceback', output.getvalue())
+            publish.assert_not_called()
 
     def test_verified_artifact_enters_publisher_once(self):
         self.invoke()
