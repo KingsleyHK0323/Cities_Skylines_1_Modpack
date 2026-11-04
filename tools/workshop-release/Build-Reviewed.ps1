@@ -1,5 +1,6 @@
 # Signature: OpenAI-Codex_workshop_implementation
 # Updated by: OpenAI-Codex.
+# Updated by: OpenAI-Codex.
 # Compiles only an exact reviewed commit and explicit sources on a GitHub-hosted runner.
 [CmdletBinding()]
 param(
@@ -21,6 +22,9 @@ if ($registry.schema -ne 1 -or $registry.signature -cne 'OpenAI-Codex_workshop_i
     throw 'The module source does not match a unique reviewed recipe.'
 }
 $recipe = $reviewedCandidates[0]
+if ($recipe.PSObject.Properties.Name -contains 'builder') {
+    throw 'This module requires its dedicated MSBuild path.'
+}
 if ($recipe.assembly -cnotmatch '^[A-Za-z][A-Za-z0-9]{1,100}$' -or $recipe.languageVersion -cnotin @('3','5','7.3')) {
     throw 'The reviewed assembly name or language version is invalid.'
 }

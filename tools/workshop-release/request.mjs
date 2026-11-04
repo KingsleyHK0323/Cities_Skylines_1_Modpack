@@ -1,4 +1,5 @@
 // Signature: OpenAI-Codex_workshop_implementation
+// Updated by: OpenAI-Codex.
 // These mappings come from the owner's dated screenshots, not live Steam checks.
 import { createHash } from 'node:crypto';
 import { recipes as reviewedRecipes } from './recipes.mjs';
@@ -9,7 +10,7 @@ const REPOSITORY_ID = 1425203074;
 const REPOSITORY = 'KingsleyHK0323/Cities_Skylines_1_Modpack';
 const rows = [
   ['AI Improve', 'AI_Improve', 'AIImprove', '3782858610', '0fd60bcdd986e6e2ae40d162c326f1232c1bf639'],
-  ['Automated Public Transport Planning', 'Automated_Public_Transport_Planning', 'AutomatedPublicTransportPlanning', '3823739383'],
+  ['Automated Public Transport Planning', 'Automated_Public_Transport_Planning', 'AutomatedPublicTransportPlanning', '3823739383', 'f2c97c858bcae95f99c7bc1b634b7178a07f3f97'],
   ['Automated Public Transport Vehicle Management', 'Automated_Public_Transport_Vehicle_Management', 'AutomatedPublicTransportVehicleManagement', '3832298237', 'afeeb21571a7ce5a496b892a4e55388d9463c968'],
   ['Full Map Unlock And Expansion', 'Full_Map_Unlock_And_Expansion', 'FullMapUnlockAndExpansion', '3832298906', 'd9daec9217b454f8dd8d751bcf480fb5d6df8dc9'],
   ['Intercity Resource Sharing', 'Intercity_Resource_Sharing', 'IntercityResourceSharing', '3832299398', '0ebc190ff9eb61789f968adba85b071c2cf0c89a'],
@@ -107,11 +108,10 @@ export function renderPreview(preview) {
     const registered = registry.find(entry => entry.key === item.key);
     if (!registered || item.branch !== registered.branch || item.workshopId !== registered.workshopId ||
         !/^[0-9a-f]{40}$/.test(item.sourceSha) || registered.paused) fail('Preview module is invalid.');
-    const status = item.key === 'Automated_Public_Transport_Planning' ?
-      'blocked: no reviewed batch recipe for the updated release preview' :
-      !recipes.has(item.key) ? 'blocked: no reviewed release recipe' :
+    const status = !recipes.has(item.key) ? 'blocked: no reviewed release recipe' :
       item.sourceSha !== registered.reviewedSource ? 'blocked: source changed since review' :
       item.key === 'Full_Map_Unlock_And_Expansion' ? 'blocked: source still identifies as Development Preview' :
+      item.key === 'Automated_Public_Transport_Planning' ? 'candidate: read-only release preview; batch build requires cloud verification' :
       item.key === 'Automated_Public_Transport_Vehicle_Management' ? 'candidate is observation-only and does not dispatch vehicles' :
       item.key === 'Realistic_City_Time' ? 'candidate is observation-only and does not change time or speed' :
       item.key === 'Intercity_Resource_Sharing' ? 'candidate is an inactive foundation without resource exchange' :
@@ -191,6 +191,7 @@ export function verifySnapshot(snapshot, evidence) {
 
 export function requireReady(snapshot) {
   if (!snapshot || !Array.isArray(snapshot.modules) || snapshot.modules.length === 0) fail('Invalid snapshot.');
+  if (Object.hasOwn(snapshot, 'validationOnly')) fail('A validation-only snapshot cannot authorize a Workshop upload.');
   for (const selection of snapshot.modules) {
     const item = registry.find(entry => entry.key === selection.key);
     if (!item || !item.releaseReady) fail(`Module is not ready for automatic Workshop upload: ${selection.key}`);

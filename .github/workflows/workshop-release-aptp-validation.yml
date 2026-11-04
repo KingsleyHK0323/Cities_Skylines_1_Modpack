@@ -1,0 +1,63 @@
+# Signature: OpenAI-Codex.
+# Cloud-only APTP release build validation; this workflow cannot upload to Steam.
+name: APTP Workshop release candidate cloud validation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    if: >-
+      github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' &&
+      github.actor == github.repository_owner && github.triggering_actor == github.repository_owner &&
+      github.ref == 'refs/heads/Modpack_Website' && github.run_attempt == 1
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Install the cloud validation runtime
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+      - name: Run isolated controller tests
+        shell: pwsh
+        run: |
+          node --test 'tools/workshop-release/test-*.mjs'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify the reviewed APTP branch head
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $approved = 'f2c97c858bcae95f99c7bc1b634b7178a07f3f97'
+          $current = gh api 'repos/KingsleyHK0323/Cities_Skylines_1_Modpack/git/ref/heads/Automated_Public_Transport_Planning' --jq '.object.sha'
+          if ($LASTEXITCODE -ne 0 -or $current -cne $approved) { throw 'The reviewed APTP branch changed.' }
+      - name: Prepare an APTP validation-only snapshot
+        shell: pwsh
+        run: |
+          node tools/workshop-release/validation-snapshot.mjs --aptp
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Check out the fixed encrypted reference bundle
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 7b8a5e7c10f2db84388e8dd8af2084f239957b13
+          path: build-dependencies
+          persist-credentials: false
+          sparse-checkout: |
+            build-references/cs1/v1
+            tools/build-references
+      - name: Restore references only into cloud temporary storage
+        shell: pwsh
+        env:
+          CS1_GAME_REFERENCES_KEY: ${{ secrets.CS1_GAME_REFERENCES_KEY }}
+        run: |
+          $game = Join-Path $env:RUNNER_TEMP 'cs1-workshop-aptp-validation-game'
+          & "$env:GITHUB_WORKSPACE/build-dependencies/tools/build-references/Restore-GameReferences.ps1" -BundleDirectory "$env:GITHUB_WORKSPACE/build-dependencies/build-references/cs1/v1" -GameRoot $game
+      - name: Compile and inspect the APTP candidate package
+        shell: pwsh
+        run: |
+          & "$env:GITHUB_WORKSPACE/tools/workshop-release/Build-Selected.ps1" -GameRoot (Join-Path $env:RUNNER_TEMP 'cs1-workshop-aptp-validation-game') -OutputDirectory (Join-Path $env:RUNNER_TEMP 'cs1-workshop-aptp-validation-packages')
+          Write-Output 'Validation only: no Issue, artifact publication, Steam upload or self-hosted runner.'

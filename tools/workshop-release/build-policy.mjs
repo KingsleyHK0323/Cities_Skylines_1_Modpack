@@ -83,6 +83,11 @@ export function verifyReleasePackage(manifest, files, expected, identities) {
       if (dll.includes(Buffer.from(marker, 'utf8')) || dll.includes(Buffer.from(marker, 'utf16le')))
         fail('A reviewed Development-only marker is present in the release DLL.');
   }
+  if (expected.module === 'Automated_Public_Transport_Planning') {
+    for (const marker of ['RouteCreationController','RouteEditingController','SaveRoundTripSpike','PerformanceProbe','OnDiagnosticsButton'])
+      if (mainDll.includes(Buffer.from(marker, 'utf8')) || mainDll.includes(Buffer.from(marker, 'utf16le')))
+        fail('A reviewed Development-only APTP marker is present in the release DLL.');
+  }
   return true;
 }
 

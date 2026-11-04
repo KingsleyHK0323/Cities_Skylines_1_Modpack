@@ -11,6 +11,8 @@ still require verification. AI Gaming remains paused. The existing
 `workshop-release` environment also requires an additional reviewer approval;
 this differs from the intended label-only trigger and must be resolved before
 deployment. No Issue or label currently enables this candidate to upload.
+The pinned AI Improve and Wireless recipes passed a cloud-only build validation;
+the new APTP batch integration still requires its own cloud validation.
 <!-- Signature: OpenAI-Codex. -->
 
 ## Development delivery migration

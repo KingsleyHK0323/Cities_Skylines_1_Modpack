@@ -26,6 +26,15 @@ test('the batch plan preserves each selected module and its exact reviewed sourc
   ]);
 });
 
+test('the APTP batch selection uses its own fixed source and Workshop target', () => {
+  const result = batch.createBuildPlan(selection(['AI_Improve', 'Automated_Public_Transport_Planning']));
+  assert.deepEqual(result[1], {module:'Automated_Public_Transport_Planning',
+    sourceSha:'f2c97c858bcae95f99c7bc1b634b7178a07f3f97'});
+  const changed = selection(['Automated_Public_Transport_Planning']);
+  changed.modules[0].workshopId = '3782858610';
+  assert.throws(() => batch.createBuildPlan(changed));
+});
+
 test('a duplicate, changed source, wrong target or unreviewed module blocks the complete batch', () => {
   assert.ok(batch, 'the batch plan is not implemented');
   const original = selection(['AI_Improve', 'Wireless_Utilities_And_Global_Coverage']);

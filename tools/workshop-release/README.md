@@ -1,7 +1,8 @@
 # Workshop release controller candidate
 
-This directory contains a local, unverified implementation candidate. The
-workflow's self-hosted upload job is hard-disabled, and every module has
+This directory contains an in-development implementation candidate. The
+Issue controller and a cloud-only validation workflow are present on the
+default branch. The self-hosted upload job is hard-disabled, and every module has
 `releaseReady: false`. It cannot yet publish a Steam item.
 
 The Issue form accepts one or more registered modules. A preview identifies each
@@ -14,14 +15,20 @@ uploader checks every package and Steam item before attempting the first upload.
 
 ## Current limitations
 
-- No candidate workflow has been deployed or executed in GitHub Actions. The
-  cloud build recipes and resulting assemblies have not been verified in this run.
-- `workshop-release-validation.yml` is a proposed owner-only, GitHub-hosted
-  validation for the exact reviewed AI Improve and Wireless sources. It uses a
-  synthetic snapshot and performs no Issue approval, artifact publication,
-  Steam upload or self-hosted execution; it has not yet run in the cloud.
-- AI Improve and twelve other modules have source recipes. APTP does not yet
-  have a reviewed recipe for its current release boundary; AI Gaming remains paused.
+- An end-to-end Issue approval, ledger claim and Steam upload has not been
+  validated. `workshop-release-validation.yml` ran successfully for the pinned
+  AI Improve and Wireless sources in run 41826121499; AI Improve's optional
+  localization check was skipped because its default Python path was missing.
+  This validation used a synthetic snapshot and did not approve an Issue,
+  publish an artifact, upload to Steam or use a self-hosted runner.
+- AI Improve and thirteen other modules have source recipes. APTP's dedicated
+  MSBuild batch path and `workshop-release-aptp-validation.yml` are candidates
+  and have not yet been run in the cloud. APTP's separate module workflow did
+  compile the same pinned source without DevTools in run 41822178605, but that
+  is not evidence that the new batch integration works. The batch candidate
+  checks the pinned project's declared XML inputs and DevTools conditions;
+  these checks are not a complete audit of evaluated MSBuild imports or game
+  behavior. AI Gaming remains paused.
   Full Map is blocked because its reviewed source identifies itself as a
   Development Preview. Several other recipes are observation-only foundations,
   not evidence that their intended gameplay functions are complete.
@@ -41,9 +48,9 @@ uploader checks every package and Steam item before attempting the first upload.
   atomic, and other legacy upload workflows do not share the new concurrency
   group. GitHub status and game acceptance are separate evidence.
 
-## Deployment prerequisites
+## Prerequisites for enabling Workshop uploads
 
-Before any deployment, review the exact workflow, recipes and the separately
+Before enabling uploads, review the exact workflow, recipes and the separately
 approved setup. The ledger branch `Workshop_Release_Ledger` must be initialized
 once with `workshop-release-ledger.json` containing schema `1`, repository
 `KingsleyHK0323/Cities_Skylines_1_Modpack`, and purpose

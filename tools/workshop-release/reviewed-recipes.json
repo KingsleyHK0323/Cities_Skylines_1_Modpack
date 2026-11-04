@@ -1,5 +1,14 @@
 {"schema": 1, "signature": "OpenAI-Codex_workshop_implementation", "updatedBy": "OpenAI-Codex", "recipes": [
   {
+    "module": "Automated_Public_Transport_Planning",
+    "sourceSha": "f2c97c858bcae95f99c7bc1b634b7178a07f3f97",
+    "assembly": "AutomatedPublicTransportPlanning",
+    "builder": "msbuild",
+    "languageVersion": "5",
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "System.Xml.dll", "UnityEngine.dll", "ICities.dll", "ColossalManaged.dll", "Assembly-CSharp.dll"],
+    "sources": ["Properties/AssemblyInfo.cs", "Source/Mod.cs", "Source/Loader.cs", "Source/Util/Log.cs", "Source/Util/Loc.cs", "Source/Util/Settings.cs", "Source/Util/Strings.cs", "Source/Planning/BusPrefabResolver.cs", "Source/Planning/StopPlacement.cs", "Source/Planning/WorldSnapshot.cs", "Source/Planning/StopGraph.cs", "Source/Planning/CitizenUnitDemand.cs", "Source/Planning/PlanningSnapshot.cs", "Source/Planning/PlanningEngine.cs", "Source/Planning/RouteStopPreview.cs", "Source/Planning/PlanningCapture.cs", "Source/Planning/PlanningPreviewAdmission.cs", "Source/Planning/PlanningThreadingExtension.cs", "Source/Planning/RouteEditRequestGate.cs"]
+  },
+  {
     "module": "Automated_Public_Transport_Vehicle_Management",
     "sourceSha": "afeeb21571a7ce5a496b892a4e55388d9463c968",
     "assembly": "AutomatedPublicTransportVehicleManagement",

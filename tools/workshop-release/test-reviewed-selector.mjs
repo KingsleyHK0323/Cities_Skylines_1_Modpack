@@ -57,6 +57,13 @@ test('the actual PowerShell selector rejects an unreviewed SHA or module', () =>
   }
 });
 
+test('the generic Roslyn selector refuses the dedicated APTP MSBuild recipe', () => {
+  const result = runSelection('Automated_Public_Transport_Planning',
+    'f2c97c858bcae95f99c7bc1b634b7178a07f3f97', selection, '$recipe.assembly');
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /dedicated MSBuild/i);
+});
+
 test('the actual assembly inspector retains the reviewed filename after name validation', () => {
   const result = runSelection('Wireless_Utilities_And_Global_Coverage', validSha, inspectionSelection, '$filename');
   assert.equal(result.status, 0, result.stderr);

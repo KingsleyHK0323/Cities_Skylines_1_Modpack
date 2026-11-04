@@ -14,6 +14,9 @@
 - Correct the APTP request preview to report its missing reviewed batch recipe
   after the standalone no-DevTools build restored read-only planning previews.
   Signature: OpenAI-Codex.
+- Prepare a dedicated, fixed-source APTP MSBuild batch candidate and a separate
+  cloud-only validation workflow; keep Steam upload disabled pending review.
+  Signature: OpenAI-Codex.
 
 ## Unreleased — Development delivery migration
 

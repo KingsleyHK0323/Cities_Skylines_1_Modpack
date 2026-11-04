@@ -21,6 +21,9 @@ export function validateRecipes(data) {
         (recipe.compilerOptions !== undefined && (!Array.isArray(recipe.compilerOptions) || recipe.compilerOptions.some(option => !allowedOptions.has(option)))))
       fail('Reviewed compiler recipe is invalid.');
     modules.add(recipe.module);
+    if ((recipe.module === 'Automated_Public_Transport_Planning' && recipe.builder !== 'msbuild') ||
+        (recipe.module !== 'Automated_Public_Transport_Planning' && recipe.builder !== undefined))
+      fail('A compiler recipe has an unexpected builder.');
     if (new Set(recipe.sources).size !== recipe.sources.length ||
         recipe.sources.some(path => typeof path !== 'string' || path.includes('..') ||
           !/^(?:Properties\/AssemblyInfo\.cs|(?:Source|Game)\/[A-Za-z0-9_./-]+\.cs)$/.test(path)) ||

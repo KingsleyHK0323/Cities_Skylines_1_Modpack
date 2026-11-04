@@ -12,7 +12,7 @@ test('the reviewed compiler recipe registry is implemented', () => {
 });
 
 test('each reviewed recipe has an independent module, exact SHA and fixed source list', () => {
-  assert.equal(library.recipes.length, 12);
+  assert.equal(library.recipes.length, 13);
   for (const recipe of library.recipes) {
     const registered = registry.find(item => item.key === recipe.module);
     assert.ok(registered);
@@ -21,6 +21,17 @@ test('each reviewed recipe has an independent module, exact SHA and fixed source
     assert.ok(recipe.sources.length > 0);
     assert.equal(new Set(recipe.sources).size, recipe.sources.length);
   }
+});
+
+test('APTP uses its cloud-built source with a dedicated MSBuild recipe', () => {
+  const item = library.recipes.find(recipe => recipe.module === 'Automated_Public_Transport_Planning');
+  assert.equal(item.sourceSha, 'f2c97c858bcae95f99c7bc1b634b7178a07f3f97');
+  assert.equal(item.assembly, 'AutomatedPublicTransportPlanning');
+  assert.equal(item.builder, 'msbuild');
+  assert.equal(item.languageVersion, '5');
+  assert.equal(item.sources.length, 19);
+  assert.equal(item.references.length, 8);
+  assert.ok(item.sources.includes('Source/Planning/PlanningPreviewAdmission.cs'));
 });
 
 test('the vehicle management candidate uses its reviewed cloud-built source and assembly metadata', () => {
@@ -41,6 +52,7 @@ test('unreviewed compiler options, paths, duplicate modules and game-reference n
     data => {data.recipes[0].references.push('malicious.dll');},
     data => {data.recipes.push(structuredClone(data.recipes[0]));},
     data => {data.recipes[0].sourceSha = 'bad';},
+    data => {data.recipes.find(x => x.module === 'Automated_Public_Transport_Planning').builder = 'roslyn';},
   ]) {
     const data = fixture(); mutate(data); assert.throws(() => library.validateRecipes(data));
   }

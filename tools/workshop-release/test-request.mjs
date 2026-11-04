@@ -1,5 +1,6 @@
 // Signature: OpenAI-Codex_workshop_implementation
 // Updated by: OpenAI-Codex.
+// Updated by: OpenAI-Codex.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -142,7 +143,7 @@ test('reviewed AI Improve and Wireless can be selected together without crossing
   const unsupported = fixture();
   unsupported.heads.AI_Improve = '0fd60bcdd986e6e2ae40d162c326f1232c1bf639';
   const multi = controller.createSnapshot(unsupported);
-  assert.throws(() => controller.requireBuildable(multi), /not implemented/i);
+  assert.throws(() => controller.requireBuildable(multi), /source changed/i);
   f.issue.body = body(['AI Improve','Wireless Utilities And Global Coverage']); f.event.issue.body = f.issue.body;
   f.heads.Wireless_Utilities_And_Global_Coverage = 'fab5d2bfa27ce03981de3a845cf4ee40148a1201';
   const selected = controller.createSnapshot(f);
@@ -195,10 +196,11 @@ test('preview presents exact module choices and full source SHAs before approval
   assert.throws(() => controller.verifyPreview(preview, comment, changed));
 });
 
-test('the APTP preview reports its missing reviewed batch recipe accurately', () => {
+test('the APTP preview describes the read-only candidate and unverified batch build', () => {
   const f = fixture();
+  f.heads.Automated_Public_Transport_Planning = 'f2c97c858bcae95f99c7bc1b634b7178a07f3f97';
   const preview = controller.createPreview(f.issue, f.heads);
   const rendered = controller.renderPreview(preview);
-  assert.match(rendered, /blocked: no reviewed batch recipe for the updated release preview/i);
+  assert.match(rendered, /read-only release preview; batch build requires cloud verification/i);
   assert.doesNotMatch(rendered, /DevTools=false also excludes core planning/i);
 });

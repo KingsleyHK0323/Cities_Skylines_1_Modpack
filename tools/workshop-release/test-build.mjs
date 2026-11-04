@@ -96,6 +96,19 @@ test('Wireless uses its separately reviewed exact source and single-DLL recipe',
   assert.throws(() => build.verifyReleasePackage(manifest, {...files,'Assembly-CSharp.dll':Buffer.from('game')}, expected, identities));
 });
 
+test('APTP release packaging binds its own assembly and rejects a Development-only marker', () => {
+  const expected = {issueNumber:17,runId:700,attempt:1,controllerSha:'a'.repeat(40),
+    module:'Automated_Public_Transport_Planning',sourceSha:'f2c97c858bcae95f99c7bc1b634b7178a07f3f97',workshopId:'3823739383'};
+  const name = 'AutomatedPublicTransportPlanning.dll';
+  const files = {[name]:Buffer.from('MZ simulated release preview')};
+  const identities = {[name]:'AutomatedPublicTransportPlanning'};
+  const manifest = build.createReleaseManifest(expected, files);
+  assert.equal(build.verifyReleasePackage(manifest, files, expected, identities), true);
+  const changed = {[name]:Buffer.from('RouteCreationController')};
+  const changedManifest = build.createReleaseManifest(expected, changed);
+  assert.throws(() => build.verifyReleasePackage(changedManifest, changed, expected, identities), /Development/i);
+});
+
 test('a known Development Preview label cannot be accepted as a release package', () => {
   const expected = {issueNumber:17,runId:700,attempt:1,controllerSha:'a'.repeat(40),
     module:'Full_Map_Unlock_And_Expansion',sourceSha:'d9daec9217b454f8dd8d751bcf480fb5d6df8dc9',workshopId:'3832298906'};

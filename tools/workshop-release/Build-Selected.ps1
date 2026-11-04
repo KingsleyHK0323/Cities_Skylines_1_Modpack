@@ -49,6 +49,8 @@ foreach ($entry in $plan) {
     $content = Join-Path $package 'content'
     if ($module -ceq 'AI_Improve') {
         & (Join-Path $PSScriptRoot 'Build-AIImprove.ps1') -SourcePath $source -SourceSha $sourceSha -GameRoot $GameRoot -OutputDirectory $content
+    } elseif ($module -ceq 'Automated_Public_Transport_Planning') {
+        & (Join-Path $PSScriptRoot 'Build-APTP.ps1') -SourcePath $source -SourceSha $sourceSha -GameRoot $GameRoot -OutputDirectory $content
     } else {
         & (Join-Path $PSScriptRoot 'Build-Reviewed.ps1') -Module $module -SourcePath $source -SourceSha $sourceSha -GameRoot $GameRoot -OutputDirectory $content
     }
