@@ -2,6 +2,21 @@
 
 Copyright © Kingsley.
 
+## Unreleased — Release preview candidate
+
+- Include the existing read-only planning preview and lifecycle in the
+  `DevTools=false` source configuration while retaining route creation, route
+  editing and the save spike behind the Development-only boundary.
+- Add static checks for both configurations and the eleven preview translations.
+  Cloud compilation and in-game behavior have not yet been verified.
+- Exclude the performance probe, startup survey and interactive diagnostics from Release.
+- Label demand as a five-slots-per-unit capacity proxy, not actual occupancy or
+  ridership, with the explanatory text available in all eleven UI languages.
+- Prepare the preview ownership ticket before publishing a request and exercise
+  admission, cancellation and stale-worker handling with an in-memory synthetic
+  test. Game callback and unload behavior remain unverified.
+- Signature: OpenAI-Codex_aptp_release_boundary.
+
 ## 2026-11-03 — Independent Development build source
 
 - Retain the cloud compile, planning checks and artifact provenance verification while publishing verified Development files to the independent Development build branch.

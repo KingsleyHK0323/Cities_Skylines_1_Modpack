@@ -3,7 +3,9 @@ using System.Globalization;
 using ColossalFramework.UI;
 using ICities;
 using AutomatedPublicTransportPlanning.Planning;
+#if DEVTOOLS
 using AutomatedPublicTransportPlanning.Spike;
+#endif
 using AutomatedPublicTransportPlanning.Util;
 
 namespace AutomatedPublicTransportPlanning
@@ -54,9 +56,11 @@ namespace AutomatedPublicTransportPlanning
         /// </summary>
         private static readonly List<KeyValuePair<object, string>> s_localised =
             new List<KeyValuePair<object, string>>();
+        // The read-only preview is shared by Release and Development builds.
+        // Signature: OpenAI-Codex_aptp_release_boundary.
+        private static UITextField s_planningStatus;
 #if DEVTOOLS
         // OpenAI-Codex: keep proposal creation disabled until a current selection is armed.
-        private static UITextField s_planningStatus;
         private static UIDropDown s_routeProposalDropdown;
         private static UIButton s_routeCreateButton;
         private static bool s_routeCreationArmed;
@@ -77,39 +81,45 @@ namespace AutomatedPublicTransportPlanning
         public static void ReleaseTrackedUI()
         {
             s_localised.Clear();
-#if DEVTOOLS
             s_planningStatus = null;
+#if DEVTOOLS
             s_routeProposalDropdown = null;
             s_routeCreateButton = null;
             s_routeCreationArmed = false;
             s_displayedPreview = null;
             s_routeProposalIndexes = new int[0];
             s_selectedRouteProposalIndex = -1;
+#endif
             PlanningCapture.ClearLatestPreview();
+#if DEVTOOLS
             RouteCreationController.ResetForLevelChange();
             RouteEditingController.ResetForLevelChange();
             RouteEditingUi.Reset(); // OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
 #endif
         }
 
-#if DEVTOOLS
         /// <summary>Called on the main thread by PlanningThreadingExtension.OnUpdate.</summary>
         internal static void UpdatePlanningStatus(string text)
         {
+#if DEVTOOLS
             RouteEditingUi.Refresh(); // OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
             RefreshRouteProposalOptions(PlanningCapture.LatestPreview, false);
             UpdateRouteCreateButton();
+#endif
             UITextField status = s_planningStatus;
             if (status != null)
             {
                 string display = text ?? string.Empty;
                 display = display.Replace(PlanningEngine.SnapshotStalePlaceholder,
                                          Loc.Get(Strings.SnapshotStaleNote));
+                display = display.Replace(PlanningEngine.DemandProxyPlaceholder,
+                                         Loc.Get(Strings.DemandProxyNote));
+#if DEVTOOLS
                 display = display + "\n\n" + RouteCreationController.StatusText;
+#endif
                 status.text = display;
             }
         }
-#endif
 
         /// <summary>
         /// Called when the player opens this mod's entry in the content manager.
@@ -145,6 +155,8 @@ namespace AutomatedPublicTransportPlanning
 
             TrackDropdownLabel(picker, Strings.LabelLanguage);
 
+#if DEVTOOLS
+            // Keep diagnostic controls out of the Release build.
             UIHelperBase diagnostics = helper.AddGroup(Loc.Get(Strings.GroupDiagnostics));
 
             UIButton testLog = Track(diagnostics.AddButton(Loc.Get(Strings.ButtonTestLog),
@@ -162,14 +174,15 @@ namespace AutomatedPublicTransportPlanning
                   Guarded("performance probe", PerformanceProbe.Run)) as UIButton,
                   Strings.ButtonMeasure);
 
-#if DEVTOOLS
             RouteEditingUi.Build(helper); // OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
-            UIButton preview = Track(diagnostics.AddButton(Loc.Get(Strings.ButtonPlanningPreview),
+#endif
+            UIHelperBase planning = helper.AddGroup(Loc.Get(Strings.LabelPlanningStatus));
+            UIButton preview = Track(planning.AddButton(Loc.Get(Strings.ButtonPlanningPreview),
                 Guarded("planning preview", delegate { PlanningCapture.RequestPreview(); })) as UIButton,
                 Strings.ButtonPlanningPreview);
-            TrackGroupTitle(preview, Strings.GroupDiagnostics);
+            TrackGroupTitle(preview, Strings.LabelPlanningStatus);
 
-            s_planningStatus = diagnostics.AddTextfield(Loc.Get(Strings.LabelPlanningStatus),
+            s_planningStatus = planning.AddTextfield(Loc.Get(Strings.LabelPlanningStatus),
                 PlanningCapture.DisplayText, null) as UITextField;
             if (s_planningStatus != null)
             {
@@ -178,6 +191,7 @@ namespace AutomatedPublicTransportPlanning
                 s_planningStatus.height = 280f;
             }
 
+#if DEVTOOLS
             s_routeCreationArmed = false;
             s_routeProposalDropdown = null;
             s_routeCreateButton = null;
@@ -528,9 +542,11 @@ namespace AutomatedPublicTransportPlanning
             return delegate { Log.Guard(context, delegate { handler(); }); };
         }
 
+#if DEVTOOLS
         private static void OnDiagnosticsButton()
         {
             Log.Info("Diagnostics button pressed. Mod assembly is loaded and responding.");
         }
+#endif
     }
 }

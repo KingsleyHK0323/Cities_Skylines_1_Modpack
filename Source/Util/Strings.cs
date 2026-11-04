@@ -52,10 +52,12 @@ namespace AutomatedPublicTransportPlanning.Util
         public const string ButtonMeasure = "btn.measure";
         public const string ButtonSnapshot = "btn.snapshot";
         public const string ButtonGraph = "btn.graph";
-#if DEVTOOLS
+        // Release preview translations: OpenAI-Codex_aptp_release_boundary.
         public const string ButtonPlanningPreview = "btn.planningPreview";
         public const string LabelPlanningStatus = "label.planningStatus";
         public const string SnapshotStaleNote = "note.snapshotStale";
+        public const string DemandProxyNote = "note.demandProxy";
+#if DEVTOOLS
         // OpenAI-Codex: Development-only controls and statuses for confirmed proposal creation.
         public const string GroupRouteCreation = "group.routeCreation";
         public const string CheckRouteArm = "check.routeArm";
@@ -116,10 +118,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "Measure planning costs (brief pause)";
             d[ButtonSnapshot] = "Capture a world snapshot";
             d[ButtonGraph] = "Build the route graph";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "Generate a read-only planning preview";
             d[LabelPlanningStatus] = "Planning preview status";
             d[SnapshotStaleNote] = "Snapshot may become stale after city changes.";
+            d[DemandProxyNote] = "Demand is estimated from five capacity slots per citizen unit, not actual people or ridership.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - create a selected route proposal (writes to your city)";
             d[CheckRouteArm] = "Arm route creation; every click still asks for confirmation";
             d[LabelRouteProposal] = "Eligible route proposal";
@@ -161,10 +164,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "量測規劃成本（會短暫停頓）";
             d[ButtonSnapshot] = "擷取世界快照";
             d[ButtonGraph] = "建立路線圖";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "產生唯讀規劃預覽";
             d[LabelPlanningStatus] = "規劃預覽狀態";
             d[SnapshotStaleNote] = "城市變動後，快照可能已過期。";
+            d[DemandProxyNote] = "需求依每個市民單位五個容量位置估算，並非實際人數或乘客量。";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - 建立所選路線提案（會寫入城市）";
             d[CheckRouteArm] = "啟用路線建立；每次點擊仍會再次確認";
             d[LabelRouteProposal] = "可建立的路線提案";
@@ -206,10 +210,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "测量规划开销（会短暂停顿）";
             d[ButtonSnapshot] = "抓取世界快照";
             d[ButtonGraph] = "构建线路图";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "生成只读规划预览";
             d[LabelPlanningStatus] = "规划预览状态";
             d[SnapshotStaleNote] = "城市变化后，快照可能已过期。";
+            d[DemandProxyNote] = "需求按每个市民单位五个容量位置估算，并非实际人数或客流量。";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - 创建所选路线提案（会写入城市）";
             d[CheckRouteArm] = "启用路线创建；每次点击仍会再次确认";
             d[LabelRouteProposal] = "可创建的路线提案";
@@ -251,10 +256,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "計画処理のコストを計測（一時的に停止します）";
             d[ButtonSnapshot] = "ワールドスナップショットを取得";
             d[ButtonGraph] = "路線グラフを構築";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "読み取り専用の計画プレビューを生成";
             d[LabelPlanningStatus] = "計画プレビューの状態";
             d[SnapshotStaleNote] = "都市の変更後、スナップショットが古くなっている場合があります。";
+            d[DemandProxyNote] = "需要は市民ユニットごとに定員5人として推定した値で、実際の人数や利用者数ではありません。";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - 選択したルート案を作成（都市に書き込みます）";
             d[CheckRouteArm] = "ルート作成を有効化（クリックごとに確認します）";
             d[LabelRouteProposal] = "作成可能なルート案";
@@ -296,10 +302,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "계획 비용 측정 (잠시 멈춤)";
             d[ButtonSnapshot] = "월드 스냅샷 캡처";
             d[ButtonGraph] = "노선 그래프 구축";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "읽기 전용 계획 미리보기 생성";
             d[LabelPlanningStatus] = "계획 미리보기 상태";
             d[SnapshotStaleNote] = "도시가 변경되면 스냅샷이 오래된 정보가 될 수 있습니다.";
+            d[DemandProxyNote] = "수요는 시민 단위당 정원 5칸으로 추정한 값이며 실제 인원이나 승객 수가 아닙니다.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - 선택한 경로 제안 생성 (도시에 기록됨)";
             d[CheckRouteArm] = "경로 생성 활성화; 클릭할 때마다 다시 확인합니다";
             d[LabelRouteProposal] = "생성 가능한 경로 제안";
@@ -341,10 +348,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "Planungskosten messen (kurze Pause)";
             d[ButtonSnapshot] = "Netzwerk-Momentaufnahme erstellen";
             d[ButtonGraph] = "Routengraph aufbauen";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "Schreibgeschützte Planungsvorschau erstellen";
             d[LabelPlanningStatus] = "Status der Planungsvorschau";
             d[SnapshotStaleNote] = "Nach Änderungen an der Stadt kann der Schnappschuss veraltet sein.";
+            d[DemandProxyNote] = "Die Nachfrage ist anhand von fünf Kapazitätsplätzen pro Bürgereinheit geschätzt, nicht anhand tatsächlicher Personen- oder Fahrgastzahlen.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - ausgewählten Routenvorschlag erstellen (ändert die Stadt)";
             d[CheckRouteArm] = "Routenerstellung aktivieren; jeder Klick erfordert weiterhin eine Bestätigung";
             d[LabelRouteProposal] = "Erstellbarer Routenvorschlag";
@@ -386,10 +394,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "Mesurer les coûts de planification (courte pause)";
             d[ButtonSnapshot] = "Capturer un instantané du réseau";
             d[ButtonGraph] = "Construire le graphe des itinéraires";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "Générer un aperçu de planification en lecture seule";
             d[LabelPlanningStatus] = "État de l'aperçu de planification";
             d[SnapshotStaleNote] = "L'instantané peut être obsolète après des changements dans la ville.";
+            d[DemandProxyNote] = "La demande est estimée à cinq places de capacité par unité de citoyens, et non à partir du nombre réel de personnes ou de voyageurs.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - créer une proposition de ligne sélectionnée (modifie la ville)";
             d[CheckRouteArm] = "Activer la création de ligne ; chaque clic demande toujours confirmation";
             d[LabelRouteProposal] = "Proposition de ligne disponible";
@@ -431,10 +440,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "Medir los costes de planificación (breve pausa)";
             d[ButtonSnapshot] = "Capturar una instantánea de la red";
             d[ButtonGraph] = "Construir el grafo de rutas";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "Generar una vista previa de planificación de solo lectura";
             d[LabelPlanningStatus] = "Estado de la vista previa de planificación";
             d[SnapshotStaleNote] = "La instantánea puede quedar obsoleta después de cambios en la ciudad.";
+            d[DemandProxyNote] = "La demanda se estima con cinco plazas de capacidad por unidad ciudadana, no con el número real de personas o pasajeros.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - crear una propuesta de ruta seleccionada (modifica la ciudad)";
             d[CheckRouteArm] = "Activar la creación de rutas; cada clic seguirá pidiendo confirmación";
             d[LabelRouteProposal] = "Propuesta de ruta disponible";
@@ -476,10 +486,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "Medir os custos de planejamento (breve pausa)";
             d[ButtonSnapshot] = "Capturar um instantâneo da rede";
             d[ButtonGraph] = "Construir o grafo de rotas";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "Gerar uma prévia de planejamento somente leitura";
             d[LabelPlanningStatus] = "Estado da prévia de planejamento";
             d[SnapshotStaleNote] = "O instantâneo pode ficar desatualizado após mudanças na cidade.";
+            d[DemandProxyNote] = "A demanda é estimada em cinco vagas de capacidade por unidade de cidadãos, não pelo número real de pessoas ou passageiros.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - criar uma proposta de rota selecionada (altera a cidade)";
             d[CheckRouteArm] = "Ativar criação de rotas; cada clique ainda exige confirmação";
             d[LabelRouteProposal] = "Proposta de rota disponível";
@@ -521,10 +532,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "Измерить затраты на планирование (короткая пауза)";
             d[ButtonSnapshot] = "Сделать снимок сети";
             d[ButtonGraph] = "Построить граф маршрутов";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "Создать предварительный план только для чтения";
             d[LabelPlanningStatus] = "Состояние предварительного плана";
             d[SnapshotStaleNote] = "После изменений города снимок может устареть.";
+            d[DemandProxyNote] = "Спрос оценивается по пяти местам вместимости на единицу жителей и не отражает фактическое число людей или пассажиров.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - создать выбранное предложение маршрута (изменит город)";
             d[CheckRouteArm] = "Включить создание маршрута; каждый щелчок всё равно требует подтверждения";
             d[LabelRouteProposal] = "Доступное предложение маршрута";
@@ -566,10 +578,11 @@ namespace AutomatedPublicTransportPlanning.Util
             d[ButtonMeasure] = "Zmierz koszty planowania (krótka pauza)";
             d[ButtonSnapshot] = "Wykonaj migawkę sieci";
             d[ButtonGraph] = "Zbuduj graf tras";
-#if DEVTOOLS
             d[ButtonPlanningPreview] = "Utwórz podgląd planowania tylko do odczytu";
             d[LabelPlanningStatus] = "Stan podglądu planowania";
             d[SnapshotStaleNote] = "Po zmianach w mieście migawka może być nieaktualna.";
+            d[DemandProxyNote] = "Popyt oszacowano na podstawie pięciu miejsc na jednostkę mieszkańców; nie jest to faktyczna liczba osób ani pasażerów.";
+#if DEVTOOLS
             d[GroupRouteCreation] = "Spike 2 - utwórz wybraną propozycję trasy (zmienia miasto)";
             d[CheckRouteArm] = "Włącz tworzenie tras; każde kliknięcie nadal wymaga potwierdzenia";
             d[LabelRouteProposal] = "Dostępna propozycja trasy";

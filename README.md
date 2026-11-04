@@ -1,5 +1,20 @@
 # Automated Public Transport Planning
 
+## Release preview candidate
+
+An unpublished source candidate makes the existing read-only planning capture
+and preview available when `DevTools=false`. Route creation, route editing, and
+the save round-trip spike remain Development-only. Static source-boundary tests
+cover the release and Development configurations, including preview translation
+keys. Development-only diagnostics, startup survey and the performance probe are
+excluded from the Release source configuration. Preview demand is a capacity proxy using five
+slots per citizen unit; it is not actual occupancy or ridership. The request
+admission and ticket classes have an in-memory controlled-interleaving check;
+this does not exercise game callbacks or level unloading. Neither configuration
+has been compiled or tested in the game for this candidate; the preview does not
+itself create or edit routes.
+<!-- Signature: OpenAI-Codex_aptp_release_boundary. -->
+
 Visit the [Automated Public Transport Planning website page](https://kingsleyhk0323.github.io/Cities_Skylines_1_Modpack/automated-public-transport-planning/) for project information, documentation, and updates.
 
 Author: Kingsley

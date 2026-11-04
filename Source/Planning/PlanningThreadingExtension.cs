@@ -13,8 +13,10 @@ namespace AutomatedPublicTransportPlanning.Planning
         public override void OnAfterSimulationFrame()
         {
             PlanningCapture.OnAfterSimulationFrame();
+#if DEVTOOLS
             RouteCreationController.OnAfterSimulationFrame();
             RouteEditingController.OnAfterSimulationFrame(); // OpenAI-Codex_Responsible: Automated_Public_Transport_Planning
+#endif
         }
 
         public override void OnUpdate(float realTimeDelta, float simulationTimeDelta)
@@ -23,3 +25,5 @@ namespace AutomatedPublicTransportPlanning.Planning
         }
     }
 }
+
+// Release preview bridge: OpenAI-Codex_aptp_release_boundary.

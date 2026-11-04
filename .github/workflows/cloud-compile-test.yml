@@ -64,6 +64,25 @@ jobs:
           & $msbuild -version -nologo
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "APTP_MSBUILD=$msbuild" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Check Release preview source boundary
+        shell: pwsh
+        run: |
+          node --test Tests/ReleasePreviewBoundary.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Check preview admission under controlled interleavings
+        shell: pwsh
+        run: ./Tests/Run-PlanningPreviewAdmissionSynthetic.ps1
+      - name: Rebuild no-DevTools DLL in an isolated cloud directory
+        shell: pwsh
+        run: |
+          $releaseOutput = Join-Path $env:RUNNER_TEMP 'aptp-release-verification'
+          $releaseIntermediate = Join-Path $env:RUNNER_TEMP 'aptp-release-intermediate'
+          & $env:APTP_MSBUILD AutomatedPublicTransportPlanning.csproj /t:Rebuild /p:Configuration=Release /p:DevTools=false /p:ModsDir= "/p:OutputPath=$releaseOutput/" "/p:IntermediateOutputPath=$releaseIntermediate/" "/p:CitiesSkylinesDir=$env:CS1_GAME_ROOT" "/p:CSInstallPath=$env:CS1_GAME_ROOT" /verbosity:normal /nologo
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $releaseDll = Join-Path $releaseOutput 'AutomatedPublicTransportPlanning.dll'
+          if (-not (Test-Path -LiteralPath $releaseDll -PathType Leaf) -or (Get-Item -LiteralPath $releaseDll).Length -le 0 -or [Reflection.AssemblyName]::GetAssemblyName($releaseDll).Name -cne 'AutomatedPublicTransportPlanning') { throw 'The isolated Release DLL is missing or has the wrong identity.' }
+          Write-Output 'Isolated no-DevTools compile passed. Game behavior is not verified.'
+      # Signature: OpenAI-Codex.
       - name: Rebuild Development DLL against verified game references
         shell: pwsh
         run: |

@@ -23,6 +23,9 @@ namespace AutomatedPublicTransportPlanning
     /// </summary>
     public sealed class Loader : LoadingExtensionBase
     {
+#if DEVTOOLS
+        // The startup survey is a development diagnostic, not a planning dependency.
+        // Signature: OpenAI-Codex_aptp_release_boundary.
         public override void OnLevelLoaded(LoadMode mode)
         {
             base.OnLevelLoaded(mode);
@@ -47,6 +50,7 @@ namespace AutomatedPublicTransportPlanning
             LoadMode loadedAs = mode;
             Singleton<SimulationManager>.instance.AddAction(delegate { RunSurvey(loadedAs); });
         }
+#endif
 
         /// <summary>
         /// Drops anything this mod is still holding from the level being torn down.
@@ -57,13 +61,12 @@ namespace AutomatedPublicTransportPlanning
         /// </summary>
         public override void OnLevelUnloading()
         {
-#if DEVTOOLS
             PlanningCapture.CancelForLevelChange();
-#endif
             Mod.ReleaseTrackedUI();
             base.OnLevelUnloading();
         }
 
+#if DEVTOOLS
         private static void RunSurvey(LoadMode mode)
         {
             try
@@ -212,5 +215,8 @@ namespace AutomatedPublicTransportPlanning
 
             Log.Info("Net segments: " + created + ", with a pedestrian lane: " + withPedestrianLane);
         }
+#endif
     }
 }
+
+// Release preview lifecycle: OpenAI-Codex_aptp_release_boundary.

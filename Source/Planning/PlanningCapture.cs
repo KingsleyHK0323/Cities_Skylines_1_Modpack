@@ -19,9 +19,8 @@ namespace AutomatedPublicTransportPlanning.Planning
         private const double SliceBudgetMillis = 5.0;
         private const int MaximumAttempts = 3;
 
-        private static volatile int s_request;
-        private static volatile int s_cancel;
-        private static volatile bool s_busy;
+        // Signature: OpenAI-Codex_aptp_release_boundary.
+        private static readonly PlanningPreviewAdmission s_admission = new PlanningPreviewAdmission();
         private static readonly object s_displayLock = new object();
         // OpenAI-Codex: publish immutable previews safely to the Development settings UI.
         private static readonly object s_previewLock = new object();
@@ -103,32 +102,36 @@ namespace AutomatedPublicTransportPlanning.Planning
 
         public static bool RequestPreview()
         {
-            if (s_busy || Interlocked.CompareExchange(ref s_request, 1, 0) != 0)
+            bool accepted = s_admission.TryQueue(delegate
+            {
+                ClearLatestPreview();
+                if (!s_workerGate.TryBegin(out s_captureTicket)) { return false; }
+                s_captureGeneration = Interlocked.CompareExchange(ref s_previewGeneration, 0, 0);
+                lock (s_displayLock)
+                {
+                    s_display = "Waiting for the next simulation frame to start a read-only capture.";
+                }
+                return true;
+            });
+            if (!accepted)
             {
                 Log.Warning("Planning preview request ignored; a capture or preview is already active.");
                 return false;
             }
-
-            lock (s_displayLock)
-            {
-                s_display = "Waiting for the next simulation frame to start a read-only capture.";
-            }
-            ClearLatestPreview();
-            if (!s_workerGate.TryBegin(out s_captureTicket)) { return false; }
-            s_captureGeneration = Interlocked.CompareExchange(ref s_previewGeneration, 0, 0);
             Log.Info("Planning preview requested; the city will be read in simulation-frame slices.");
             return true;
         }
 
         public static void CancelForLevelChange()
         {
-            Interlocked.Exchange(ref s_cancel, 1);
-            Interlocked.Exchange(ref s_request, 0);
-            ClearLatestPreview();
-            lock (s_displayLock)
+            s_admission.Cancel(delegate
             {
-                s_display = "No planning preview has been generated in this city session.";
-            }
+                ClearLatestPreview();
+                lock (s_displayLock)
+                {
+                    s_display = "No planning preview has been generated in this city session.";
+                }
+            });
         }
 
         /// <summary>Called only from ThreadingExtensionBase.OnAfterSimulationFrame.</summary>
@@ -136,20 +139,20 @@ namespace AutomatedPublicTransportPlanning.Planning
         {
             try
             {
-                if (Interlocked.Exchange(ref s_cancel, 0) != 0)
+                bool wasBusy = false;
+                if (s_admission.TryResetCancelled(delegate
                 {
-                    if (s_active || s_busy)
-                    {
-                        Log.Info("Planning capture cancelled because the level is changing.");
-                    }
+                    wasBusy = s_active || s_admission.IsBusy;
                     ResetCapture("Capture cancelled because the level changed.");
+                }))
+                {
+                    if (wasBusy) { Log.Info("Planning capture cancelled because the level is changing."); }
                     return;
                 }
 
                 if (!s_active)
                 {
-                    if (Interlocked.Exchange(ref s_request, 0) == 0) { return; }
-                    s_busy = true;
+                    if (!s_admission.TryTake()) { return; }
                     s_attempt = 0;
                     s_retryDiagnostic = string.Empty;
                     s_accumulatedElapsedMillis = 0.0;
@@ -513,7 +516,6 @@ namespace AutomatedPublicTransportPlanning.Planning
                 s_retryDiagnostic, s_totalRequestSlices, s_totalRequestOverBudgetSlices, s_buildIndexAtStart,
                 s_buildIndexAtEnd, s_signatureAtStart, s_signatureAtCaptureEnd,
                 elapsed, sliceWork, s_totalRequestMaxSliceMillis, s_busPrefabName);
-            s_busy = true;
             int previewGeneration = s_captureGeneration;
             RouteEditRequestTicket workerTicket = s_captureTicket;
             UpdateDisplay("Capture validated; computing demand and route proposals on copied data. Retries=" +
@@ -568,7 +570,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                     });
                 }, delegate
                 {
-                    s_workerGate.TryPublish(workerTicket, delegate { s_busy = false; });
+                    s_workerGate.TryPublish(workerTicket, delegate { s_admission.Complete(); });
                     s_workerGate.Complete(workerTicket);
                 });
             }, snapshot);
@@ -607,7 +609,6 @@ namespace AutomatedPublicTransportPlanning.Planning
 
             if (s_attempt >= MaximumAttempts)
             {
-                s_busy = false;
                 string abandoned = "城市持續變動，請暫停後重試\nCapture abandoned after " + MaximumAttempts +
                     " attempts (retries=" + (MaximumAttempts - 1) + "). Reason(s): " + s_retryDiagnostic +
                     "\nLast attempt: elapsed=" + elapsed.ToString("F2") + " ms; created segments=" +
@@ -622,6 +623,7 @@ namespace AutomatedPublicTransportPlanning.Planning
                 s_segments = null;
                 s_buildings = null;
                 s_busInfo = null;
+                s_admission.Complete();
                 return;
             }
 
@@ -637,7 +639,6 @@ namespace AutomatedPublicTransportPlanning.Planning
         private static void FailPermanently(string reason)
         {
             s_active = false;
-            s_busy = false;
             string message = "Capture unavailable; no retry was attempted. Reason: " + reason;
             UpdateDisplay(message);
             double elapsed = s_attemptClock == null ? 0.0 : Millis(s_attemptClock);
@@ -652,12 +653,12 @@ namespace AutomatedPublicTransportPlanning.Planning
             s_segments = null;
             s_buildings = null;
             s_busInfo = null;
+            s_admission.Complete();
         }
 
         private static void ResetCapture(string message)
         {
             s_active = false;
-            s_busy = false;
             if (s_attemptClock != null) { s_attemptClock.Stop(); }
             s_retryPending = false;
             s_readyToComplete = false;
@@ -665,7 +666,8 @@ namespace AutomatedPublicTransportPlanning.Planning
             s_buildings = null;
             s_busInfo = null;
             s_lineActive = false;
-            UpdateDisplay(message);
+            // Cancellation reset runs under the admission lock before a new request can start.
+            lock (s_displayLock) { s_display = message ?? string.Empty; }
         }
 
         private static StructureSignature ReadSignature()
@@ -692,7 +694,11 @@ namespace AutomatedPublicTransportPlanning.Planning
 
         private static void UpdateDisplay(string text)
         {
-            lock (s_displayLock) { s_display = text ?? string.Empty; }
+            // Do not publish status from a capture invalidated by a level change.
+            s_workerGate.TryPublish(s_captureTicket, delegate
+            {
+                lock (s_displayLock) { s_display = text ?? string.Empty; }
+            });
         }
     }
 }

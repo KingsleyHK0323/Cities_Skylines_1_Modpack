@@ -151,13 +151,15 @@
     <Compile Include="Source\Planning\StopPlacement.cs" />
     <Compile Include="Source\Planning\WorldSnapshot.cs" />
     <Compile Include="Source\Planning\StopGraph.cs" />
-    <Compile Include="Source\Planning\CitizenUnitDemand.cs" Condition=" '$(DevTools)' == 'true' " />
-    <Compile Include="Source\Planning\PlanningSnapshot.cs" Condition=" '$(DevTools)' == 'true' " />
-    <Compile Include="Source\Planning\PlanningEngine.cs" Condition=" '$(DevTools)' == 'true' " />
+    <!-- The read-only planning preview is a release feature; write controls remain development-only. Signature: OpenAI-Codex_aptp_release_boundary. -->
+    <Compile Include="Source\Planning\CitizenUnitDemand.cs" />
+    <Compile Include="Source\Planning\PlanningSnapshot.cs" />
+    <Compile Include="Source\Planning\PlanningEngine.cs" />
     <!-- Signature: OpenAI-Codex_Automated_Public_Transport_Planning -->
-    <Compile Include="Source\Planning\RouteStopPreview.cs" Condition=" '$(DevTools)' == 'true' " />
-    <Compile Include="Source\Planning\PlanningCapture.cs" Condition=" '$(DevTools)' == 'true' " />
-    <Compile Include="Source\Planning\PlanningThreadingExtension.cs" Condition=" '$(DevTools)' == 'true' " />
+    <Compile Include="Source\Planning\RouteStopPreview.cs" />
+    <Compile Include="Source\Planning\PlanningCapture.cs" />
+    <Compile Include="Source\Planning\PlanningPreviewAdmission.cs" />
+    <Compile Include="Source\Planning\PlanningThreadingExtension.cs" />
     <!-- OpenAI-Codex: keep route creation isolated from Release builds. -->
     <Compile Include="Source\Planning\RouteCreation.cs" Condition=" '$(DevTools)' == 'true' " />
     <!-- Signature: OpenAI-Codex_Responsible: Automated_Public_Transport_Planning -->
@@ -166,10 +168,10 @@
     <Compile Include="Source\Planning\RouteManualInput.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\RouteEditing.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Planning\RouteEditExecution.cs" Condition=" '$(DevTools)' == 'true' " />
-    <Compile Include="Source\Planning\RouteEditRequestGate.cs" Condition=" '$(DevTools)' == 'true' " />
+    <Compile Include="Source\Planning\RouteEditRequestGate.cs" />
     <Compile Include="Source\RouteEditingUi.cs" Condition=" '$(DevTools)' == 'true' " />
-    <!-- This probe only reads the city and remains available in the release diagnostics. -->
-    <Compile Include="Source\Spike\PerformanceProbe.cs" />
+    <!-- Development diagnostics are excluded from Release. Signature: OpenAI-Codex_aptp_release_boundary. -->
+    <Compile Include="Source\Spike\PerformanceProbe.cs" Condition=" '$(DevTools)' == 'true' " />
     <Compile Include="Source\Spike\SaveRoundTripSpike.cs" Condition=" '$(DevTools)' == 'true' " />
   </ItemGroup>
 

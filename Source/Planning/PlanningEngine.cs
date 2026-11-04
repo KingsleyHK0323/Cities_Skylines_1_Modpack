@@ -169,7 +169,9 @@ namespace AutomatedPublicTransportPlanning.Planning
                 .Append("; buildings=").Append(Snapshot == null ? 0 : Snapshot.CreatedBuildingCount)
                 .Append("; existing bus stops=").Append(Snapshot == null ? 0 : Snapshot.ExistingStopCount)
                 .Append("; graph nodes=").Append(GraphNodes)
-                .Append("\nDemand (people): home=").Append(HomePeople)
+                // Signature: OpenAI-Codex_aptp_release_boundary.
+                .Append("\n").Append(PlanningEngine.DemandProxyPlaceholder)
+                .Append("\nCapacity proxy: home=").Append(HomePeople)
                 .Append("; work=").Append(WorkPeople)
                 .Append("; visit=").Append(VisitPeople)
                 .Append("; assigned buildings=").Append(AssignedBuildings)
@@ -240,6 +242,7 @@ namespace AutomatedPublicTransportPlanning.Planning
     internal static class PlanningEngine
     {
         internal const string SnapshotStalePlaceholder = "Snapshot may become stale after city changes.";
+        internal const string DemandProxyPlaceholder = "Demand is estimated from five capacity slots per citizen unit, not actual people or ridership.";
         private const float GridCellSize = 256f;
         private const float TargetStopSpacing = 400f;
         private const float MinimumStopSpacing = TargetStopSpacing * 0.75f;

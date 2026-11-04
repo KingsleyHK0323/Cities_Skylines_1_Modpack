@@ -77,6 +77,9 @@ namespace AutomatedPublicTransportPlanning.Planning
             return chosen;
         }
 
+#if DEVTOOLS
+        // Development-only diagnostic; the resolver above remains available in Release.
+        // Signature: OpenAI-Codex_aptp_release_boundary.
         /// <summary>
         /// Dumps the fields that might let us tell city buses from intercity buses
         /// on something better than a name. Diagnostic only.
@@ -109,5 +112,6 @@ namespace AutomatedPublicTransportPlanning.Planning
 
             Log.Info(sb.ToString());
         }
+#endif
     }
 }
