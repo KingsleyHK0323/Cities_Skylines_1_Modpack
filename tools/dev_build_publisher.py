@@ -233,9 +233,30 @@ class GitHubGateway:
         if method == "PATCH" and suffix.startswith("/git/refs/heads/"):
             operation = "update-ref"
 
-        def failure(stderr=""):
-            status = re.search(r"\bHTTP ([1-5][0-9]{2})\b", stderr)
-            return PublicationError(f"GitHub API {operation} failed (HTTP {status.group(1) if status else 'unknown'})")
+        def failure(stderr="", stdout="", process="exit-unknown"):
+            status_match = re.search(r"\bHTTP ([1-5][0-9]{2})\b", stderr)
+            status = status_match.group(1) if status_match else "unknown"
+            if status == "unknown":
+                try:
+                    response = json.loads(stdout)
+                    candidate = str(response.get("status", "")) if isinstance(response, dict) else ""
+                    if re.fullmatch(r"[1-5][0-9]{2}", candidate):
+                        status = candidate
+                except (TypeError, ValueError):
+                    pass
+            details = (stderr[:2048] + " " + stdout[:2048]).lower()
+            category = "other"
+            for label, markers in (
+                ("rate-limit", ("rate limit", "rate-limit", "abuse detection")),
+                ("authentication", ("bad credentials", "authentication required", "not logged in")),
+                ("permission", ("access denied", "permission denied", "not accessible by integration")),
+                ("network", ("connection reset", "connection refused", "could not resolve", "unexpected eof", "tls handshake")),
+                ("invalid-input", ("invalid json", "invalid character", "unexpected end of json")),
+            ):
+                if any(marker in details for marker in markers):
+                    category = label
+                    break
+            return PublicationError(f"GitHub API {operation} failed (HTTP {status}; process {process}; category {category})")
 
         cmd = ["gh", "api", "--method", method, "-H", "Accept: application/vnd.github+json", self.base + suffix]
         encoded = None
@@ -244,12 +265,19 @@ class GitHubGateway:
             encoded = json.dumps(body)
         try:
             result = subprocess.run(cmd, input=encoded, capture_output=True, text=True, timeout=60, check=False)
-        except (OSError, subprocess.TimeoutExpired) as exc:
-            raise failure() from exc
+        except subprocess.TimeoutExpired as exc:
+            raise failure(process="timeout") from exc
+        except FileNotFoundError as exc:
+            raise failure(process="program-missing") from exc
+        except PermissionError as exc:
+            raise failure(process="program-denied") from exc
+        except OSError as exc:
+            raise failure(process="os-error") from exc
         if result.returncode:
             if allow_missing and "HTTP 404" in result.stderr:
                 return None
-            raise failure(result.stderr)
+            code = result.returncode if type(result.returncode) is int and 0 < result.returncode < 256 else "unknown"
+            raise failure(result.stderr, result.stdout, f"exit-{code}")
         try:
             return json.loads(result.stdout)
         except ValueError as exc:

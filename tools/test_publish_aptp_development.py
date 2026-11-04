@@ -80,8 +80,8 @@ class PublishAptpChecks(unittest.TestCase):
                 self.publish = publish
 
     def test_diagnostics_allow_only_fixed_safe_publication_details(self):
-        safe = self.module.publisher.PublicationError('GitHub API write-blob failed (HTTP 403)')
-        self.assertIn('GitHub API write-blob failed (HTTP 403)', self.module.failure_message(safe))
+        safe = self.module.publisher.PublicationError('GitHub API write-blob failed (HTTP 403; process exit-1; category rate-limit)')
+        self.assertIn('GitHub API write-blob failed (HTTP 403; process exit-1; category rate-limit)', self.module.failure_message(safe))
         for error in (ValueError('private-example-value'),
                       self.module.publisher.PublicationError('private-example-value'),
                       self.module.publisher.PublicationError('GitHub API write-blob failed (HTTP 403) private-example-value')):

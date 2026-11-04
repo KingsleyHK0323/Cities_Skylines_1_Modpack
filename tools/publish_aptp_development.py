@@ -31,7 +31,9 @@ def failure_message(error):
         message = str(error)
         api_error = re.fullmatch(
             r'GitHub API (?:read|write-blob|write-tree|write-commit|create-ref|update-ref|other) '
-            r'failed \(HTTP (?:unknown|[1-5][0-9]{2})\)', message)
+            r'failed \(HTTP (?:unknown|[1-5][0-9]{2}); '
+            r'process (?:exit-(?:unknown|[0-9]{1,3})|timeout|program-missing|program-denied|os-error); '
+            r'category (?:other|rate-limit|authentication|permission|network|invalid-input)\)', message)
         if message in safe_reasons or api_error:
             return 'APTP development publication failed: ' + message
     return 'APTP artifact provenance or publication verification failed.'

@@ -196,8 +196,8 @@ class GitHubGatewayTests(unittest.TestCase):
     def test_failed_write_exposes_only_safe_operation_and_http_status(self):
         gateway = publisher.GitHubGateway(context())
         for stderr, expected in (
-            ("gh: sensitive-example-value (HTTP 403)", "GitHub API write-blob failed (HTTP 403)"),
-            ("sensitive-example-value", "GitHub API write-blob failed (HTTP unknown)"),
+            ("gh: sensitive-example-value (HTTP 403)", "GitHub API write-blob failed (HTTP 403; process exit-1; category other)"),
+            ("sensitive-example-value", "GitHub API write-blob failed (HTTP unknown; process exit-1; category other)"),
         ):
             response = SimpleNamespace(returncode=1, stdout="sensitive-example-value", stderr=stderr)
             with self.subTest(stderr=stderr), patch.object(publisher.subprocess, "run", return_value=response):
@@ -205,6 +205,24 @@ class GitHubGatewayTests(unittest.TestCase):
                     gateway.write_blob(b"fixture")
                 self.assertEqual(str(caught.exception), expected)
                 self.assertNotIn("sensitive-example-value", str(caught.exception))
+
+    def test_failed_write_classifies_rate_limit_without_exposing_response(self):
+        gateway = publisher.GitHubGateway(context())
+        response = SimpleNamespace(returncode=1, stdout='{"status":"403","message":"private-example"}',
+                                   stderr="secondary rate limit: private-example")
+        with patch.object(publisher.subprocess, "run", return_value=response):
+            with self.assertRaises(publisher.PublicationError) as caught:
+                gateway.write_blob(b"fixture")
+        self.assertEqual(str(caught.exception), "GitHub API write-blob failed (HTTP 403; process exit-1; category rate-limit)")
+        self.assertNotIn("private-example", str(caught.exception))
+
+    def test_failed_process_reports_only_a_fixed_cause(self):
+        gateway = publisher.GitHubGateway(context())
+        with patch.object(publisher.subprocess, "run", side_effect=PermissionError("private-example")):
+            with self.assertRaises(publisher.PublicationError) as caught:
+                gateway.write_blob(b"fixture")
+        self.assertEqual(str(caught.exception), "GitHub API write-blob failed (HTTP unknown; process program-denied; category other)")
+        self.assertNotIn("private-example", str(caught.exception))
 
     def test_ref_updates_never_allow_force(self):
         gateway = publisher.GitHubGateway(context())
