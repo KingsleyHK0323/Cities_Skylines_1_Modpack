@@ -1,5 +1,12 @@
 # Change Log
 
+## 2026-11-04
+
+- Compare existing output directories by their Windows native real paths in the
+  icon-cache identity test, allowing short and long aliases of the same directory
+  while rejecting a different directory. The build implementation is unchanged.
+  Signature: OpenAI-Codex_dev_manager_icon
+
 - Distinguish an installed build matching a newly observed candidate from an
   unavailable source, while keeping the candidate explicitly unverified.
   Signature: OpenAI-Codex

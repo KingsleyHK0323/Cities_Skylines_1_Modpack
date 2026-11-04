@@ -23,7 +23,10 @@ test('native build identity changes for different icon input without generating 
   const identity=(sourcePath,iconPath)=>execFileSync('pwsh',['-NoLogo','-NoProfile','-NonInteractive','-File',path.resolve('desktop/Build-Native.ps1'),'-IdentityOnly','-IdentitySourcePath',sourcePath,'-IdentityIconPath',iconPath,'-OutputDirectory',root],{encoding:'utf8',windowsHide:true,timeout:15000,stdio:['pipe','pipe','pipe']}).trim();
   const first=identity(source,a),again=identity(source,a),changedIcon=identity(source,b),changedSource=identity(source2,a);
   assert.equal(first,again);assert.notEqual(first,changedIcon);assert.notEqual(first,changedSource);assert.match(path.basename(first),/^DevManager-dev-[a-f0-9]{64}\.exe$/);
-  assert.equal(path.dirname(first).toLowerCase(),root.toLowerCase());
+  const sameDirectory=(left,right)=>fs.realpathSync.native(left).toLowerCase()===fs.realpathSync.native(right).toLowerCase();
+  assert.equal(sameDirectory(path.dirname(first),root),true);
+  assert.equal(sameDirectory(root,`${root}${path.sep}..${path.sep}${path.basename(root)}`),true);
+  assert.equal(sameDirectory(root,path.dirname(root)),false);
   assert.equal(fs.existsSync(first),false);assert.equal(fs.existsSync(changedIcon),false);
   let failure;try{identity(source,path.join(root,'missing-input.bin'));}catch(error){failure=error;}assert.ok(failure);assert.match(String(failure.stderr),/Required app icon is missing/);
   const attributes=execFileSync('git',['check-attr','text','--','desktop/DevManager.ico'],{encoding:'utf8',windowsHide:true});assert.match(attributes,/: unset\s*$/);
