@@ -1,5 +1,25 @@
 # Development test readiness
 
+## Status update: 2026-11-04 (Asia/Hong_Kong)
+
+The assessment below is a historical 2026-11-03 snapshot. Its statements that no
+App Release or module artifact branches were observed describe that earlier point
+in time. [Dev Manager v0.1.0-beta.1](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/dev-manager-v0.1.0-beta.1)
+is now published as a prerelease with a Windows installer. That installer predates
+the icon changes in this source revision; this note does not claim that a newer
+installer has been published.
+
+GitHub currently has artifact branches for [AI Improve](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/tree/Development_Build/AI_Improve)
+(observed commit `2e2f211b9a3ca2db218ca7c31cdc3daeb150e6bb`) and
+[Automated Public Transport Planning](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/tree/Development_Build/Automated_Public_Transport_Planning)
+(observed commit `c63b9b234c5435a324f6b1113fa741ecad4aa312`). Branches may
+change, and their existence alone does not verify installation or gameplay.
+Interactive GUI and real-game acceptance remain pending.
+
+Signature: OpenAI-Codex_dev_manager_icon
+
+## Historical assessment: 2026-11-03
+
 Assessment date: 2026-11-03, Asia/Hong_Kong. This is a local App assessment, not a
 claim that GitHub or Steam distribution is ready. Main Session owns Release and
 cross-branch publication. Do not interpret a compiled package, an API response or

@@ -2,6 +2,10 @@
 
 ## 2026-11-04
 
+- Update the development-test readiness note with the published beta.1 installer
+  and two observed artifact branches, while retaining the historical assessment.
+  Signature: OpenAI-Codex_dev_manager_icon
+
 - Compare existing output directories by their Windows native real paths in the
   icon-cache identity test, allowing short and long aliases of the same directory
   while rejecting a different directory. The build implementation is unchanged.
