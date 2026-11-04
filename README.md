@@ -10,9 +10,9 @@ ownership checks, ledger protection, cloud build results and game-entry checks
 still require verification. AI Gaming remains paused. The existing
 `workshop-release` environment also requires an additional reviewer approval;
 this differs from the intended label-only trigger and must be resolved before
-deployment. No Issue or label currently enables this candidate to upload.
-The pinned AI Improve and Wireless recipes passed a cloud-only build validation;
-the new APTP batch integration still requires its own cloud validation.
+uploads are enabled. No Issue or label currently enables this candidate to upload.
+The pinned AI Improve, Wireless and APTP recipes passed separate cloud-only
+build validations; the complete Issue-to-Steam pipeline remains unverified.
 <!-- Signature: OpenAI-Codex. -->
 
 ## Development delivery migration

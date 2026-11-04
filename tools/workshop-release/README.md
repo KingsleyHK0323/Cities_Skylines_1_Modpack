@@ -22,13 +22,12 @@ uploader checks every package and Steam item before attempting the first upload.
   This validation used a synthetic snapshot and did not approve an Issue,
   publish an artifact, upload to Steam or use a self-hosted runner.
 - AI Improve and thirteen other modules have source recipes. APTP's dedicated
-  MSBuild batch path and `workshop-release-aptp-validation.yml` are candidates
-  and have not yet been run in the cloud. APTP's separate module workflow did
-  compile the same pinned source without DevTools in run 41822178605, but that
-  is not evidence that the new batch integration works. The batch candidate
-  checks the pinned project's declared XML inputs and DevTools conditions;
-  these checks are not a complete audit of evaluated MSBuild imports or game
-  behavior. AI Gaming remains paused.
+  MSBuild batch path passed cloud-only validation in run 41835685397 using
+  controller commit `bf6ff50494bb6a1a7b463d9a92f4cc38b4d506ee` and its pinned
+  source. It checked the Release DLL's identity, allowed files and hashes;
+  no artifact was published. The batch checks the pinned project's declared
+  XML inputs and DevTools conditions, not the full set of evaluated MSBuild
+  imports or game behavior. AI Gaming remains paused.
   Full Map is blocked because its reviewed source identifies itself as a
   Development Preview. Several other recipes are observation-only foundations,
   not evidence that their intended gameplay functions are complete.
