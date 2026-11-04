@@ -11,6 +11,9 @@
 - Preserve the reviewed PowerShell recipe through source-SHA and assembly-name
   validation, with executable regression tests for both selection boundaries.
   Signature: OpenAI-Codex.
+- Correct the APTP request preview to report its missing reviewed batch recipe
+  after the standalone no-DevTools build restored read-only planning previews.
+  Signature: OpenAI-Codex.
 
 ## Unreleased — Development delivery migration
 

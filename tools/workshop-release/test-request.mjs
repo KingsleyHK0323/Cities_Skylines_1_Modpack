@@ -194,3 +194,11 @@ test('preview presents exact module choices and full source SHAs before approval
   const changed = fixture(); changed.heads.AI_Improve = 'c'.repeat(40);
   assert.throws(() => controller.verifyPreview(preview, comment, changed));
 });
+
+test('the APTP preview reports its missing reviewed batch recipe accurately', () => {
+  const f = fixture();
+  const preview = controller.createPreview(f.issue, f.heads);
+  const rendered = controller.renderPreview(preview);
+  assert.match(rendered, /blocked: no reviewed batch recipe for the updated release preview/i);
+  assert.doesNotMatch(rendered, /DevTools=false also excludes core planning/i);
+});

@@ -108,7 +108,7 @@ export function renderPreview(preview) {
     if (!registered || item.branch !== registered.branch || item.workshopId !== registered.workshopId ||
         !/^[0-9a-f]{40}$/.test(item.sourceSha) || registered.paused) fail('Preview module is invalid.');
     const status = item.key === 'Automated_Public_Transport_Planning' ?
-      'blocked: DevTools=false also excludes core planning and route features' :
+      'blocked: no reviewed batch recipe for the updated release preview' :
       !recipes.has(item.key) ? 'blocked: no reviewed release recipe' :
       item.sourceSha !== registered.reviewedSource ? 'blocked: source changed since review' :
       item.key === 'Full_Map_Unlock_And_Expansion' ? 'blocked: source still identifies as Development Preview' :
