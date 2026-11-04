@@ -1,5 +1,14 @@
 # Change Log
 
+## Unreleased — Workshop release request candidate
+
+- Prepare a single- or multi-module Issue form, owner approval snapshots,
+  single-use ledger claims, reviewed per-module cloud build plans and Steam
+  target checks. Add a cloud-only two-module validation candidate. Keep the
+  upload job explicitly disabled pending batch, private item, cloud and
+  game-entry verification. No Steam publication was performed.
+  Signature: OpenAI-Codex.
+
 ## Unreleased — Development delivery migration
 
 - Prepare the App installer to embed its Windows icon from the exact pinned App

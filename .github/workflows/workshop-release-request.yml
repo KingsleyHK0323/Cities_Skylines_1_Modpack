@@ -1,0 +1,205 @@
+# Signature: OpenAI-Codex_workshop_implementation
+# Updated by: OpenAI-Codex.
+name: Workshop release request
+on:
+  issues:
+    types: [opened, edited, labeled]
+permissions:
+  contents: read
+concurrency:
+  group: workshop-request-${{ github.event.issue.number }}
+  cancel-in-progress: false
+jobs:
+  preview:
+    if: >-
+      github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' &&
+      (github.event.action == 'opened' || github.event.action == 'edited') &&
+      startsWith(github.event.issue.title, '[Workshop update]: ') &&
+      !github.event.issue.pull_request
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Check out the exact default-branch controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check the controller contracts
+        run: node --test tools/workshop-release/test-*.mjs
+      - name: Show the current module and source snapshot for owner review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/workshop-release/control.mjs preview
+  authorize:
+    if: >-
+      github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'steam-workshop-release-approved' &&
+      github.event.sender.id == 157894869 && github.run_attempt == 1 &&
+      startsWith(github.event.issue.title, '[Workshop update]: ') &&
+      !github.event.issue.pull_request
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      issues: read
+    outputs:
+      snapshot: ${{ steps.claim.outputs.snapshot }}
+      buildable: ${{ steps.claim.outputs.buildable }}
+    steps:
+      - name: Check out the exact default-branch controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Check the controller contracts
+        run: node --test tools/workshop-release/test-*.mjs
+      - name: Validate owner approval and claim the issue once
+        id: claim
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/workshop-release/control.mjs authorize
+  build:
+    needs: authorize
+    if: needs.authorize.outputs.buildable == 'true'
+    runs-on: windows-2022
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      artifact_id: ${{ steps.artifact.outputs.artifact-id }}
+    env:
+      WORKSHOP_SNAPSHOT_BASE64: ${{ needs.authorize.outputs.snapshot }}
+    steps:
+      - name: Check out the exact controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller
+          persist-credentials: false
+      - name: Check out the fixed encrypted reference bundle
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 7b8a5e7c10f2db84388e8dd8af2084f239957b13
+          path: build-dependencies
+          persist-credentials: false
+          sparse-checkout: |
+            build-references/cs1/v1
+            tools/build-references
+      - uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - name: Recheck the exact approval and source before compilation
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node "$env:GITHUB_WORKSPACE/controller/tools/workshop-release/control.mjs" recheck
+      - name: Restore verified game references only in runner temporary storage
+        shell: pwsh
+        env:
+          CS1_GAME_REFERENCES_KEY: ${{ secrets.CS1_GAME_REFERENCES_KEY }}
+        run: |
+          $game = Join-Path $env:RUNNER_TEMP 'cs1-workshop-game-references'
+          & "$env:GITHUB_WORKSPACE/build-dependencies/tools/build-references/Restore-GameReferences.ps1" -BundleDirectory "$env:GITHUB_WORKSPACE/build-dependencies/build-references/cs1/v1" -GameRoot $game
+      - name: Compile every reviewed selected module in the cloud
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP 'cs1-workshop-package'
+          & "$env:GITHUB_WORKSPACE/controller/tools/workshop-release/Build-Selected.ps1" -GameRoot (Join-Path $env:RUNNER_TEMP 'cs1-workshop-game-references') -OutputDirectory $package
+      - name: Recheck the approval and branch after compilation
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node "$env:GITHUB_WORKSPACE/controller/tools/workshop-release/control.mjs" recheck
+      - name: Transfer only the verified Workshop package
+        id: artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: workshop-release-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cs1-workshop-package/
+          if-no-files-found: error
+          retention-days: 1
+  upload:
+    needs: [authorize, build]
+    # Disabled until the complete multi-module path and the self-hosted trust
+    # boundary have been independently validated and explicitly deployed.
+    if: ${{ false }}
+    runs-on: [self-hosted, Windows, X64, cs1-workshop]
+    environment: workshop-release
+    timeout-minutes: 30
+    concurrency:
+      group: steam-workshop-release-batch
+      cancel-in-progress: false
+    outputs:
+      results: ${{ steps.submit.outputs.results }}
+    permissions:
+      contents: read
+      issues: read
+      actions: read
+    env:
+      WORKSHOP_SNAPSHOT_BASE64: ${{ needs.authorize.outputs.snapshot }}
+      WORKSHOP_RELEASE_UPLOAD_ENABLED: ${{ vars.WORKSHOP_RELEASE_UPLOAD_ENABLED }}
+    steps:
+      - name: Refuse an existing controller destination
+        shell: pwsh
+        run: |
+          $controller = Join-Path $env:GITHUB_WORKSPACE "controller-workshop-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          if (Test-Path -LiteralPath $controller) { throw 'Controller destination already exists.' }
+      - name: Check out the exact controller only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: controller-workshop-${{ github.run_id }}-${{ github.run_attempt }}
+          clean: false
+          set-safe-directory: false
+          persist-credentials: false
+      - name: Refuse an existing artifact destination
+        shell: pwsh
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "cs1-workshop-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          if (Test-Path -LiteralPath $package) { throw 'Artifact destination already exists.' }
+      - name: Receive the immutable artifact from this exact run
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          github-token: ${{ github.token }}
+          run-id: ${{ github.run_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/cs1-workshop-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Revalidate and submit the existing Steam item once
+        id: submit
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STEAM_WORKSHOP_OWNER_ID: ${{ secrets.STEAM_WORKSHOP_OWNER_ID }}
+        run: |
+          $package = Join-Path $env:RUNNER_TEMP "cs1-workshop-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          $controller = Join-Path $env:GITHUB_WORKSPACE "controller-workshop-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          node "$controller/tools/workshop-release/upload-batch.mjs" $package
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  report:
+    needs: [authorize, build, upload]
+    if: always() && needs.authorize.result == 'success' && needs.authorize.outputs.snapshot != ''
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Check out the exact controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Report the conservative module outcome
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKSHOP_SNAPSHOT_BASE64: ${{ needs.authorize.outputs.snapshot }}
+          AUTH_STATUS: ${{ needs.authorize.result }}
+          BUILD_STATUS: ${{ needs.build.result }}
+          UPLOAD_STATUS: ${{ needs.upload.result }}
+          UPLOAD_RESULTS: ${{ needs.upload.outputs.results }}
+        run: node tools/workshop-release/control.mjs report

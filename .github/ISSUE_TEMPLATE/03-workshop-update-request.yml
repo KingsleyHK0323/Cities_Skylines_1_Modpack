@@ -1,61 +1,47 @@
-name: Steam Workshop update request
-description: Request review of an update to an existing Workshop item. This form does not trigger an upload.
+name: Steam Workshop release update request
+description: Request review of one or more existing Workshop release items.
 title: "[Workshop update]: "
 body:
   - type: markdown
     attributes:
       value: |
-        This form records an update request only. It does not start a workflow or authorize an upload. A maintainer must review and approve any upload. Never include Steam passwords, Steam Guard codes, API keys, or other credentials.
-  - type: dropdown
-    id: project
+        Select one or more modules. This request does not itself authorize or start an upload.
+        The owner must review the exact source commits and approve the request separately.
+        The new automated release pipeline is not yet enabled or verified. Some modules are
+        not release-ready and AI Gaming is paused. Do not include credentials or Steam Guard codes.
+  - type: checkboxes
+    id: modules
     attributes:
-      label: Mod
+      label: Modules
+      description: Select at least one module. A paused or unready module cannot be uploaded.
       options:
-        - AI Improve
-        - Automated Public Transport Planning
-        - AI Gaming
-    validations:
-      required: true
-  - type: dropdown
-    id: edition
-    attributes:
-      label: Workshop edition
-      options:
-        - Release Version
-        - Development Version
-    validations:
-      required: true
-  - type: input
-    id: workshop_item
-    attributes:
-      label: Existing Workshop item URL or ID
-      description: Provide the existing item if known. A valid existing item ID is required before an upload can be considered; new-item creation is not requested by this form.
-      placeholder: "https://steamcommunity.com/sharedfiles/filedetails/?id=..."
-    validations:
-      required: false
-  - type: markdown
-    attributes:
-      value: |
-        Source selection follows the current HEAD of the selected mod's branch. AI Improve and Automated Public Transport Planning Release and Development editions currently use the same Release build configuration; DevTools remains disabled.
+        - label: AI Improve
+        - label: Automated Public Transport Planning
+        - label: Automated Public Transport Vehicle Management
+        - label: Full Map Unlock And Expansion
+        - label: Intercity Resource Sharing
+        - label: Realistic Border Control
+        - label: Realistic City First Response
+        - label: Realistic City Time
+        - label: Realistic Import Export Control
+        - label: Realistic Pedestrian Traffic Control
+        - label: Realistic Railway Traffic Control
+        - label: Realistic Urban Population
+        - label: Realistic Vehicle Traffic Control
+        - label: Wireless Utilities And Global Coverage
+        - label: AI Gaming (paused)
   - type: textarea
     id: change_note
     attributes:
       label: Proposed Workshop change note
-      description: Summarize the changes that should appear in the Workshop update.
+      description: Enter one English line of up to 240 characters, without double quotes or backslashes. It will become the public Steam change note and is never used as a command, path or item ID.
     validations:
       required: true
-  - type: textarea
-    id: source_details
-    attributes:
-      label: Source commit or release context
-      description: Optionally provide a commit SHA, release reference, or explanation of what should be reviewed.
-    validations:
-      required: false
   - type: checkboxes
     id: acknowledgement
     attributes:
       label: Acknowledgement
       options:
-        - label: I understand this is a request for maintainer review only; creating this issue does not trigger or authorize an upload.
+        - label: I understand this issue is a request and does not itself authorize or start an upload.
           required: true
-# Author: OpenAI-Codex.
+# Signature: OpenAI-Codex_workshop_implementation.

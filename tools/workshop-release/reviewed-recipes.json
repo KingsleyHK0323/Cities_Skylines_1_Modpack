@@ -1,0 +1,102 @@
+{"schema": 1, "signature": "OpenAI-Codex_workshop_implementation", "updatedBy": "OpenAI-Codex", "recipes": [
+  {
+    "module": "Automated_Public_Transport_Vehicle_Management",
+    "sourceSha": "afeeb21571a7ce5a496b892a4e55388d9463c968",
+    "assembly": "AutomatedPublicTransportVehicleManagement",
+    "languageVersion": "5",
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "ICities.dll", "Assembly-CSharp.dll", "ColossalManaged.dll", "UnityEngine.dll"],
+    "sources": ["Properties/AssemblyInfo.cs", "Source/Game/LineReader.cs", "Source/Lifecycle/CitySession.cs", "Source/Model/LineKey.cs", "Source/Model/LineObservation.cs", "Source/State/ObservationGate.cs", "Source/Ui/ObservationPanel.cs", "Source/VehicleManagementMod.cs"]
+  },
+  {
+    "module": "Wireless_Utilities_And_Global_Coverage",
+    "sourceSha": "fab5d2bfa27ce03981de3a845cf4ee40148a1201",
+    "assembly": "WirelessUtilitiesAndGlobalCoverage",
+    "languageVersion": "3",
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "UnityEngine.dll", "ICities.dll", "ColossalManaged.dll", "Assembly-CSharp.dll"],
+    "sources": ["Source/AssemblyInfo.cs", "Source/ModuleIdentity.cs", "Source/ModuleLifecycle.cs", "Source/WirelessUtilitiesLoadingExtension.cs", "Source/WirelessUtilitiesMod.cs"]
+  },
+  {
+    "module": "Full_Map_Unlock_And_Expansion",
+    "sourceSha": "d9daec9217b454f8dd8d751bcf480fb5d6df8dc9",
+    "assembly": "FullMapUnlockAndExpansion",
+    "languageVersion": "7.3",
+    "references": ["mscorlib.dll", "System.dll", "UnityEngine.dll", "ICities.dll"],
+    "sources": ["Source/AreaPreview.cs", "Source/GameObservation.cs"]
+  },
+  {
+    "module": "Intercity_Resource_Sharing",
+    "sourceSha": "0ebc190ff9eb61789f968adba85b071c2cf0c89a",
+    "assembly": "IntercityResourceSharing",
+    "languageVersion": "7.3",
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "UnityEngine.dll", "ICities.dll"],
+    "sources": ["Source/Game/Entry.cs", "Source/Game/Lifecycle.cs"]
+  },
+  {
+    "module": "Realistic_Border_Control",
+    "sourceSha": "0df0f34b7e38ca679678251e748d99668d2c9915",
+    "assembly": "RealisticBorderControl",
+    "languageVersion": "7.3",
+    "references": ["mscorlib.dll", "System.dll", "UnityEngine.dll", "ICities.dll"],
+    "sources": ["Source/Game/BorderControlLifecycle.cs", "Source/Game/BorderControlLoading.cs", "Source/Game/BorderControlMod.cs"]
+  },
+  {
+    "module": "Realistic_City_First_Response",
+    "sourceSha": "8e70ce923705546c98e7da05b4f5c00dfe687797",
+    "assembly": "RealisticCityFirstResponse",
+    "languageVersion": "7.3",
+    "references": ["mscorlib.dll", "System.dll", "UnityEngine.dll", "ICities.dll"],
+    "sources": ["Source/FireWeatherAnalysis.cs", "Source/FireWeatherSnapshot.cs", "Source/Mod.cs", "Source/ObservationLifecycle.cs"]
+  },
+  {
+    "module": "Realistic_City_Time",
+    "sourceSha": "4c3b1e2949ddc75fc7c50902543a8f56c46f14b2",
+    "assembly": "RealisticCityTime",
+    "languageVersion": "7.3",
+    "references": ["mscorlib.dll", "System.dll", "UnityEngine.dll", "ColossalManaged.dll", "ICities.dll", "Assembly-CSharp.dll"],
+    "sources": ["Game/GameClockState.cs", "Game/GameMod.cs"]
+  },
+  {
+    "module": "Realistic_Import_Export_Control",
+    "sourceSha": "88bce99e0b348e8513c9a02e8cf68c1d2bd4e652",
+    "assembly": "RealisticImportExportControl",
+    "languageVersion": "7.3",
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "UnityEngine.dll", "ICities.dll"],
+    "sources": ["Source/Game/CargoLoading.cs", "Source/Game/CargoMod.cs", "Source/Game/CargoSession.cs"]
+  },
+  {
+    "module": "Realistic_Pedestrian_Traffic_Control",
+    "sourceSha": "f4a55b98a8d8fb95640f3f3e45b8418b5d451f54",
+    "assembly": "RealisticPedestrianTrafficControl",
+    "languageVersion": "3",
+    "compilerOptions": ["/warnaserror+"],
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "ICities.dll"],
+    "sources": ["Source/Game/PedestrianMod.cs", "Source/Pedestrian/CrossingModel.cs", "Source/Pedestrian/CrossingReadAdapter.cs", "Source/Runtime/PedestrianRuntime.cs"]
+  },
+  {
+    "module": "Realistic_Railway_Traffic_Control",
+    "sourceSha": "af486927ee50fc9d099d6f260965fb8b90f311e7",
+    "assembly": "RealisticRailwayTrafficControl",
+    "languageVersion": "3",
+    "compilerOptions": ["/warnaserror+"],
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "ICities.dll", "ColossalManaged.dll", "UnityEngine.dll"],
+    "sources": ["Source/Game/RailwayLoadingExtension.cs", "Source/Game/RealisticRailwayTrafficControlMod.cs", "Source/Model/MovementRequest.cs", "Source/Model/RailwayShadowAnalyzer.cs", "Source/Model/RailwaySnapshot.cs", "Source/Model/RailwaySnapshotValidator.cs", "Source/Model/ShadowDecision.cs", "Source/Model/ValidationReport.cs", "Source/Observation/RailwayObservationSession.cs", "Source/Runtime/RailwayModLifecycle.cs"]
+  },
+  {
+    "module": "Realistic_Urban_Population",
+    "sourceSha": "800da5e1a8c928530f0e289acb1561842a0e0b95",
+    "assembly": "RealisticUrbanPopulation",
+    "languageVersion": "3",
+    "compilerOptions": ["/checked+", "/warnaserror+"],
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "ICities.dll"],
+    "sources": ["Source/Demand/DemandPolicy.cs", "Source/Demand/DemandSession.cs", "Source/Demand/DemandSnapshotReader.cs", "Source/Game/RealisticUrbanPopulationMod.cs", "Source/Runtime/PopulationLifecycle.cs"]
+  },
+  {
+    "module": "Realistic_Vehicle_Traffic_Control",
+    "sourceSha": "df8821d7ea0012b7cec2c504bb26975d2d119891",
+    "assembly": "RealisticVehicleTrafficControl",
+    "languageVersion": "3",
+    "compilerOptions": ["/warnaserror+"],
+    "references": ["mscorlib.dll", "System.dll", "System.Core.dll", "ICities.dll"],
+    "sources": ["Source/Game/ModEntry.cs", "Source/Lifecycle/ModLifecycle.cs", "Source/Observation/PreviewLifecycle.cs", "Source/Observation/ReadOnlyJunctionCapture.cs", "Source/Observation/RoadNetworkObservation.cs", "Source/Planning/JunctionSnapshot.cs", "Source/Planning/LaneProposalPlanner.cs"]
+  }
+]}

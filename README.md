@@ -1,5 +1,18 @@
 # Cities: Skylines 1 Modpack
 
+## Workshop release request candidate
+
+An in-development Issue form and controller prepare owner-reviewed, single- or
+multi-module release requests. The candidate pins each selected source commit,
+validates a one-use approval claim and prepares reviewed cloud build recipes.
+Steam upload is explicitly disabled: the complete batch uploader, private-item
+ownership checks, ledger protection, cloud build results and game-entry checks
+still require verification. AI Gaming remains paused. The existing
+`workshop-release` environment also requires an additional reviewer approval;
+this differs from the intended label-only trigger and must be resolved before
+deployment. No Issue or label currently enables this candidate to upload.
+<!-- Signature: OpenAI-Codex. -->
+
 ## Development delivery migration
 
 The scheduled combined Development Release is disabled while individual
