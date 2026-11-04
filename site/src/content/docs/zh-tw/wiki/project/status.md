@@ -3,6 +3,14 @@ title: 模組狀態與替代目標
 description: "附日期的 15 個模組及 22 項已確認替代方向總覽，分別說明實作與驗收狀態。"
 ---
 
+> <span lang="en"><strong>Development downloads:</strong> If a Dev Manager Windows Setup.exe is published, look for it on <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. Module availability can vary; use the builds the app identifies as verified when available. This does not establish game acceptance. AI Gaming development is paused. Historical module-release and bundle information below is not a current download entry.</span>
+
+<!-- Earlier notice retained for traceability. OpenAI-Codex_distribution_docs.
+> <span lang="en"><strong>Distribution plan — 3 November 2026:</strong> GitHub Releases is intended only for the Dev Manager Windows Setup.exe installer. Separate artifact branches are planned as the manager’s mod sources. Only the new artifact-branch changes for AI Improve and Automated Public Transport Planning are current candidates; these candidates have not been committed, pushed or published. The Windows installer has not yet been built or published. A local portable manager candidate and synthetic tests do not establish real downloads, installation or in-game acceptance. AI Gaming remains paused. Earlier GitHub mod-release and bundle instructions below describe the previous distribution approach, not availability under this new plan.</span>
+-->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->
+
 狀態快照：**2026 年 11 月 2 日**。專案包含**處於不同階段的 15 個模組**，並非 15 個已完成的下載項目。下方 22 項外部目標是已確認的替代方向，不代表替代已完成、可以取消訂閱，或已證明相容。
 
 設計交付、原始碼實作、雲端編譯、可下載產物、公開發布及遊戲驗收是不同里程碑。專案已確認各模組的責任範圍，但不代表相關功能已遷移或通過遊戲驗收；實作細節及介面仍可能屬於提案。本快照採用的證據尚未證明任何完整替代已完成。
@@ -35,9 +43,21 @@ description: "附日期的 15 個模組及 22 項已確認替代方向總覽，�
 
 ### 發布及規劃中的行為
 
-已部署整包流程收集 AI Improve、Planning 及 Vehicle Management 的既有成功產物，香港時間每日 08:00、13:00、20:00 及手動觸發；GitHub 可能延遲執行。新目標則是在雲端編譯含實際開發工具的開發版，再打包及發布；**這項改造尚未實作**。正式版規劃為擁有者核准工單、雲端編譯排除開發工具，再交本機僅上傳執行器處理，尚未完整實作。
+<details>
+<summary lang="en">Historical download only — <!-- not a current download; new installer not released -->not a current mod-download method</summary>
+
+已部署整包流程收集 AI Improve、Planning 及 Vehicle Management 的既有成功產物，香港時間每日 08:00、13:00、20:00 及手動觸發；GitHub 可能延遲執行。新目標則是在雲端編譯含實際開發工具的開發版，再打包及發布；**這項改造尚未實作**。
+
+</details>
+
+正式版規劃為擁有者核准工單、雲端編譯排除開發工具，再交本機僅上傳執行器處理，尚未完整實作。
+
+<details>
+<summary lang="en">Historical download only — <!-- not a current download; new installer not released -->not a current mod-download method</summary>
 
 Cities Skylines 1 Modpack Dev Manager 目前只有本機分支及需求筆記，**尚無可安裝 App**。預期提供逐模組更新偵測、單一／批量安裝、更新及解除安裝。
+
+</details>
 
 已確認的後續並存行為：同一模組正式版及開發版同時安裝時，進遊戲只顯示警告；不自動停用、解除安裝、取消訂閱或阻止載入。此警告尚未套用至全部模組，不代表已驗證並存相容性。開發版遊戲名稱將採以下固定英文格式：
 
@@ -123,3 +143,7 @@ Actions 建置產物可能過期，下載時亦可能需要登入 GitHub。上�
 
 目前確認方向總數為22；新增的Right of Way不在上述210項歷史收藏快照中，因此不把187項未分類扣成186，也不聲稱目前線上收藏仍有210項。
 <!-- Updated by OpenAI-Codex. -->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->

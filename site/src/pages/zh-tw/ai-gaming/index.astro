@@ -32,7 +32,16 @@ const base = import.meta.env.BASE_URL;
 				<p>另外保留獨立的手動城市摘要功能；依玩家要求，將遊戲日期、人口、資金、住宅需求、商業需求及工作需求寫入本機遊戲記錄。</p>
 				<p>每次請求都要重新確認。回覆只會作為建議顯示，不會轉成遊戲操作。原始碼沒有雲端供應商介接或 API 金鑰輸入欄位。</p>
 				<p>每次確認後，AI Gaming 會透過本機輔助程式把預覽中的資料、模型名稱及問題傳給這台電腦上的 Ollama。Ollama 可能依自身設定把推論轉送至雲端服務，模組無法檢查其設定。自由輸入的問題未經自動檢查，請勿包含城市名稱、帳戶資料、秘密或個人資料。</p>
+				{false && (
+				<p lang="en"><strong>Distribution update, 3 November 2026:</strong> AI Gaming remains paused and is not among the AI Improve and Automated Public Transport Planning artifact-branch candidates. The package guidance below is historical and does not establish current availability or game acceptance.</p>
+				)}
+				<p lang="en"><strong>Development status:</strong> AI Gaming remains paused. If Dev Manager's Windows Setup.exe has been published, check <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. The planned app is intended to show verified module builds when available; availability varies by module. Earlier package guidance is historical and does not establish current availability or game acceptance.</p>
+				<!-- Notice wording: OpenAI-Codex_distribution_components. -->
+				<p class="section-intro" lang="en">AI Gaming remains paused. In-game behavior and Ollama requests remain unverified. Back up saves and use a separate test city.</p>
+				<details>
+					<summary lang="en">Historical package guidance - not a current download</summary>
 				<p class="section-intro"><strong>開發版本狀態：</strong>開發維持暫停。較早的套件曾分別提供 DLL 及 Windows x64 輔助程式；目前公開檔案是否可用尚未核實。如有相符的官方發布檔案，兩個檔案必須來自同一次發布：DLL 需要雜湊值完全相符的輔助程式。發布及檔案檢查不代表已確認 Cities: Skylines 遊戲運作或 Ollama 請求成功；兩者仍未驗證。請備份存檔並使用獨立的測試城市。</p>
+				</details>
 			</div>
 			<div class="screenshot-stack">
 				<ScreenshotSlot locale="zh-tw" title="Ollama 請求預覽" description="所選城市資料、自動加入的已安裝內容識別項、模型名稱、問題及獨立的確認控制項。" />
@@ -61,3 +70,7 @@ const base = import.meta.env.BASE_URL;
 <!-- Author: OpenAI-Codex_module_worker. -->
 <!-- Updated by OpenAI-Codex on 2026-11-02. -->
 <!-- Author: OpenAI-Codex_gaming_update. -->
+
+<!-- Updated by OpenAI-Codex_distribution_components on 2026-11-03. -->
+
+<!-- Historical guidance: OpenAI-Codex_distribution_components. -->

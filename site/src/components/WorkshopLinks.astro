@@ -25,17 +25,29 @@ const labels = {
 };
 ---
 
+{false && (
+<p class="workshop-note" lang="en"><strong>Distribution update, 3 November 2026:</strong> GitHub Releases is planned for the Dev Manager Windows Setup.exe. Mod artifacts are planned for separate branches; the AI Improve and Automated Public Transport Planning candidates are local and not committed, pushed, or published. Setup.exe has not been built or published. Earlier mod-release download guidance below is historical.{mod === 'ai-gaming' && ' AI Gaming remains paused and is not among those candidates.'}</p>
+)}
+<p class="workshop-note" lang="en"><strong>Distribution:</strong> If Dev Manager's Windows Setup.exe has been published, check <a href={releases}>GitHub Releases</a>. The planned app is intended to show verified module builds when available; availability varies by module. Earlier module-release guidance below is historical.{mod === 'ai-gaming' && ' AI Gaming remains paused.'}</p>
+<!-- Notice wording: OpenAI-Codex_distribution_components. -->
 <div class="workshop-links" lang={zh ? 'zh-TW' : 'en'}>
+	<details>
+		<summary lang="en">Historical release link - not a current mod download</summary>
 	<a class="button github-development" href={releases}>{downloadLabel} <span aria-hidden="true">↗</span></a>
+	</details>
 	{(['release', 'development'] as const).map((edition) => items[edition].public
 		? <a class={edition === 'release' ? 'button' : 'button secondary'} href={workshopUrl(items[edition].id)}>{labels[edition]} <span aria-hidden="true">↗</span></a>
 		: <span class="button pending" aria-disabled="true">{labels[edition]} · {items[edition].removed ? (zh ? '已下架' : 'removed') : (zh ? '尚未公開' : 'not yet public')}</span>)}
 </div>
+<p class="workshop-note" lang="en">Steam Workshop Development editions have been removed. Check stable Workshop listings and their dependencies. Back up saves, use a separate test city, and enable only one edition of each mod. <a href={guide}>Read the distribution guide.</a></p>
+<details>
+	<summary lang="en">Historical module-release guidance - not a current download</summary>
 <p class="workshop-note" lang={zh ? 'zh-TW' : 'en'}>{zh ? 'Steam 工作坊開發版已下架；GitHub 發行版本的可用性請於發布頁確認。每個模組僅啟用一個版本。穩定版連結沿用來源紀錄；實際可用性請查看各模組工作坊頁面。' : 'Steam Workshop Development editions have been removed; check GitHub for release availability. Enable only one copy of each mod. Stable-edition links are based on existing records; check each Workshop page for availability.'}</p>
 <div class="development-notice" lang={zh ? 'zh-TW' : 'en'}>
 	<p><strong>{zh ? 'GitHub 開發版本資訊：' : 'GitHub Development information:'}</strong> {zh ? translatedStatus[mod] : developmentRelease.status}</p>
 	<p>{zh ? '可安裝附件的現況尚未核實；原始碼壓縮檔並非安裝檔。請備份存檔，並使用獨立測試城市；不要同時啟用此模組的其他版本。' : 'Current installable attachments have not been verified; source archives are not installers. Back up saves and use a separate test city; do not enable another copy of this mod.'} <a href={releases}>{downloadLabel}</a> · <a href={guide}>{zh ? '安裝與風險' : 'Installation and risks'}</a></p>
 </div>
+</details>
 <style>
 	/* Provide the GitHub release check while preserving Workshop access.
 	   OpenAI-Codex_Responsible: Modpack_Website. */
@@ -52,3 +64,7 @@ const labels = {
 <!-- Author: OpenAI-Codex_module_worker. -->
 
 <!-- Updated by OpenAI-Codex on 2026-11-02. -->
+
+<!-- Updated by OpenAI-Codex_distribution_components on 2026-11-03. -->
+
+<!-- Historical guidance: OpenAI-Codex_distribution_components. -->

@@ -33,8 +33,20 @@ const base = import.meta.env.BASE_URL;
 					<li><strong>擷取世界快照</strong><span>規劃器會用到的道路與站點摘要。</span></li>
 					<li><strong>建立路線圖</strong><span>各站點之間可能的連接網絡。</span></li>
 				</ul>
+				<p lang="en">The historical stop-move prototype requires preview, enabling the feature, and two confirmations before an attempt. Attempts may affect saves; back up and use a separate test city. Game and save/reload acceptance remain pending.</p>
+				<details>
+					<summary lang="en">Historical prototype release record - not a current mod download</summary>
 				<p>來自<a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/commit/60976d7c34f73aee698af192a660abe001ec347d">原始碼 60976d7</a> 的<a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/Automated_Public_Transport_Planning-dev-41252417067-1">歷史開發版發行紀錄</a>當時包括手動及自動純移站編輯，適用於有 3–6 個站點的普通市內公車既有路線；設計上保留線路 ID 及站點數量。嘗試變更前，須預覽、啟用並確認兩次。原站及目標站的站位均須使用確切的 RoadAI，並通過路段資格及放置檢查；橋樑、隧道、車站專用道路、未知或自訂 AI（人工智能）道路上的站點會被保守拒絕。</p>
+				</details>
+				{false && (
+				<p lang="en"><strong>Distribution update, 3 November 2026:</strong> GitHub Releases is planned for the Dev Manager Windows Setup.exe, while mods are intended to come from separate artifact branches. The installer is not built or published. The AI Improve and Automated Public Transport Planning branch candidates remain local and are not committed, pushed, or published. The earlier release-attachment guidance below is historical.</p>
+				)}
+				<p lang="en"><strong>Distribution:</strong> If Dev Manager's Windows Setup.exe has been published, check <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. The planned app is intended to show verified module builds when available; availability varies by module. Earlier module-release guidance on this page is historical.</p>
+				<!-- Notice wording: OpenAI-Codex_distribution_components. -->
+				<details>
+					<summary lang="en">Historical release check - not a current mod download</summary>
 				<p>2026 年 11 月 2 日可用性核查：目前無法確認可安裝的附件。安裝前請查看 <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases（發行清單）</a>及各發行項目的實際附件；自動產生的原始碼壓縮檔不是可安裝的模組檔案。</p>
+				</details>
 				<p>請備份存檔，並使用獨立的測試城市。回復並非原子操作且可能失敗；乘客、車輛及路徑可能無法完整還原。遊戲內運作及存檔重新載入尚未通過驗收。</p>
 			</div>
 			<div class="screenshot-stack">
@@ -61,3 +73,7 @@ const base = import.meta.env.BASE_URL;
 <!-- Author: OpenAI-Codex_status_worker. -->
 
 <!-- Author: OpenAI-Codex_transport_update. -->
+
+<!-- Updated by OpenAI-Codex_distribution_components on 2026-11-03. -->
+
+<!-- Historical guidance: OpenAI-Codex_distribution_components. -->

@@ -3,7 +3,20 @@ title: AI Gaming
 description: "0.4.0 開發版原始碼的功能、逐次確認流程，以及套件和執行限制。"
 ---
 
+> <span lang="en">Distribution guidance: If Dev Manager Windows Setup.exe is published, check GitHub Releases. Module availability varies; use verified builds shown in the app when available. Historical mod-release and bundle-download instructions below are not current download methods. AI Gaming development remains paused. See the <a href="/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/">Development guide</a>.</span>
+
+<!--
+> <span lang="en">Distribution update (3 November 2026): GitHub Releases is planned for the Dev Manager Windows installer. Individual mod artifacts are planned on separate branches; the AI Improve and Automated Public Transport Planning candidates and the installer are not yet published. Earlier mod-release and bundle-download instructions below are historical. AI Gaming remains paused and is not one of the current candidates. See the <a href="/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/">Development guide</a>.</span>
+-->
+
+<!-- Distribution update: OpenAI-Codex. -->
+
+<details>
+<summary lang="en">Historical mod-release guidance — not a current download</summary>
+
 > **歷史開發版更新，2026 年 10 月 31 日：** 較早的發布曾分別提供 Windows x64 輔助程式及配對 DLL。開發維持暫停，目前公開檔案是否可用尚未核實。遊戲內執行行為尚未驗證。請見[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)。
+
+</details>
 
 **[0.4.0 開發版原始碼 e7de649](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/e7de649f58c775f0692ef74d62eed351cf2d6607/Source/LocalAiRequestController.cs)** 透過 Windows x64 輔助程式提供由玩家確認的 Ollama Local 建議。它不會操控模擬。其他玩法仍屬規劃中。
 
@@ -17,7 +30,12 @@ description: "0.4.0 開發版原始碼的功能、逐次確認流程，以及套
 
 ## 套件與遊戲執行狀態
 
+<details>
+<summary lang="en">Historical mod-release guidance — not a current download</summary>
+
 較早的 GitHub 開發版本曾分別提供 DLL 及獨立封裝的 Windows x64 輔助程式。如有相符的官方發布檔案，請使用同一次發布的檔案：DLL 會核對輔助程式的確切雜湊值。發布檔案及雲端建置不代表已成功在遊戲內使用或完成 Ollama 請求；兩者尚未驗證。請備份存檔並使用獨立測試城市。
+
+</details>
 
 ## 本機資料與 Ollama
 
@@ -36,3 +54,5 @@ description: "0.4.0 開發版原始碼的功能、逐次確認流程，以及套
 <!-- Author: OpenAI-Codex_zh_docs. -->
 <!-- Author: OpenAI-Codex_module_worker. -->
 <!-- Author: OpenAI-Codex_gaming_update. -->
+
+<!-- Historical disclosure: OpenAI-Codex. -->

@@ -3,6 +3,14 @@ title: Module status and replacement targets
 description: "A dated overview of 15 modules and 22 confirmed replacement directions, with implementation and acceptance kept separate."
 ---
 
+> <span lang="en"><strong>Development downloads:</strong> If a Dev Manager Windows Setup.exe is published, look for it on <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. Module availability can vary; use the builds the app identifies as verified when available. This does not establish game acceptance. AI Gaming development is paused. Historical module-release and bundle information below is not a current download entry.</span>
+
+<!-- Earlier notice retained for traceability. OpenAI-Codex_distribution_docs.
+> <span lang="en"><strong>Distribution plan — 3 November 2026:</strong> GitHub Releases is intended only for the Dev Manager Windows Setup.exe installer. Separate artifact branches are planned as the manager’s mod sources. Only the new artifact-branch changes for AI Improve and Automated Public Transport Planning are current candidates; these candidates have not been committed, pushed or published. The Windows installer has not yet been built or published. A local portable manager candidate and synthetic tests do not establish real downloads, installation or in-game acceptance. AI Gaming remains paused. Earlier GitHub mod-release and bundle instructions below describe the previous distribution approach, not availability under this new plan.</span>
+-->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->
+
 Status snapshot: **2 November 2026**. The project contains **15 modules at different stages**, not 15 finished downloads. The 22 external targets below are confirmed replacement directions. They are not completed replacements, permission to unsubscribe, or proof of compatibility.
 
 Design delivery, source implementation, cloud compilation, downloadable artifacts, public releases and game acceptance are separate milestones. The project has confirmed responsibility areas, but that does not mean the corresponding features have been migrated or accepted in game; implementation details and interfaces may remain proposals. No complete replacement has been established by the evidence used for this snapshot.
@@ -35,9 +43,20 @@ AI Improve, Public Transport Planning and Public Transport Vehicle Management ac
 
 ### Distribution and planned behavior
 
-The deployed bundle collector gathers existing verified AI Improve, Planning and Vehicle Management outputs. It is scheduled for 08:00, 13:00 and 20:00 Hong Kong time, with manual dispatch; GitHub may delay runs. The new target pipeline will instead compile Development modules with real Dev Tools in the cloud before packaging and release. That replacement pipeline is **not yet implemented**. The planned stable pipeline uses an owner-approved issue, cloud builds without Dev Tools, and a local upload-only runner; it is not fully implemented.
+<details>
+<summary lang="en">Historical download only — <!-- not a current download; new installer not released -->not a current mod-download method</summary>
+
+The deployed bundle collector gathers existing verified AI Improve, Planning and Vehicle Management outputs. It is scheduled for 08:00, 13:00 and 20:00 Hong Kong time, with manual dispatch; GitHub may delay runs. The new target pipeline will instead compile Development modules with real Dev Tools in the cloud before packaging and release. That replacement pipeline is **not yet implemented**.
+
+</details>
+ The planned stable pipeline uses an owner-approved issue, cloud builds without Dev Tools, and a local upload-only runner; it is not fully implemented.
+
+<details>
+<summary lang="en">Historical download only — <!-- not a current download; new installer not released -->not a current mod-download method</summary>
 
 The proposed Cities Skylines 1 Modpack Dev Manager has a local branch and requirements notes, but **no installable App**. Its intended features are per-module update detection and individual/batch installation, updates and removal.
+
+</details>
 
 The confirmed future duplicate-install behavior is a warning when stable and Development editions of the same module are installed. It will not automatically disable or uninstall either edition, cancel subscriptions or block loading. This warning has not yet been implemented across the modules and does not establish compatibility. The planned Development display-name suffix is:
 
@@ -123,3 +142,7 @@ Use the [Development installation guide](/Cities_Skylines_1_Modpack/wiki/develop
 
 There are now 22 confirmed directions. Right of Way was added outside that historical 210-item collection snapshot; the 187 unclassified entries are not reduced to 186, and the current online collection size is not asserted.
 <!-- Updated by OpenAI-Codex. -->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->

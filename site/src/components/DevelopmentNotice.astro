@@ -11,10 +11,24 @@ const base = import.meta.env.BASE_URL;
 <aside class="development-notice" aria-label={translated ? '開發版下載公告' : 'Development build announcement'}>
 	<div class="page-wrap notice-layout">
 		<div class="notice-copy">
+			<p lang="en">Steam Workshop Development editions have been removed. Back up saves, use a separate test city, and enable only one edition of each mod.</p>
+			<details>
+				<summary lang="en">Historical module-release guidance - not a current download</summary>
 			<p class="notice-title">{translated ? '開發版下載：請先確認供應情況' : 'Development downloads: check availability.'} <time datetime="2026-11-02">{translated ? '2026 年 11 月 2 日' : '2 November 2026'}</time></p>
 			<p>{translated ? 'Steam 工作坊開發版已下架；GitHub 可安裝附件的現況尚未核實。請查看發布頁及安裝指南，備份存檔、使用測試城市，並僅啟用每個模組的一個版本。' : 'Steam Workshop Development editions have been removed; current GitHub installable attachments have not been verified. Check the release page and installation guide, back up saves, use a test city, and enable only one copy of each mod.'}</p>
+			</details>
+			{false && (
+			<p lang="en"><strong>3 November 2026:</strong> GitHub Releases is planned for the Dev Manager Windows installer; mods are planned for separate artifact branches. The installer is not built or published, and the first two branch candidates remain local. Earlier mod-release download guidance is historical.</p>
+			)}
+			<p lang="en"><strong>Distribution:</strong> If Dev Manager's Windows Setup.exe has been published, check <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. The planned app is intended to show verified module builds when available; availability varies by module. Earlier module-release guidance is historical.</p>
+			<!-- Notice wording: OpenAI-Codex_distribution_components. -->
 		</div>
+		<details>
+			<summary lang="en">Historical download label - not a current download</summary>
 		<a class="button secondary" href={base + (translated ? 'zh-tw/' : '') + 'wiki/development-downloads/'}>{translated ? '開發版下載與安裝' : 'Development downloads and installation'}</a>
+		</details>
+		<a class="button secondary" lang="en" href={base + (translated ? 'zh-tw/' : '') + 'wiki/development-downloads/'}>Read distribution guidance</a>
+		<!-- Guidance link: OpenAI-Codex_distribution_components. -->
 	</div>
 </aside>
 
@@ -36,3 +50,7 @@ const base = import.meta.env.BASE_URL;
 <!-- Updated by OpenAI-Codex_home_worker on 2026-11-01. -->
 
 <!-- Updated by OpenAI-Codex on 2026-11-02. -->
+
+<!-- Updated by OpenAI-Codex_distribution_components on 2026-11-03. -->
+
+<!-- Historical guidance: OpenAI-Codex_distribution_components. -->

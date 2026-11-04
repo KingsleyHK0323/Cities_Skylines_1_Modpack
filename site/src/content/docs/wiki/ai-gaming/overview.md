@@ -3,7 +3,20 @@ title: AI Gaming
 description: "What the 0.4.0 Development source does, its confirmation flow, and its packaging and runtime limits."
 ---
 
+> <span lang="en">Distribution guidance: If Dev Manager Windows Setup.exe is published, check GitHub Releases. Module availability varies; use verified builds shown in the app when available. Historical mod-release and bundle-download instructions below are not current download methods. AI Gaming development remains paused. See the <a href="/Cities_Skylines_1_Modpack/wiki/development-downloads/">Development guide</a>.</span>
+
+<!--
+> <span lang="en">Distribution update (3 November 2026): GitHub Releases is planned for the Dev Manager Windows installer. Individual mod artifacts are planned on separate branches; the AI Improve and Automated Public Transport Planning candidates and the installer are not yet published. Earlier mod-release and bundle-download instructions below are historical. AI Gaming remains paused and is not one of the current candidates. See the <a href="/Cities_Skylines_1_Modpack/wiki/development-downloads/">Development guide</a>.</span>
+-->
+
+<!-- Distribution update: OpenAI-Codex. -->
+
+<details>
+<summary lang="en">Historical mod-release guidance — not a current download</summary>
+
 > **Historical Development update, 31 October 2026:** An earlier release included a Windows x64 Companion and matching DLL as individual assets. Development is paused and current public availability is unverified. In-game behavior remains unverified. See [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/).
+
+</details>
 
 The **[0.4.0 Development source at e7de649](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/blob/e7de649f58c775f0692ef74d62eed351cf2d6607/Source/LocalAiRequestController.cs)** offers player-confirmed advice from Ollama Local through a Windows x64 Companion. It does not control the simulation. Other play modes remain planned.
 
@@ -17,7 +30,12 @@ The **[0.4.0 Development source at e7de649](https://github.com/KingsleyHK0323/Ci
 
 ## Package and runtime status
 
+<details>
+<summary lang="en">Historical mod-release guidance — not a current download</summary>
+
 An earlier GitHub Development release packaged the DLL and self-contained Windows x64 Companion as separate assets. If matching official assets are available, use files from the same release: the DLL checks the exact Companion hash. Published assets and cloud builds do not establish successful in-game use or Ollama requests; both remain unverified. Back up saves and use a separate test city.
+
+</details>
 
 ## Local data and Ollama
 
@@ -34,3 +52,5 @@ See the [roadmap](/Cities_Skylines_1_Modpack/wiki/project/roadmap/) for progress
 <!-- Author: OpenAI-Codex_Responsible: Modpack_Website. -->
 <!-- Author: OpenAI-Codex_module_worker. -->
 <!-- Author: OpenAI-Codex_gaming_update. -->
+
+<!-- Historical disclosure: OpenAI-Codex. -->

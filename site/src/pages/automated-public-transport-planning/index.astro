@@ -33,8 +33,20 @@ const base = import.meta.env.BASE_URL;
 					<li><strong>Capture a world snapshot</strong><span>A summary of the roads and stops the planner would use.</span></li>
 					<li><strong>Build the route graph</strong><span>The network of possible stop connections.</span></li>
 				</ul>
+				<p lang="en">The historical stop-move prototype requires preview, enabling the feature, and two confirmations before an attempt. Attempts may affect saves; back up and use a separate test city. Game and save/reload acceptance remain pending.</p>
+				<details>
+					<summary lang="en">Historical prototype release record - not a current mod download</summary>
 				<p>The <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/Automated_Public_Transport_Planning-dev-41252417067-1">historical Development release</a> from <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/commit/60976d7c34f73aee698af192a660abe001ec347d">source 60976d7</a> included manual and automatic move-only editing for existing regular city-bus lines with 3–6 stops, intended to retain the line ID and stop count. Preview, enable and confirm twice before attempting a change. Both original and target stops must use exact RoadAI and pass segment-eligibility and placement checks. Stops on bridges, tunnels, station roads or unknown/custom-AI roads are conservatively rejected.</p>
+				</details>
+				{false && (
+				<p lang="en"><strong>Distribution update, 3 November 2026:</strong> GitHub Releases is planned for the Dev Manager Windows Setup.exe, while mods are intended to come from separate artifact branches. The installer is not built or published. The AI Improve and Automated Public Transport Planning branch candidates remain local and are not committed, pushed, or published. The earlier release-attachment guidance below is historical.</p>
+				)}
+				<p lang="en"><strong>Distribution:</strong> If Dev Manager's Windows Setup.exe has been published, check <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. The planned app is intended to show verified module builds when available; availability varies by module. Earlier module-release guidance on this page is historical.</p>
+				<!-- Notice wording: OpenAI-Codex_distribution_components. -->
+				<details>
+					<summary lang="en">Historical release check - not a current mod download</summary>
 				<p>Availability check, 2 November 2026: current installable attachments could not be verified. Check <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a> and the actual release attachments before installing; automatically generated source archives are not installable mod files.</p>
+				</details>
 				<p>Back up saves and use a separate test city. Recovery is non-atomic and may fail; passengers, vehicles and paths may not be fully restored. In-game operation and save/reload have not been accepted.</p>
 			</div>
 			<div class="screenshot-stack">
@@ -59,3 +71,7 @@ const base = import.meta.env.BASE_URL;
 <!-- Author: OpenAI-Codex_status_worker. -->
 
 <!-- Author: OpenAI-Codex_transport_update. -->
+
+<!-- Updated by OpenAI-Codex_distribution_components on 2026-11-03. -->
+
+<!-- Historical guidance: OpenAI-Codex_distribution_components. -->

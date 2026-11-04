@@ -32,7 +32,16 @@ const base = import.meta.env.BASE_URL;
 				<p>The separate city-summary command remains available; on request it writes the game date, population, funds, residential demand, commercial demand and workplace demand to the local game log.</p>
 				<p>Each request needs a separate confirmation. The response is displayed as advice only; it is not interpreted as a game action. The source has no cloud-provider adapter or API-key entry.</p>
 				<p>After each confirmation, AI Gaming sends the previewed data, model name and question through the local Companion to Ollama on this PC. Ollama may route inference to a cloud service depending on its own configuration, which the mod cannot inspect. Do not include city names, account information, secrets or personal data in the free-text question.</p>
+				{false && (
+				<p lang="en"><strong>Distribution update, 3 November 2026:</strong> AI Gaming remains paused and is not among the AI Improve and Automated Public Transport Planning artifact-branch candidates. The package guidance below is historical and does not establish current availability or game acceptance.</p>
+				)}
+				<p lang="en"><strong>Development status:</strong> AI Gaming remains paused. If Dev Manager's Windows Setup.exe has been published, check <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. The planned app is intended to show verified module builds when available; availability varies by module. Earlier package guidance is historical and does not establish current availability or game acceptance.</p>
+				<!-- Notice wording: OpenAI-Codex_distribution_components. -->
+				<p class="section-intro" lang="en">AI Gaming remains paused. In-game behavior and Ollama requests remain unverified. Back up saves and use a separate test city.</p>
+				<details>
+					<summary lang="en">Historical package guidance - not a current download</summary>
 				<p class="section-intro"><strong>Development build status:</strong> Development is paused. An earlier package used separate DLL and Windows x64 Companion assets; current public availability is unverified. If matching official assets are available, use both files from the same release: the DLL requires the exact Companion hash. Publication and file checks do not establish successful Cities: Skylines gameplay or Ollama requests; both remain unverified. Back up saves and test in a separate city.</p>
+				</details>
 			</div>
 			<div class="screenshot-stack">
 				<ScreenshotSlot title="Ollama request preview" description="The selected city data, automatically added installed-content identifiers, model name, question and separate confirmation control." />
@@ -59,3 +68,7 @@ const base = import.meta.env.BASE_URL;
 <!-- Author: OpenAI-Codex_module_worker. -->
 <!-- Updated by OpenAI-Codex on 2026-11-02. -->
 <!-- Author: OpenAI-Codex_gaming_update. -->
+
+<!-- Updated by OpenAI-Codex_distribution_components on 2026-11-03. -->
+
+<!-- Historical guidance: OpenAI-Codex_distribution_components. -->

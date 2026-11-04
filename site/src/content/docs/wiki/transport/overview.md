@@ -3,6 +3,14 @@ title: Automated Public Transport Planning
 description: "Survey diagnostics, Development route proposals and the limits of confirmed route-creation attempts."
 ---
 
+> <span lang="en">Distribution guidance: If Dev Manager Windows Setup.exe is published, check GitHub Releases. Module availability varies; use verified builds shown in the app when available. Historical mod-release and bundle-download instructions below are not current download methods. See the <a href="/Cities_Skylines_1_Modpack/wiki/development-downloads/">Development guide</a>.</span>
+
+<!--
+> <span lang="en">Distribution update (3 November 2026): GitHub Releases is planned for the Dev Manager Windows installer. Individual mod artifacts are planned on separate branches; the AI Improve and Automated Public Transport Planning candidates and the installer are not yet published. Earlier mod-release and bundle-download instructions below are historical. See the <a href="/Cities_Skylines_1_Modpack/wiki/development-downloads/">Development guide</a>.</span>
+-->
+
+<!-- Distribution update: OpenAI-Codex. -->
+
 > **Development build update, 31 October 2026:** The GitHub Development prototype can attempt to create a selected route after arming and confirmation; it can change a save and is not read-only. Successful route creation and save/reload have not been established in subscribed-game acceptance. See [Development downloads and installation](/Cities_Skylines_1_Modpack/wiki/development-downloads/).
 
 Automated Public Transport Planning's Development prototype estimates city-bus routes and can attempt to create a selected proposal after arming and confirmation. The prototype may change saves and does not guarantee runnable routes. Other transport types remain a future direction.
@@ -32,9 +40,23 @@ The Development edition has been removed from Steam Workshop. Guidance for exper
 
 - **Planning preview (being tested).** The *Generate a read-only planning preview* button estimates city-bus lines from your city's demand and lists them with their scores. It does not create or change any line. The estimates are not yet checked against the game's own pathfinding.
 - **Route-creation prototype.** A selected proposal can be submitted for creation after the feature is armed and each attempt is confirmed. Proposals do not guarantee connected or runnable routes. Successful creation and save/reload remain unverified in subscribed-game acceptance; use a backup and a separate test city.
+
+<details>
+<summary lang="en">Historical prototype release — not a current mod download</summary>
+
 - **Existing-line stop-move prototype.** The [historical Development release](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases/tag/Automated_Public_Transport_Planning-dev-41252417067-1), built from [source `60976d7`](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/commit/60976d7c34f73aee698af192a660abe001ec347d), included manual and automatic move-only editing for existing regular city-bus lines with 3–6 stops. The prototype was intended to preserve the line ID and number of stops. Preview the changes, enable the feature and provide two confirmations before an attempt. Both the original and target stop locations must use exact `RoadAI` and pass segment-eligibility and placement checks. Stops on bridges, tunnels, station roads or unknown/custom-AI roads are conservatively rejected. An attempt may change the save; recovery is non-atomic and may fail, and cannot guarantee complete restoration of passengers, vehicles or paths. Back up first. In-game behavior and save/reload have not been accepted.
 
+</details>
+
+<p lang="en">Historical route edits can affect saves. Back up saves, use a separate test city, and note that game and save/reload acceptance remain pending.</p>
+<!-- Historical prototype: OpenAI-Codex. -->
+
+<details>
+<summary lang="en">Historical mod-release guidance — not a current download</summary>
+
 Availability check, 2 November 2026: current installable attachments could not be verified. Check [GitHub Releases](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases) and the actual release attachments before installing; automatically generated source archives are not installable mod files.
+
+</details>
 
 ## Helping test
 
@@ -47,3 +69,5 @@ Run the diagnostics on cities of different sizes and include the log output when
 <!-- Author: OpenAI-Codex_status_worker. -->
 
 <!-- Author: OpenAI-Codex_transport_update. -->
+
+<!-- Historical disclosure: OpenAI-Codex. -->

@@ -23,6 +23,9 @@
 
 ## Unreleased — Development delivery migration
 
+- Update the website's Development distribution notices and mark older
+  module and bundle download instructions as historical.
+  Signature: OpenAI-Codex.
 - Prepare the App installer to embed its Windows icon from the exact pinned App
   source; the next icon-bearing installer still requires cloud verification.
   Signature: OpenAI-Codex.

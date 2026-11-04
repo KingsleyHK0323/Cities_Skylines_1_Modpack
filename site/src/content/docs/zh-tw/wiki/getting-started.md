@@ -3,7 +3,20 @@ title: 開始使用
 description: "在 Cities: Skylines 1 中訂閱、選擇正確版本並啟用 Modpack 模組。"
 ---
 
+> <span lang="en"><strong>Development downloads:</strong> If a Dev Manager Windows Setup.exe is published, look for it on <a href="https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases">GitHub Releases</a>. Module availability can vary; use the builds the app identifies as verified when available. This does not establish game acceptance. AI Gaming development is paused. Historical module-release and bundle information below is not a current download entry.</span>
+
+<!-- Earlier notice retained for traceability. OpenAI-Codex_distribution_docs.
+> <span lang="en"><strong>Distribution plan — 3 November 2026:</strong> GitHub Releases is intended only for the Dev Manager Windows Setup.exe installer. Separate artifact branches are planned as the manager’s mod sources. Only the new artifact-branch changes for AI Improve and Automated Public Transport Planning are current candidates; these candidates have not been committed, pushed or published. The Windows installer has not yet been built or published. A local portable manager candidate and synthetic tests do not establish real downloads, installation or in-game acceptance. AI Gaming remains paused. Earlier GitHub mod-release and bundle instructions below describe the previous distribution approach, not availability under this new plan.</span>
+-->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->
+
+<details>
+<summary lang="en">Historical download only — <!-- not a current download; new installer not released -->not a current mod-download method</summary>
+
 > **GitHub 開發版：** 目前公開可安裝檔案的供應情況尚未核實，亦可能改變；請查看 [GitHub Releases（發行清單）](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/releases)中的實際附件，自動產生的原始碼壓縮檔不是可直接安裝的版本。AI Gaming 開發已暫緩。依賴及存檔風險請見[開發版下載與安裝](/Cities_Skylines_1_Modpack/zh-tw/wiki/development-downloads/)。同一模組不可同時啟用多個版本。
+
+</details>
 
 ## 1. 訂閱依賴模組
 
@@ -14,13 +27,29 @@ Automated Public Transport Planning 及 AI Gaming 不需要其他模組。如有
 
 ## 2. 選擇正式版或開發版
 
-各模組的 Steam Workshop（Steam 工作坊）發布記錄及現時可用性各有不同，這裏未重新核實；請查看各模組頁面的連結。如有官方可安裝的實驗性 GitHub 開發版，需另外下載及安裝。
+各模組的 Steam Workshop（Steam 工作坊）發布記錄及現時可用性各有不同，這裏未重新核實；請查看各模組頁面的連結。
+
+<details>
+<summary lang="en">Historical download only — <!-- not a current download; new installer not released -->not a current mod-download method</summary>
+
+如有官方可安裝的實驗性 GitHub 開發版，需另外下載及安裝。
+
+</details>
+
+
+<details>
+<summary lang="en">Historical edition comparison — not a current mod-download method</summary>
 
 | | 穩定正式版 | GitHub 開發版 |
 | --- | --- | --- |
 | 用途 | 日常遊玩 | 提前試用變更及協助測試 |
-| 更新方式 | 發布後透過 Steam 工作坊更新 | 查看 GitHub 發行清單及版本附帶的可安裝檔案 |
+| 更新方式 | 發布後透過 Steam 工作坊更新 | <details><summary lang="en">Historical download only — <!-- not a current download; new installer not released -->not a current mod-download method</summary>查看 GitHub 發行清單及版本附帶的可安裝檔案</details> |
 | 測試工具 | 不包括 | 視乎版本而定；請查看該版本的說明 |
+
+</details>
+
+<p lang="en">For an available stable edition, check the mod’s Steam Workshop page. Back up saves before testing.</p>
+<!-- Historical edition comparison: OpenAI-Codex. -->
 
 **每個模組只能啟用一個版本。** 測試 GitHub 開發版前，請停用其他本機或工作坊版本。連結位於各模組頁面：[AI Improve](/Cities_Skylines_1_Modpack/zh-tw/ai-improve/)、[Automated Public Transport Planning](/Cities_Skylines_1_Modpack/zh-tw/automated-public-transport-planning/)、[AI Gaming](/Cities_Skylines_1_Modpack/zh-tw/ai-gaming/)。
 
@@ -44,3 +73,7 @@ Automated Public Transport Planning 及 AI Gaming 不需要其他模組。如有
 <!-- Updated by OpenAI-Codex on 2026-11-01. -->
 
 <!-- Updated by OpenAI-Codex_wiki_update on 2026-11-02. -->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->
+
+<!-- Updated by OpenAI-Codex_distribution_docs on 2026-11-03. -->
