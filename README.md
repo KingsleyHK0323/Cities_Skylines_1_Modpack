@@ -15,6 +15,15 @@ The pinned AI Improve, Wireless and APTP recipes passed separate cloud-only
 build validations; the complete Issue-to-Steam pipeline remains unverified.
 <!-- Signature: OpenAI-Codex. -->
 
+## AI Improve description-only candidate
+
+A separate candidate prepares an owner-approved update of the AI Improve
+Workshop description without selecting a DLL, image or visibility change. It
+had not been deployed or tested against Steam when prepared on 5 November 2026.
+Its prerequisites, exact issue text, and unresolved safety limits are documented in
+[`tools/steam-workshop/README.md`](tools/steam-workshop/README.md).
+<!-- Signature: OpenAI-Codex. -->
+
 ## Development delivery migration
 
 The scheduled combined Development Release is disabled while individual

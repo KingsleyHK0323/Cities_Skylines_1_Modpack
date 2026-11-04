@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased — Workshop metadata candidate
+
+- Prepare a separate owner-issue candidate for the AI Improve Workshop
+  description. Pin the item and reviewed text, omit content, image and
+  visibility fields, and fail closed on changed text or approval. No Steam
+  submission or deployment was performed during preparation on 5 November 2026.
+  Signature: OpenAI-Codex.
+
 ## Unreleased — Workshop release request candidate
 
 - Prepare a single- or multi-module Issue form, owner approval snapshots,

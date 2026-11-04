@@ -1,0 +1,43 @@
+# Signature: OpenAI-Codex.
+# Candidate for an owner-approved, description-only AI Improve update.
+name: AI Improve Workshop metadata candidate
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: steam-workshop-ai-improve-release
+  cancel-in-progress: false
+
+jobs:
+  description-only:
+    if: >-
+      github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' &&
+      github.ref == 'refs/heads/Modpack_Website' &&
+      github.actor == github.repository_owner &&
+      github.triggering_actor == github.repository_owner &&
+      github.run_attempt == 1 &&
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'steam-workshop-metadata-approved' &&
+      github.event.issue.user.login == github.repository_owner &&
+      vars.WORKSHOP_RELEASE_APPROVAL_READY == 'true'
+    runs-on: [self-hosted, Windows, X64, cs1-workshop]
+    environment: workshop-release
+    timeout-minutes: 10
+    steps:
+      - name: Check out the exact controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check the issue and update only the reviewed description
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          METADATA_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          & './tools/steam-workshop/Invoke-MetadataOnly.ps1' -Mode 'UPDATE AI IMPROVE DESCRIPTION ONLY'
