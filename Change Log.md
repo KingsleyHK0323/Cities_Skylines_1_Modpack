@@ -8,6 +8,9 @@
   upload job explicitly disabled pending batch, private item, cloud and
   game-entry verification. No Steam publication was performed.
   Signature: OpenAI-Codex.
+- Preserve the reviewed PowerShell recipe through source-SHA and assembly-name
+  validation, with executable regression tests for both selection boundaries.
+  Signature: OpenAI-Codex.
 
 ## Unreleased — Development delivery migration
 

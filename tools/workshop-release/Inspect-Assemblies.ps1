@@ -16,12 +16,14 @@ if ($Module -ceq 'AI_Improve') {
 } else {
     if (-not [string]::IsNullOrWhiteSpace($DependencyDll)) { throw 'This reviewed recipe has no approved packaged dependency.' }
     $registry = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'reviewed-recipes.json') -Raw | ConvertFrom-Json
-    $matches = @($registry.recipes | Where-Object { $_.module -ceq $Module })
-    if ($registry.schema -ne 1 -or $matches.Count -ne 1 -or $matches[0].assembly -cnotmatch '^[A-Za-z][A-Za-z0-9]{1,100}$') {
+    $reviewedCandidates = @($registry.recipes | Where-Object { $_.module -ceq $Module })
+    if ($registry.schema -ne 1 -or $reviewedCandidates.Count -ne 1 -or $reviewedCandidates[0].assembly -cnotmatch '^[A-Za-z][A-Za-z0-9]{1,100}$') {
         throw 'A unique reviewed assembly recipe was not found.'
     }
-    $filename = "$($matches[0].assembly).dll"
+    $filename = "$($reviewedCandidates[0].assembly).dll"
     if ([IO.Path]::GetFileName($ModuleDll) -cne $filename) { throw 'The assembly filename differs from its recipe.' }
     $result[$filename] = [Reflection.AssemblyName]::GetAssemblyName([IO.Path]::GetFullPath($ModuleDll)).Name
 }
 $result | ConvertTo-Json -Compress
+
+# Updated by: OpenAI-Codex.

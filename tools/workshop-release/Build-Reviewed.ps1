@@ -15,12 +15,12 @@ if ($env:GITHUB_ACTIONS -cne 'true' -or $env:RUNNER_ENVIRONMENT -cne 'github-hos
     throw 'Release compilation requires a disposable GitHub-hosted runner.'
 }
 $registry = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'reviewed-recipes.json') -Raw | ConvertFrom-Json
-$matches = @($registry.recipes | Where-Object { $_.module -ceq $Module })
+$reviewedCandidates = @($registry.recipes | Where-Object { $_.module -ceq $Module })
 if ($registry.schema -ne 1 -or $registry.signature -cne 'OpenAI-Codex_workshop_implementation' -or
-    $matches.Count -ne 1 -or $matches[0].sourceSha -cne $SourceSha -or $SourceSha -cnotmatch '^[0-9a-f]{40}$') {
+    $reviewedCandidates.Count -ne 1 -or $reviewedCandidates[0].sourceSha -cne $SourceSha -or $SourceSha -cnotmatch '^[0-9a-f]{40}$') {
     throw 'The module source does not match a unique reviewed recipe.'
 }
-$recipe = $matches[0]
+$recipe = $reviewedCandidates[0]
 if ($recipe.assembly -cnotmatch '^[A-Za-z][A-Za-z0-9]{1,100}$' -or $recipe.languageVersion -cnotin @('3','5','7.3')) {
     throw 'The reviewed assembly name or language version is invalid.'
 }
