@@ -95,7 +95,9 @@ jobs:
           $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
           if (-not (Test-Path -LiteralPath $iscc -PathType Leaf)) { throw 'The expected Inno Setup compiler is unavailable.' }
           $script = Join-Path $env:GITHUB_WORKSPACE 'release-controller/tools/dev-manager-release/DevManager.iss'
-          & $iscc "/DPackageDir=$package" "/DOutputDir=$transfer" "/DAppVersion=$env:APP_VERSION" $script
+          $icon = Join-Path $env:GITHUB_WORKSPACE 'desktop/DevManager.ico'
+          if (-not (Test-Path -LiteralPath $icon -PathType Leaf)) { throw 'The App installer icon is unavailable in the pinned source.' }
+          & $iscc "/DPackageDir=$package" "/DOutputDir=$transfer" "/DAppVersion=$env:APP_VERSION" "/DIconFile=$icon" $script
           if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
           $setup = Join-Path $transfer 'Cities_Skylines_1_Modpack_Dev_Manager_Setup.exe'
           if (-not (Test-Path -LiteralPath $setup -PathType Leaf)) { throw 'Installer output is missing.' }

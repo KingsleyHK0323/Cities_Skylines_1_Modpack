@@ -8,6 +8,9 @@
 #ifndef AppVersion
   #error AppVersion is required
 #endif
+#ifndef IconFile
+  #error IconFile is required
+#endif
 
 [Setup]
 AppId=Cities_Skylines_1_Modpack_Dev_Manager-{#AppVersion}
@@ -22,6 +25,7 @@ PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 WizardStyle=modern
+SetupIconFile={#IconFile}
 CloseApplications=no
 LicenseFile={#PackageDir}\LICENSE
 OutputDir={#OutputDir}

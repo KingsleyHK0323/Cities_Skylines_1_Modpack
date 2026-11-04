@@ -15,6 +15,8 @@ historical App Releases. No App Release is created merely by editing this file.
 The candidate checks an exact App file allowlist, approved runtime notices and
 draft identity before publication. Release notes disclose that module sources
 may be unavailable and that game launch and coexistence checks remain incomplete.
+The next installer recipe uses the Windows icon from its pinned App source;
+previously published installers remain unchanged. <!-- Signature: OpenAI-Codex -->
 Automatic Release title transitions are best effort because GitHub updates are
 not conditional atomic writes; manual changes require review. The workflow's
 actual build and publication results must be checked separately. <!-- Signature: OpenAI-Codex -->

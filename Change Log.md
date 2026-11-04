@@ -2,6 +2,9 @@
 
 ## Unreleased — Development delivery migration
 
+- Prepare the App installer to embed its Windows icon from the exact pinned App
+  source; the next icon-bearing installer still requires cloud verification.
+  Signature: OpenAI-Codex.
 - Set an explicit byte length for installer uploads and add an owner-only
   recovery workflow that resumes an existing App Release using its original
   successful cloud build. Recheck empty draft identity before uploading.
