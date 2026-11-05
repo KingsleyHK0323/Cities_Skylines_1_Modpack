@@ -100,3 +100,34 @@ A separate Steam API check confirmed the final description SHA-256
 The earlier unverified-account and VDF statement records the original candidate
 status before these runs; the result does not establish delivery for other
 Workshop items or in-game compatibility. Signature: OpenAI-Codex.
+
+## APTP description update candidate
+
+This local candidate prepares one metadata-only update for Workshop item
+3823739383. It requires an owner issue with the reviewed source, candidate and
+rendered-description hashes, a distinct owner label, the existing release
+environment and an explicit manual workflow input. It serializes with the
+existing transport release workflow and uses a separate local one-shot claim.
+
+The historical BBCode matches the observed page in visible text, ordered links
+and basic formatting counts. The public Steam API did not return the original
+BBCode, so byte-for-byte preservation of the live original is not established.
+Before submission, the controller checks the exact final HTTPS URL, item and
+game page markers, rendered-description fingerprint and visible content. After
+submission it compares visible text, links and basic formatting. Those checks
+cannot verify hidden source formatting. The claim is local to this runner, and
+the final checks are not atomic with Steam accepting an update.
+
+This is a local candidate. It has not been committed, deployed or executed
+against Steam. The second user confirmation is still required before replacing
+the existing description. Signature: OpenAI-Codex.
+
+The candidate status above records preparation on 2026-11-05. The owner-issue
+event timestamps have one-second resolution, so an issue edit and label event
+in the same second may not be distinguishable by time alone. The exact issue
+body, owner label, environment approval and reviewed hashes remain required.
+Signature: OpenAI-Codex.
+
+The owner provided the second confirmation for this specific description
+update on 2026-11-05. The actual Steam outcome must be verified separately.
+Signature: OpenAI-Codex.

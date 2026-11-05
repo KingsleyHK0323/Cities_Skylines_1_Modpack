@@ -305,3 +305,10 @@ Author: OpenAI-Codex
   fields, existing description and post-submission Steam response.
 - Signature: OpenAI-Codex.
 - Exclude explicitly marked internal workflow notes from the public website change log. Signature: OpenAI-Codex.
+
+## 2026-11-05 — APTP description update preparation <!-- internal -->
+
+- Prepare a metadata-only APTP controller with reviewed hashes, an owner issue,
+  a rendered-page comparison and a one-shot local submission claim.
+- Document the limit that rendered HTML does not establish raw BBCode equality.
+- Signature: OpenAI-Codex.

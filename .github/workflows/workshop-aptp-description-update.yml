@@ -1,0 +1,55 @@
+# Signature: OpenAI-Codex.
+name: APTP Workshop description update
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Owner issue number for the reviewed APTP description
+        type: string
+        required: true
+      confirm_update:
+        description: Apply the reviewed APTP description update
+        type: choice
+        required: true
+        default: DO NOT RUN
+        options:
+          - DO NOT RUN
+          - APPLY APTP DESCRIPTION UPDATE
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: steam-workshop-aptp-release
+  cancel-in-progress: false
+
+jobs:
+  description-update:
+    if: >-
+      github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' &&
+      github.ref == 'refs/heads/Modpack_Website' &&
+      github.actor == github.repository_owner &&
+      github.triggering_actor == github.repository_owner &&
+      github.run_attempt == 1 &&
+      inputs.confirm_update == 'APPLY APTP DESCRIPTION UPDATE' &&
+      vars.WORKSHOP_RELEASE_APPROVAL_READY == 'true'
+    runs-on: [self-hosted, Windows, X64, cs1-workshop]
+    environment: workshop-release
+    concurrency:
+      group: steam-workshop-transport-release
+      cancel-in-progress: false
+    timeout-minutes: 10
+    steps:
+      - name: Check out the exact controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check the owner issue and update only the reviewed description
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APTP_ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: |
+          & './tools/steam-workshop/Invoke-APTPDescriptionUpdate.ps1' -Mode 'APPLY APTP DESCRIPTION UPDATE'
