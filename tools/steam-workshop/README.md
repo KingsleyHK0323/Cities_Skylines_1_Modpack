@@ -90,3 +90,13 @@ Steam and VDF checks are not atomic with Steam accepting the submission.
 
 Pure and mocked tests do not establish a successful Workshop update. Signature:
 OpenAI-Codex.
+
+## Verified AI Improve metadata updates
+
+On 2026-11-05, owner-approved workflow runs 41939497690 and 41951319499
+completed two description-only updates for AI Improve item 3782858610.
+A separate Steam API check confirmed the final description SHA-256
+`CF59F60DDF8765DFAE722AA08775D385C8054CBF80578EBB08EE695CB2B36342`.
+The earlier unverified-account and VDF statement records the original candidate
+status before these runs; the result does not establish delivery for other
+Workshop items or in-game compatibility. Signature: OpenAI-Codex.
