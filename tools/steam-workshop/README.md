@@ -131,3 +131,18 @@ Signature: OpenAI-Codex.
 The owner provided the second confirmation for this specific description
 update on 2026-11-05. The actual Steam outcome must be verified separately.
 Signature: OpenAI-Codex.
+
+## APTP description update observation
+
+On 2026-11-05, owner-approved run 41983615978 created its one-shot claim and
+then failed during the post-submission page check with an unexpected page
+title. A later independent Steam page read returned HTTP 200; the visible text,
+ordered links and basic formatting counts matched the reviewed candidate. The
+observed description HTML SHA-256 was
+AFDACB5909C23BFE357768A9D0458C6D4302643A0963F887B7B0EA45D9BB8C69.
+
+The workflow result remains failure and the underlying page response was not
+diagnosed. The later visible comparison does not prove raw BBCode equality or
+the state of other Workshop fields. The one-shot claim is retained; do not
+rerun the upload. This observation supersedes the preparation-only status
+above. Signature: OpenAI-Codex.
