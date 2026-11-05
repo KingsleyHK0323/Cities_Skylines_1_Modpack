@@ -1,0 +1,135 @@
+# Signature: OpenAI-Codex.
+name: Workshop description rewrite memory candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      module:
+        description: One module from the owner-approved local manifest
+        type: choice
+        required: true
+        options:
+          - AI Gaming
+          - AI Improve
+          - Automated Public Transport Planning
+          - Automated Public Transport Vehicle Management
+          - Full Map Unlock And Expansion
+          - Realistic Urban Population
+          - Realistic City Time
+          - Realistic City First Response
+          - Realistic Vehicle Traffic Control
+          - Realistic Pedestrian Traffic Control
+          - Realistic Railway Traffic Control
+          - Realistic Border Control
+          - Realistic Import Export Control
+          - Intercity Resource Sharing
+          - Wireless Utilities And Global Coverage
+      issue_number:
+        description: Owner issue approving the pinned batch and controller commit
+        type: string
+        required: true
+      confirm_update:
+        description: Submit one reviewed description only
+        type: choice
+        required: true
+        default: DO NOT RUN
+        options:
+          - DO NOT RUN
+          - APPLY REVIEWED DESCRIPTION
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: steam-workshop-description-rewrite
+  cancel-in-progress: false
+
+jobs:
+  description-rewrite:
+    if: >-
+      github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' &&
+      github.ref == 'refs/heads/Modpack_Website' &&
+      github.actor == github.repository_owner &&
+      github.triggering_actor == github.repository_owner &&
+      github.run_attempt == 1 &&
+      inputs.confirm_update == 'APPLY REVIEWED DESCRIPTION' &&
+      vars.WORKSHOP_RELEASE_APPROVAL_READY == 'true'
+    runs-on: [self-hosted, Windows, X64, cs1-workshop]
+    environment: workshop-release
+    timeout-minutes: 10
+    steps:
+      - name: Load the pinned controller without a checkout
+        shell: 'pwsh -NoLogo -NoProfile -NonInteractive -File "{0}"'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REWRITE_MODULE: ${{ inputs.module }}
+          REWRITE_ISSUE_NUMBER: ${{ inputs.issue_number }}
+          WORKSHOP_RELEASE_APPROVAL_READY: ${{ vars.WORKSHOP_RELEASE_APPROVAL_READY }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GITHUB_SHA -cnotmatch '^[0-9a-f]{40}$' -or [string]::IsNullOrWhiteSpace($env:GH_TOKEN)) { throw 'The controller commit or token is invalid.' }
+          $projectRoot = [IO.Path]::GetFullPath('D:\Code\Game Code\Cities_Skyline_1_Modpack').TrimEnd('\')
+          $expectedSteam = Join-Path $projectRoot 'Resource\Tools\steamcmd\steamcmd.exe'
+          if ([string]::IsNullOrWhiteSpace($env:STEAMCMD_EXE) -or [IO.Path]::GetFullPath($env:STEAMCMD_EXE) -ine $expectedSteam) { throw 'The SteamCMD executable is outside the reviewed location.' }
+          $steamFile = Get-Item -LiteralPath $expectedSteam -Force -ErrorAction Stop
+          if ($steamFile.PSIsContainer -or ($steamFile.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'The SteamCMD executable is not a regular file.' }
+          $steamLock = [IO.File]::Open($expectedSteam, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+          try {
+          $expectedSteamHash = '7baf77927639793e11b2a02ec2fd6d9114c95432be2f23a3225e274732255cf4'
+          if ((Get-FileHash -LiteralPath $expectedSteam -Algorithm SHA256).Hash.ToLowerInvariant() -cne $expectedSteamHash) { throw 'The SteamCMD executable changed since review.' }
+          $signature = Get-AuthenticodeSignature -LiteralPath $expectedSteam
+          if ($signature.Status -ne 'Valid' -or $null -eq $signature.SignerCertificate -or $signature.SignerCertificate.Subject -cnotmatch '^CN=Valve Corp\.,') { throw 'The SteamCMD executable signature is not the reviewed Valve signature.' }
+          $configDirectory = Get-Item -LiteralPath (Join-Path (Split-Path -Parent $expectedSteam) 'config') -Force -ErrorAction Stop
+          $configFile = Get-Item -LiteralPath (Join-Path $configDirectory.FullName 'config.vdf') -Force -ErrorAction Stop
+          if (-not $configDirectory.PSIsContainer -or ($configDirectory.Attributes -band [IO.FileAttributes]::ReparsePoint) -or
+              $configFile.PSIsContainer -or ($configFile.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'The SteamCMD login configuration location is not a regular file and directory.' }
+          $current = Split-Path -Parent $expectedSteam
+          while ($true) {
+            $directory = Get-Item -LiteralPath $current -Force -ErrorAction Stop
+            if (-not $directory.PSIsContainer -or ($directory.Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'A SteamCMD directory is unavailable or is a reparse point.' }
+            if ($current -ieq $projectRoot) { break }
+            $parent = Split-Path -Parent $current
+            if ([string]::IsNullOrWhiteSpace($parent) -or $parent -ieq $current) { throw 'The SteamCMD directory ancestry is invalid.' }
+            $current = $parent.TrimEnd('\')
+          }
+          $headers = @{ Authorization = 'Bearer ' + $env:GH_TOKEN; Accept = 'application/vnd.github+json'; 'X-GitHub-Api-Version' = '2022-11-28' }
+          $paths = @('tools/steam-workshop/DescriptionRewritePlan.psm1', 'tools/steam-workshop/MetadataOnly.psm1', 'tools/steam-workshop/Invoke-DescriptionRewriteMemory.ps1')
+          $sources = @{}
+          $expectedHashes = @{
+            'tools/steam-workshop/DescriptionRewritePlan.psm1' = 'bbe4bb0c0096eb7ecf39bedadb1d9802060d8864a85ef9c42925a3568fdf44ec'
+            'tools/steam-workshop/MetadataOnly.psm1' = '5c3ee3aa9b9d71fbcb1219a071ffbb18ed0bd24ea16fb209a74e04fa036e645b'
+            'tools/steam-workshop/Invoke-DescriptionRewriteMemory.ps1' = '073ada0caad57638d07980e78e63b9a99efbb170f97844c3b57af2819d85c604'
+          }
+          # BEGIN OFFLINE SOURCE VALIDATION
+          function Convert-RewriteSourceContent {
+            param($Response, [string]$ExpectedPath, [string]$ExpectedSha256)
+            if ($ExpectedSha256 -cnotmatch '^[0-9a-f]{64}$' -or [string]$Response.type -cne 'file' -or [string]$Response.path -cne $ExpectedPath -or
+                [string]$Response.encoding -cne 'base64' -or [string]$Response.sha -cnotmatch '^[0-9a-f]{40}$' -or
+                [long]$Response.size -le 0 -or [long]$Response.size -gt 262144) { throw 'A pinned controller response is invalid.' }
+            try { $bytes = [Convert]::FromBase64String([string]$Response.content) } catch { throw 'A pinned controller response is not valid base64.' }
+            if ($bytes.Length -ne [long]$Response.size) { throw 'A pinned controller response has the wrong size.' }
+            $prefix = [Text.Encoding]::ASCII.GetBytes(('blob ' + $bytes.Length + [char]0))
+            $blob = [byte[]]::new($prefix.Length + $bytes.Length)
+            [Buffer]::BlockCopy($prefix, 0, $blob, 0, $prefix.Length)
+            [Buffer]::BlockCopy($bytes, 0, $blob, $prefix.Length, $bytes.Length)
+            $sha1 = [Security.Cryptography.SHA1]::Create()
+            try { $gitHash = [BitConverter]::ToString($sha1.ComputeHash($blob)).Replace('-', '').ToLowerInvariant() } finally { $sha1.Dispose() }
+            if ($gitHash -cne [string]$Response.sha) { throw 'A controller blob failed its Git object hash check.' }
+            $sha256 = [Security.Cryptography.SHA256]::Create()
+            try { $contentHash = [BitConverter]::ToString($sha256.ComputeHash($bytes)).Replace('-', '').ToLowerInvariant() } finally { $sha256.Dispose() }
+            if ($contentHash -cne $ExpectedSha256) { throw 'A controller source does not match its pinned SHA-256.' }
+            return [Text.UTF8Encoding]::new($false, $true).GetString($bytes)
+          }
+          # END OFFLINE SOURCE VALIDATION
+          foreach ($path in $paths) {
+            $url = 'https://api.github.com/repos/KingsleyHK0323/Cities_Skylines_1_Modpack/contents/' + $path + '?ref=' + $env:GITHUB_SHA
+            try { $response = Invoke-RestMethod -Method Get -Uri $url -Headers $headers -MaximumRedirection 0 -TimeoutSec 20 }
+            catch { throw 'Could not retrieve the pinned controller source.' }
+            $sources[$path] = Convert-RewriteSourceContent -Response $response -ExpectedPath $path -ExpectedSha256 $expectedHashes[$path]
+          }
+          $planModule = New-Module -Name 'RewritePlanVerified' -ScriptBlock ([scriptblock]::Create($sources[$paths[0]]))
+          $metadataModule = New-Module -Name 'RewriteMetadataVerified' -ScriptBlock ([scriptblock]::Create($sources[$paths[1]]))
+          $controller = [scriptblock]::Create($sources[$paths[2]])
+          & $controller -Mode 'APPLY REVIEWED DESCRIPTION' -PlanModule $planModule -MetadataModule $metadataModule
+          } finally { $steamLock.Dispose() }

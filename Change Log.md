@@ -312,3 +312,11 @@ Author: OpenAI-Codex
   a rendered-page comparison and a one-shot local submission claim.
 - Document the limit that rendered HTML does not establish raw BBCode equality.
 - Signature: OpenAI-Codex.
+
+## 2026-11-05 - Fifteen-module description rewrite candidate <!-- internal -->
+
+- Prepare an owner-reviewed, manual single-item metadata controller bound to
+  a local manifest, the owner issue and the controller commit.
+- Record that runner temporary cleanup, blind replacement and live verification
+  require user approval; no runner or Steam execution is implied.
+- Signature: OpenAI-Codex.
