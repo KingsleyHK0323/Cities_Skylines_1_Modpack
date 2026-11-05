@@ -5,6 +5,16 @@ name: AI Improve Workshop metadata candidate
 on:
   issues:
     types: [labeled]
+  workflow_dispatch:
+    inputs:
+      confirm_retry:
+        description: Retry the same approved issue after a pre-submission failure
+        type: choice
+        required: true
+        default: DO NOT RUN
+        options:
+          - DO NOT RUN
+          - RETRY AI IMPROVE DESCRIPTION ONLY
 
 permissions:
   contents: read
@@ -22,9 +32,11 @@ jobs:
       github.actor == github.repository_owner &&
       github.triggering_actor == github.repository_owner &&
       github.run_attempt == 1 &&
-      github.event.action == 'labeled' &&
-      github.event.label.name == 'steam-workshop-metadata-approved' &&
-      github.event.issue.user.login == github.repository_owner &&
+      ((github.event_name == 'issues' && github.event.action == 'labeled' &&
+        github.event.label.name == 'steam-workshop-metadata-approved' &&
+        github.event.issue.user.login == github.repository_owner) ||
+       (github.event_name == 'workflow_dispatch' &&
+        inputs.confirm_retry == 'RETRY AI IMPROVE DESCRIPTION ONLY')) &&
       vars.WORKSHOP_RELEASE_APPROVAL_READY == 'true'
     runs-on: [self-hosted, Windows, X64, cs1-workshop]
     environment: workshop-release
@@ -38,6 +50,6 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-          METADATA_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          METADATA_ISSUE_NUMBER: ${{ github.event_name == 'workflow_dispatch' && '1' || github.event.issue.number }}
         run: |
           & './tools/steam-workshop/Invoke-MetadataOnly.ps1' -Mode 'UPDATE AI IMPROVE DESCRIPTION ONLY'

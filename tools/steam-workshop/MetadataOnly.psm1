@@ -60,6 +60,8 @@ function Test-MetadataIssueApproved {
     if ($null -ne $Issue.PSObject.Properties['pull_request'] -or
         [string]$Issue.title -cne '[Workshop metadata] AI Improve 3782858610' -or
         [string]$Issue.state -cne 'open' -or [string]$Issue.user.login -ine 'KingsleyHK0323' -or
+        ([DateTimeOffset]$Issue.created_at).ToUniversalTime() -ne [DateTimeOffset]::Parse('2026-11-04T23:12:17Z') -or
+        ([DateTimeOffset]$Issue.updated_at).ToUniversalTime() -ne [DateTimeOffset]::Parse('2026-11-04T23:12:32Z') -or
         ([string]$Issue.body).Replace("`r`n", "`n").Trim() -cne $body) {
         throw 'The issue does not match the reviewed owner request.'
     }
@@ -70,6 +72,8 @@ function Test-MetadataIssueApproved {
 
 function Test-MetadataApprovalEvents {
     param([Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Events)
+    # Invoke-RestMethod can emit a JSON event array as one nested pipeline object.
+    $Events = @($Events | ForEach-Object { $_ })
     if ($Events.Count -eq 0 -or $Events.Count -ge 100) { throw 'Approval history is missing or may be incomplete.' }
     $last = $null
     foreach ($entry in $Events) {
@@ -78,7 +82,8 @@ function Test-MetadataApprovalEvents {
             [string]$entry.event -in @('labeled', 'unlabeled')) { $last = $entry }
     }
     if ($null -eq $last -or [string]$last.event -cne 'labeled' -or
-        [string]$last.actor.login -ine 'KingsleyHK0323') {
+        [string]$last.actor.login -ine 'KingsleyHK0323' -or [string]$last.id -cne '35184966638' -or
+        ([DateTimeOffset]$last.created_at).ToUniversalTime() -ne [DateTimeOffset]::Parse('2026-11-04T23:12:32Z')) {
         throw 'The most recent metadata approval label was not applied by the owner.'
     }
     return $true

@@ -58,6 +58,7 @@ $body = @(
 ) -join "`n"
 function New-TestIssue {
     return [pscustomobject]@{ title = '[Workshop metadata] AI Improve 3782858610'; body = $body; state = 'open';
+        created_at = '2026-11-04T23:12:17Z'; updated_at = '2026-11-04T23:12:32Z';
         user = [pscustomobject]@{ login = 'KingsleyHK0323' }; labels = @([pscustomobject]@{ name = 'steam-workshop-metadata-approved' }) }
 }
 $issue = New-TestIssue
@@ -74,15 +75,27 @@ $issue = New-TestIssue; $issue.title = 'Another target'
 Assert-Rejected { Test-MetadataIssueApproved $issue } 'An issue with the wrong title was accepted.'
 $issue = New-TestIssue; $issue | Add-Member -NotePropertyName pull_request -NotePropertyValue @{}
 Assert-Rejected { Test-MetadataIssueApproved $issue } 'A pull request was accepted as an issue.'
-$ownerEvent = [pscustomobject]@{ event = 'labeled'; actor = [pscustomobject]@{ login = 'KingsleyHK0323' }; label = [pscustomobject]@{ name = 'steam-workshop-metadata-approved' } }
+$issue = New-TestIssue; $issue.updated_at = '2026-11-04T23:12:33Z'
+Assert-Rejected { Test-MetadataIssueApproved $issue } 'An issue changed after owner approval was accepted.'
+$issue = New-TestIssue; $issue.created_at = '2026-11-04T23:12:16Z'
+Assert-Rejected { Test-MetadataIssueApproved $issue } 'An unexpected issue creation time was accepted.'
+$ownerEvent = [pscustomobject]@{ id = 35184966638; created_at = '2026-11-04T23:12:32Z'; event = 'labeled'; actor = [pscustomobject]@{ login = 'KingsleyHK0323' }; label = [pscustomobject]@{ name = 'steam-workshop-metadata-approved' } }
 $removedEvent = [pscustomobject]@{ event = 'unlabeled'; actor = [pscustomobject]@{ login = 'someone-else' }; label = [pscustomobject]@{ name = 'steam-workshop-metadata-approved' } }
 $otherEvent = [pscustomobject]@{ event = 'labeled'; actor = [pscustomobject]@{ login = 'someone-else' }; label = [pscustomobject]@{ name = 'steam-workshop-metadata-approved' } }
 Assert-True (Test-MetadataApprovalEvents @($ownerEvent)) 'The owner approval event was rejected.'
+$wrongEvent = [pscustomobject]@{ id = 35184966639; created_at = '2026-11-04T23:12:32Z'; event = 'labeled'; actor = [pscustomobject]@{ login = 'KingsleyHK0323' }; label = [pscustomobject]@{ name = 'steam-workshop-metadata-approved' } }
+Assert-Rejected { Test-MetadataApprovalEvents @($wrongEvent) } 'A different owner approval event was accepted.'
 Assert-Rejected { Test-MetadataApprovalEvents @($ownerEvent, $removedEvent) } 'A removed approval was accepted.'
 Assert-Rejected { Test-MetadataApprovalEvents @($ownerEvent, $otherEvent) } 'An approval added by someone else was accepted.'
 Assert-Rejected { Test-MetadataApprovalEvents @() } 'Missing approval history was accepted.'
 $manyEvents = @($ownerEvent) * 100
 Assert-Rejected { Test-MetadataApprovalEvents $manyEvents } 'Incomplete approval history was accepted.'
+$wrappedOwner = ,@($ownerEvent)
+Assert-True (Test-MetadataApprovalEvents $wrappedOwner) 'A REST response containing a nested owner-event array was rejected.'
+$wrappedRemoved = ,@($ownerEvent, $removedEvent)
+Assert-Rejected { Test-MetadataApprovalEvents $wrappedRemoved } 'A nested response with removed approval was accepted.'
+$wrappedMany = ,$manyEvents
+Assert-Rejected { Test-MetadataApprovalEvents $wrappedMany } 'A nested response with incomplete event history was accepted.'
 $environment = @{ SystemRoot = 'C:\Windows'; PATH = 'C:\Windows'; USERPROFILE = 'C:\User'; GH_TOKEN = 'secret';
     GITHUB_TOKEN = 'secret'; ACTIONS_RUNTIME_TOKEN = 'secret'; STEAM_PASSWORD = 'secret'; STEAMCMD_USERNAME = 'secret' }
 $childEnvironment = Get-SteamCmdEnvironment $environment

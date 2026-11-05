@@ -7,6 +7,10 @@
   visibility fields, and fail closed on changed text or approval. No Steam
   submission or deployment was performed during preparation on 5 November 2026.
   Signature: OpenAI-Codex.
+- Accept the nested GitHub event-array shape observed in the first run, and
+  permit an owner-only retry against the same approved issue after a failure
+  before submission. Pin the issue snapshot and owner label event; preserve the
+  one-shot claim. Signature: OpenAI-Codex.
 
 ## Unreleased — Workshop release request candidate
 

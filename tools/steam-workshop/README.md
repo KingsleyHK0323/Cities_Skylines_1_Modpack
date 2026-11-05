@@ -19,6 +19,20 @@ from the owner. The existing `workshop-release` environment requires its own
 reviewer approval. At preparation on 5 November 2026 the label did not exist
 and this candidate had not opened an issue.
 
+The first issue-triggered run, `41931858096`, rejected a nested REST event
+array before reaching Steam or creating the one-shot claim. A corrected
+candidate adds an owner-only manual retry which checks the same approved issue
+`#1`, the original text and the same hashes. The default retry input is
+`DO NOT RUN`; the persistent claim still blocks a retry after submission may
+have started. The corrected candidate requires its own deployment and has not
+yet been verified on the runner.
+
+For this one-off retry, the issue creation and last-update times and the
+specific owner label event `35184966638` are pinned. Subsequent issue changes
+or a different approval event fail closed. GitHub timestamps have limited
+resolution; this is not a general cryptographic binding of every issue edit to
+the approval event.
+
 Title:
 
 ```text
