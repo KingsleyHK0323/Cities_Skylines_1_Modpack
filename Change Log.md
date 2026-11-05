@@ -297,10 +297,11 @@ Author: OpenAI-Codex
 - Publish build-run evidence without claiming active simulation controls, Dev Tools, Workshop delivery or game acceptance.
 - Signature: OpenAI-Codex.
 
-## 2026-11-05 — AI Improve description correction
+## 2026-11-05 — AI Improve description correction <!-- internal -->
 
 - Add an owner-approved, single-attempt metadata controller for two reviewed
   AI Improve description replacements without sending module files.
 - Validate the reviewed hashes, owner issue and label event, item identity, VDF
   fields, existing description and post-submission Steam response.
 - Signature: OpenAI-Codex.
+- Exclude explicitly marked internal workflow notes from the public website change log. Signature: OpenAI-Codex.

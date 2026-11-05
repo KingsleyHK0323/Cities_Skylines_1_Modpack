@@ -18,4 +18,6 @@ export const changeEntries: ChangeEntry[] = source
 		return { date: heading[1], title: heading[2].trim(), bullets };
 	})
 	.filter((entry): entry is ChangeEntry => Boolean(entry))
+	// Keep explicitly marked internal workflow notes out of the public site. Signature: OpenAI-Codex.
+	.filter((entry) => !entry.title.endsWith('<!-- internal -->'))
 	.sort((a, b) => b.date.localeCompare(a.date));

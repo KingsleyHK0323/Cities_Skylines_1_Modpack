@@ -48,3 +48,10 @@ This is a source-available, noncommercial project. Mod and website code use the 
 <!-- Documentation updated by OpenAI-Codex on 2026-10-27. -->
 
 Author: OpenAI-Codex
+
+## Website changelog visibility
+
+Dated `Change Log.md` headings ending with `<!-- internal -->` remain in the
+repository record but are omitted from the public website changelog. Other
+entries continue to require their existing Traditional Chinese translations.
+Signature: OpenAI-Codex.
