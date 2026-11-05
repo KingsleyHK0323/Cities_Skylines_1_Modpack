@@ -296,3 +296,11 @@ Author: OpenAI-Codex
 - Verify Railway, Vehicle, Intercity and Wireless cloud DLL builds and update the delivery snapshot to 14 non-paused modules, with AI Gaming retaining its paused older preview.
 - Publish build-run evidence without claiming active simulation controls, Dev Tools, Workshop delivery or game acceptance.
 - Signature: OpenAI-Codex.
+
+## 2026-11-05 — AI Improve description correction
+
+- Add an owner-approved, single-attempt metadata controller for two reviewed
+  AI Improve description replacements without sending module files.
+- Validate the reviewed hashes, owner issue and label event, item identity, VDF
+  fields, existing description and post-submission Steam response.
+- Signature: OpenAI-Codex.

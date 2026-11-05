@@ -73,3 +73,20 @@ required authorization. The candidate does not alter the existing binary-release
 workflow and does not yet support private-item description reads or other mods.
 
 Signature: OpenAI-Codex.
+
+## AI Improve one-off description correction
+
+The dedicated correction controller uses owner Issue #2 and a distinct approval
+label. It checks the reviewed original and corrected SHA-256 values, the exact
+two replacements, the item and game IDs, and the existing description before
+submission. The generated VDF contains only app ID, published-file ID and
+description; it does not include module files or other Workshop metadata.
+
+The manually dispatched workflow requires the repository owner, the reviewed
+branch, the existing release environment and explicit confirmation. It creates
+a separate persistent local claim before starting SteamCMD. Do not remove the
+claim to retry an uncertain result. The claim is local to the runner; the final
+Steam and VDF checks are not atomic with Steam accepting the submission.
+
+Pure and mocked tests do not establish a successful Workshop update. Signature:
+OpenAI-Codex.

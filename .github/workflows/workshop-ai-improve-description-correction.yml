@@ -1,0 +1,47 @@
+# Signature: OpenAI-Codex.
+name: AI Improve Workshop description correction
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_correction:
+        description: Apply the two reviewed AI Improve description replacements
+        type: choice
+        required: true
+        default: DO NOT RUN
+        options:
+          - DO NOT RUN
+          - APPLY AI IMPROVE DESCRIPTION CORRECTION
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: steam-workshop-ai-improve-release
+  cancel-in-progress: false
+
+jobs:
+  description-correction:
+    if: >-
+      github.repository == 'KingsleyHK0323/Cities_Skylines_1_Modpack' &&
+      github.ref == 'refs/heads/Modpack_Website' &&
+      github.actor == github.repository_owner &&
+      github.triggering_actor == github.repository_owner &&
+      github.run_attempt == 1 &&
+      inputs.confirm_correction == 'APPLY AI IMPROVE DESCRIPTION CORRECTION' &&
+      vars.WORKSHOP_RELEASE_APPROVAL_READY == 'true'
+    runs-on: [self-hosted, Windows, X64, cs1-workshop]
+    environment: workshop-release
+    timeout-minutes: 10
+    steps:
+      - name: Check out the exact controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check the owner issue and apply only the reviewed description correction
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          & './tools/steam-workshop/Invoke-AIImproveDescriptionCorrection.ps1' -Mode 'APPLY AI IMPROVE DESCRIPTION CORRECTION'
