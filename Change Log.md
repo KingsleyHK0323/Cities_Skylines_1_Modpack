@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retain the short in-game name and existing build-specific descriptions; add
+  isolated entry-point checks for both build symbols and the combined display text.
+  Signature: OpenAI-Codex_AI_Improve.
+
 - Pin hosted actions to reviewed commits and require a full-job rerun when a
   publisher retry would otherwise reuse a failed workflow attempt. Signature: OpenAI-Codex.
 

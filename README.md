@@ -1,5 +1,21 @@
 # AI Improve
 
+## In-game version display
+
+Both builds retain the short `AI_Improve` name. Builds made with `DevTools=true`
+provide the approved development warning in their description; the release
+description is unchanged. A static review of the game assembly found that, without
+a locale override, the content list combines the name, ` - ` and the description.
+The separate simultaneous-installation warning is not implemented by this change.
+
+`pwsh -NoProfile -File ./tests/VersionNameChecks.ps1 -BuildKind Release` and the
+same command with `-BuildKind Development` compile the actual entry-point source
+against synthetic dependencies in an isolated process, and check the name,
+description and combined text. The checks do not start the game; locale overrides
+and actual in-game rendering remain unverified.
+
+Signature: OpenAI-Codex_AI_Improve.
+
 ## Development delivery migration
 
 The Development workflow is configured to publish verified build files and their

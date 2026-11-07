@@ -9,6 +9,8 @@ namespace AIImprove
     // only through CitiesHarmony.API, otherwise the mod fails to load when CitiesHarmony isn't installed.
     public class AIImproveMod : IUserMod
     {
+        // The unlocalized content list combines this short name with Description.
+        // Signature: OpenAI-Codex_AI_Improve.
         public string Name => "AI_Improve";
 
         // Content Manager displays Name followed by Description. Signed: OpenAI-Codex.
