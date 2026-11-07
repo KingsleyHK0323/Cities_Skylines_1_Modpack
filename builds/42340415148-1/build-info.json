@@ -1,0 +1,9 @@
+{
+  "runId": "42340415148",
+  "sourceSHA": "84ca67380b85fb96c731fe13f6667d4afdedf1f2",
+  "runAttempt": "1",
+  "EnableLateMergeProbe": false,
+  "sharedReferencesSHA": "7b8a5e7c10f2db84388e8dd8af2084f239957b13",
+  "signature": "OpenAI-Codex_Responsible: AI_Improve",
+  "DevTools": true
+}
