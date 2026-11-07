@@ -1,3 +1,4 @@
+#nullable disable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +14,7 @@ namespace AIGaming
     internal sealed class CompanionSession : IDisposable
     {
         private readonly object _sequenceLock = new object();
+        private int _disposeStarted;
 
         internal Process Process { get; private set; }
         internal byte[] SessionToken { get; private set; }
@@ -41,6 +43,7 @@ namespace AIGaming
 
         public void Dispose()
         {
+            if (Interlocked.Exchange(ref _disposeStarted, 1) != 0) return;
             try { Process.StandardInput.Close(); }
             catch { }
             if (SessionToken != null)
@@ -448,3 +451,4 @@ namespace AIGaming
     }
 }
 // Implementation update signed by OpenAI-Codex.
+// Session-disposal lifecycle fix: OpenAI-Codex_AI_Gaming.

@@ -1,5 +1,8 @@
 # AI Gaming — Development Build
 
+> **Current distribution:** The manual Release-asset instructions below are historical. Dev Manager is the intended route for available development builds, but AI Gaming availability has not yet been verified.
+<!-- Signature: OpenAI-Codex -->
+
 ## Module Overview
 
 AI Gaming previews local Ollama advice using player-selected, reviewed city data. It does not implement cloud models or game control.
@@ -48,3 +51,13 @@ AI Gaming is source-available under the included unchanged PolyForm Noncommercia
 Steam_Workshop_Link.txt lists stable item links recorded in project source; these are not live Steam status claims. This prerelease is not marked Latest. No ZIP package is supplied; GitHub may display its own automatic source-archive links.
 
 Signature: OpenAI-Codex_Responsible: AI_Gaming
+
+## Current distribution status
+
+The manual Release-asset instructions above describe a historical route. New
+module GitHub Release publishing is disabled; the intended route for available development builds is the
+Dev Manager Windows installer. AI Gaming availability in
+Dev Manager has not yet been verified. The paired DLL and Companion must still
+match before use.
+
+<!-- Signature: OpenAI-Codex -->

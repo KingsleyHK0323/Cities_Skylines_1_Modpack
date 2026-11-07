@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Made Companion session disposal single-entry when cancellation and completion race, preserving token-buffer clearing without repeating process cleanup. Added isolated repeated and concurrent disposal checks using an unstarted synthetic process; a concurrent caller does not wait for the first cleanup to finish. Signature: OpenAI-Codex_AI_Gaming.
+
 - Fixed failed-publisher retries to use the successful compile job's immutable artifact ID and build attempt instead of the current publish attempt. Full reruns retain distinct immutable artifacts. Preserved source/reference provenance and checksum checks. Signature: OpenAI-Codex_release_format_audit.
 - Resolve newly created Development drafts by their returned release ID, avoiding first-page release-list lookup. Signature: OpenAI-Codex_release_format_audit.
 
@@ -53,3 +55,7 @@ Implementation update signed by OpenAI-Codex_Responsible: AI Gaming.
 - Added an early cancellation guard before Companion startup for already-cancelled queued requests and a compiled-module regression check. Cloud compilation and execution of this change are pending; no gameplay acceptance is claimed. Signature: OpenAI-Codex_Responsible: AI_Gaming.
 
 - Retained verified Development releases as unpublished drafts so cloud cancellation regression validation cannot automatically publish a public version; preserved release-audit retry fixes. Signature: OpenAI-Codex_Responsible: AI_Gaming.
+
+- Disable the module GitHub Release publishing job while retaining cloud
+  compilation and checks; Dev Manager distribution is not yet verified.
+  Signature: OpenAI-Codex.

@@ -112,7 +112,7 @@ jobs:
             ${{ runner.temp }}/release-assets/SHA256SUMS.txt
   publish:
     needs: compile
-    if: github.ref == 'refs/heads/AI_Gaming'
+    if: github.ref == 'refs/heads/AI_Gaming' && false # OpenAI-Codex: module Release publishing disabled
     runs-on: windows-latest
     permissions:
       contents: write

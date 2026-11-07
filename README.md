@@ -1,5 +1,8 @@
 # AI Gaming
 
+> **Current distribution:** The AI Gaming workflow no longer publishes module Releases. Dev Manager availability for this module is not yet verified. Earlier Release sections below are historical.
+<!-- Signature: OpenAI-Codex -->
+
 Visit the [AI Gaming website page](https://kingsleyhk0323.github.io/Cities_Skylines_1_Modpack/ai-gaming/) for project information, documentation, and updates.
 
 ## In-game language
@@ -89,3 +92,19 @@ The compile job passes its immutable artifact ID and build attempt to the publis
 
 Pushes and manual runs build, test and verify the nine allowlisted assets, then retain an unpublished Development prerelease draft. This supersedes earlier automatic public-publication descriptions. Publishing an existing draft is a separate authorized action; this workflow does not perform it. Immutable artifact identity, original build attempt, source/reference provenance and direct release-ID verification remain enforced. No existing release or tag is modified or recreated.
 <!-- Signature: OpenAI-Codex_Responsible: AI_Gaming -->
+
+### Companion session disposal
+
+Cancellation and request completion can both dispose the same Companion session. Only the first disposal now performs process cleanup and clears the original session-token buffer; subsequent concurrent or repeated calls do not repeat cleanup. A concurrent caller can return while the first cleanup is still in progress. This change does not eliminate cancellation races with an already running request or prove behavior in the subscribed game build.
+
+<!-- Signature: OpenAI-Codex_AI_Gaming -->
+
+## Module Release publication disabled
+
+This supersedes the earlier draft-only publication description. The development
+workflow retains its cloud compile and checks, but its module GitHub Release
+publisher is disabled. Its Actions artifact expires after one day and is not a
+permanent distribution channel. Availability through Dev Manager is not yet
+verified. No existing release or tag is changed by this policy.
+
+<!-- Signature: OpenAI-Codex -->

@@ -6,11 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="obj\**\*.cs;bin\**\*.cs" />
     <Compile Include="..\BoundedOllamaResponseReader.cs" Link="BoundedOllamaResponseReader.cs" />
     <Compile Include="..\SessionProtocol.cs" Link="SessionProtocol.cs" />
     <Compile Include="..\..\Source\LocalAiResponseLimit.cs" Link="LocalAiResponseLimit.cs" />
     <Compile Include="..\..\Source\RequestCaptureGeneration.cs" Link="RequestCaptureGeneration.cs" />
+    <Compile Include="..\..\Source\CompanionLauncher.cs" Link="CompanionLauncher.cs" />
   </ItemGroup>
 </Project>
 <!-- Implementation update signed by OpenAI-Codex. -->
 <!-- Implementation update signed by OpenAI-Codex_Responsible: AI Gaming. -->
+<!-- Synthetic session lifecycle checks: OpenAI-Codex_AI_Gaming. -->

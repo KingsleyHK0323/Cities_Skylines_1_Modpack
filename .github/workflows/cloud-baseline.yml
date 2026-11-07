@@ -25,7 +25,7 @@ jobs:
               project = ET.parse(name).getroot()
               assert project.findtext('.//TargetFramework') == framework, name
           print('Project metadata verified. Game build, Companion build, tests and release are not performed.')
-      - name: Record unresolved build dependencies
+      - name: Record metadata-only boundary # OpenAI-Codex
         run: |
-          echo 'Game reference DLL provisioning is unresolved: ICities, ColossalManaged, Assembly-CSharp, UnityEngine.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'No DLL or Companion is built or published. Releases must eventually provide paired files directly, without ZIP.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This metadata check does not restore game reference DLLs or run a build.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The separate compile workflow is configured to build a paired mod and Companion; Dev Manager availability is unverified.' >> "$GITHUB_STEP_SUMMARY"

@@ -11,6 +11,8 @@ internal static class Program
 
     private static async Task Main()
     {
+        SessionDisposalClearsTokenExactlyOnce();
+        ParallelSessionDisposalIsSafe();
         RejectsCancelledModuleRequestBeforeCompanionLaunch();
         ParsesZeroAsUnlimitedResponseSetting();
         ParsesConfiguredResponseLimitInMebibytes();
@@ -30,6 +32,31 @@ internal static class Program
         RejectsNegativeResponseLimit();
         RejectsPartialCityDataGroup();
         Console.WriteLine("PASS: bounded model-list, configurable local response limits, independent capture/response generations, and schema v4 checks.");
+    }
+
+    private static void SessionDisposalClearsTokenExactlyOnce()
+    {
+        var process = new CountingUnstartedProcess();
+        byte[] token = Enumerable.Repeat((byte)0xA5, 32).ToArray();
+        var session = new AIGaming.CompanionSession(process, token, 1);
+        session.Dispose();
+        session.Dispose();
+        if (process.DisposeCount != 1 || session.SessionToken != null || token.Any(value => value != 0))
+            throw new InvalidOperationException("Repeated session disposal must release the process once and clear the original token.");
+    }
+
+    private static void ParallelSessionDisposalIsSafe()
+    {
+        for (int iteration = 0; iteration < 100; iteration++)
+        {
+            var process = new CountingUnstartedProcess();
+            byte[] token = Enumerable.Repeat((byte)0xA5, 32).ToArray();
+            var session = new AIGaming.CompanionSession(process, token, 1);
+            Parallel.For(0, 16, _ => session.Dispose());
+            if (process.DisposeCount != 1 || session.SessionToken != null || token.Any(value => value != 0))
+                throw new InvalidOperationException("Parallel session disposal must release the process once and clear the original token.");
+        }
+        Console.WriteLine("PASS: repeated and concurrent session disposal clears the token and releases the synthetic process once.");
     }
 
     private static void RejectsCancelledModuleRequestBeforeCompanionLaunch()
@@ -398,6 +425,18 @@ internal sealed class NonSeekableReadStream : Stream
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 }
 
+internal sealed class CountingUnstartedProcess : System.Diagnostics.Process
+{
+    private int _disposeCount;
+    internal int DisposeCount => Volatile.Read(ref _disposeCount);
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) Interlocked.Increment(ref _disposeCount);
+        base.Dispose(disposing);
+    }
+}
+
 internal static class CompanionBuildInfo
 {
     internal const string Edition = "release";
@@ -408,3 +447,4 @@ internal static class CompanionBuildInfo
 // Implementation update signed by OpenAI-Codex.
 // Implementation update signed by OpenAI-Codex_Responsible: AI Gaming.
 // Cancellation lifecycle regression: OpenAI-Codex_Responsible: AI_Gaming.
+// Synthetic session disposal checks: OpenAI-Codex_AI_Gaming.
