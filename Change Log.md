@@ -39,3 +39,16 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 - Add Main-owned cloud observation DLL compilation, preview/lifecycle gates and allowlisted artifact upload; execution awaits approval. Signature: OpenAI-Codex.
 
 - Select the installed stable .NET 8 compiler explicitly when the hosted default SDK is newer. Signature: OpenAI-Codex.
+
+## 2026-11-07
+
+- Preserve the loaded-city state when an area provider releases, so a replacement provider can resume observation without another level load.
+- Add synthetic lifecycle cases for replacement after release, old-generation invalidation, and provider creation after city unload.
+- Add a pure candidate calculation for the 25-area startup goal, rejecting incomplete or inconsistent snapshots and caller-supplied freshness tokens.
+- Add an instantaneous latest-observation identity check; document retained references, cross-city callback ambiguity, and the absence of any game-write authorization.
+- Record static startup-unlock and save-format evidence, unresolved cost and save decisions, and the current Dev Manager distribution direction.
+- Require distinct declared coordinates and consistent native indices in the pure 25-area candidate; document that caller-supplied labels do not prove observation provenance.
+- Add a stateless synthetic startup-step preview that proposes `requireMoney = false`, blocks reported pending or failed attempts, and requires a newer observation after a reported success.
+- Document the confirmed no-city-funds decision, native coordinate-alias risk, and the remaining transaction, retry, lifecycle and save boundaries.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion

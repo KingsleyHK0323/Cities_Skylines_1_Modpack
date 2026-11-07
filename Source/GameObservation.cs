@@ -27,7 +27,8 @@ namespace FullMapUnlockAndExpansion {
   private static void Advance() { generation = generation == long.MaxValue ? 1 : generation + 1; latest = null; }
   internal static void Begin(object owner, bool playable) { lock (Gate) { loadingOwner = owner; Advance(); active = playable; } }
   internal static void End(object owner) { lock (Gate) { if (!object.ReferenceEquals(loadingOwner, owner)) return; active = false; loadingOwner = null; Advance(); } }
-  internal static void Release(object owner) { lock (Gate) { if (object.ReferenceEquals(provider, owner)) { provider = null; active = false; Advance(); } } }
+  // Provider release invalidates observations without ending the loaded city.
+  internal static void Release(object owner) { lock (Gate) { if (object.ReferenceEquals(provider, owner)) { provider = null; Advance(); } } }
   internal static void Record(object owner, int? x, int? z, bool? eligibility, int? price) {
    lock (Gate) {
     if (!active || !object.ReferenceEquals(provider, owner)) return;
@@ -35,6 +36,10 @@ namespace FullMapUnlockAndExpansion {
    }
   }
   public static AreaObservation Read() { lock (Gate) { return active ? latest : null; } }
+  // True only at this instant; this cannot verify which city originated a callback.
+  public static bool IsCurrent(AreaObservation observation) {
+   lock (Gate) { return active && provider != null && observation != null && object.ReferenceEquals(latest, observation); }
+  }
  }
  public sealed class Loading : LoadingExtensionBase {
   public override void OnLevelLoaded(LoadMode mode) { Observation.Begin(this, mode == LoadMode.NewGame || mode == LoadMode.LoadGame); }
