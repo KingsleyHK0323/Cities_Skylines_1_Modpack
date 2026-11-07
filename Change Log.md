@@ -1,5 +1,16 @@
 # Change Log
 
+## 2026-11-07 — Synthetic transfer assessment
+
+- Add an unwired, read-only consistency assessment for one observed electricity, water, sewage, or heating transfer, preserving unknown and unsupported states.
+- Reject invalid or mismatched resources, session/epoch context, units, negative amounts, and accepted quantities exceeding the observed offer or request.
+- Add isolated in-memory synthetic checks; this model does not establish native data semantics, route utilities, modify a city, or prevent cross-transaction double counting.
+- Correct the documented development distribution direction to the Dev Manager installer; the existing cloud workflow does not yet run the new synthetic check.
+- Clarify that pushes trigger the existing cloud workflows. Signature: OpenAI-Codex.
+- Correct the Workshop item ID and distinguish the 2026-11-02 screenshot visibility from its unverified current visibility.
+
+Signature: OpenAI-Codex_Wireless_Utilities_And_Global_Coverage
+
 ## 2026-11-02 — Inactive game entry-point source batch
 
 - Add a real ICities IUserMod and loading extension, with gameplay-only session state and cleanup on unload/release.

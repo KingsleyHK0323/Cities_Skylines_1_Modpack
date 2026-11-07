@@ -31,6 +31,7 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="ModuleIdentity.cs" />
     <Compile Include="ModuleLifecycle.cs" />
+    <Compile Include="UtilityTransferAssessment.cs" />
     <Compile Include="WirelessUtilitiesMod.cs" />
     <Compile Include="WirelessUtilitiesLoadingExtension.cs" />
   </ItemGroup>
