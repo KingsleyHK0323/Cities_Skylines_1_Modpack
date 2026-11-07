@@ -5,7 +5,7 @@ public enum Resource { Water, Electricity, Heat }
 public sealed record Input(string Scenario, string Contract, int Version, Resource Resource,
     string Source, string Receiver, long Window, long Supply, long OwnDemand,
     long Demand, long LocalSupply, long Limit, bool Available);
-public sealed record Output(long Transfer, long Surplus, long Shortfall, string Reason);
+public sealed record Output(long Transfer, long? Surplus, long? Shortfall, string Reason);
 // Serialized, in-memory use only. No game state, persistent ledger, or cancellation.
 public sealed class Preview
 {
@@ -25,15 +25,24 @@ public sealed class Preview
             if (input == previous.Input) return previous.Output;
             var old = previous.Input;
             if (old.Contract != input.Contract || old.Source != input.Source || old.Receiver != input.Receiver
-                || input.Window <= old.Window || input.Version < old.Version
+                || input.Window < old.Window || (input.Window == old.Window && old.Available)
+                || input.Version < old.Version
                 || (input.Limit != old.Limit && input.Version == old.Version))
                 throw new ArgumentException("Conflicting contract, retry, or old window");
         }
-        long surplus = Math.Max(0,input.Supply-input.OwnDemand);
-        long shortage = Math.Max(0,input.Demand-input.LocalSupply);
-        long transfer = input.Available ? Math.Min(input.Limit,Math.Min(surplus,shortage)) : 0;
-        var result = new Output(transfer,surplus-transfer,shortage-transfer,
-            input.Available ? "SyntheticPreview" : "Unavailable");
+        Output result;
+        if (!input.Available)
+        {
+            // An unavailable window is pending, with no trustworthy remaining quantities.
+            result = new Output(0, null, null, "Unavailable");
+        }
+        else
+        {
+            long surplus = Math.Max(0,input.Supply-input.OwnDemand);
+            long shortage = Math.Max(0,input.Demand-input.LocalSupply);
+            long transfer = Math.Min(input.Limit,Math.Min(surplus,shortage));
+            result = new Output(transfer,surplus-transfer,shortage-transfer,"SyntheticPreview");
+        }
         scenario = input.Scenario;
         latest[input.Resource] = (input,result);
         return result;
