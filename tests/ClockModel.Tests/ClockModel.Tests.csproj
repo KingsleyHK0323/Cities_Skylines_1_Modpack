@@ -3,6 +3,7 @@
 <!-- Explicit cloud compilation inputs: OpenAI-Codex_Realistic_City_Time -->
 <!-- Continuity regression tests: OpenAI-Codex_Realistic_City_Time -->
 <!-- Update signature: OpenAI-Codex -->
+<!-- Channel identity checks: OpenAI-Codex_clock_surface -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -12,6 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="ChannelIdentityTests.cs" />
     <Compile Include="ClockInputTests.cs" />
     <Compile Include="ClockContinuityTests.cs" />
     <Compile Include="PortableClockScalerTests.cs" />

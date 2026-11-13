@@ -1,6 +1,10 @@
 // Signature: OpenAI-Codex_Realistic_City_Time
 // Update signature: OpenAI-Codex_lifecycle_impl
 // Update signature: OpenAI-Codex
+// Channel identity update: OpenAI-Codex
+#if RCT_CHANNEL_DEVELOPMENT && RCT_CHANNEL_RELEASE
+#error RCT_CHANNEL_DEVELOPMENT and RCT_CHANNEL_RELEASE cannot both be defined.
+#endif
 using System;
 using System.Diagnostics;
 using ColossalFramework;
@@ -8,12 +12,27 @@ using ICities;
 
 namespace RealisticCityTime.Game
 {
+    internal static class GameBuildChannel
+    {
+#if RCT_CHANNEL_RELEASE
+        internal const string Value = "Release";
+#elif RCT_CHANNEL_DEVELOPMENT
+        internal const string Value = "Development";
+#else
+        internal const string Value = "Unspecified";
+#endif
+    }
+
     public sealed class RealisticCityTimeMod : IUserMod
     {
         public string Name { get { return "Realistic City Time"; } }
         public string Description
         {
+#if RCT_CHANNEL_RELEASE
+            get { return "Observation-only foundation. Does not change game time or speed."; }
+#else
             get { return "Development observation-only foundation. Does not change game time or speed."; }
+#endif
         }
 
         public void OnSettingsUI(UIHelperBase helper)

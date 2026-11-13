@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased — 2026-11-14 explicit game build channels
+
+- Keep the mod name and existing development description for unmarked and Development builds; only an explicit Release selects the neutral observation-only description.
+- Add mutually exclusive channel symbols, an internal channel value, and an optional case-sensitive Channel argument to the existing cloud-only compiler entry. Conflicting symbols fail compilation; channel selection does not enable time writes or publish a release.
+- The existing GITHUB_ACTIONS environment-variable check is an operational guard and does not authenticate the host. Signature: OpenAI-Codex.
+- Require the fake test runner to supply the expected channel independently of compiler symbols; missing, invalid, or mismatched expectations fail. Existing hosted invocation text now specifies Unspecified, but no workflow was run. Signature: OpenAI-Codex.
+- Add same-assembly fake identity checks alongside the existing model and observation tests. No real game, loader behavior, or gameplay acceptance is implied. Signature: OpenAI-Codex.
+
 ## Unreleased — 2026-11-14 NONRELEASE callback bridge
 
 - Add a default-disabled, symbol-gated public-interface bridge for five fake callback kinds; it has no loader, automatic output, or game connection.

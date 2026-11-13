@@ -1,5 +1,21 @@
 # Observation-only game assembly candidate
 
+**Build channel selection:** The existing cloud-only compiler entry accepts the optional, case-sensitive Channel values Unspecified, Development, and Release. Omitting the parameter is equivalent to Unspecified. Unspecified adds no channel symbol; Development adds RCT_CHANNEL_DEVELOPMENT; Release adds RCT_CHANNEL_RELEASE. Unknown or incorrectly cased values are rejected before the output directory is created. Conflicting channel symbols are rejected by the game source at compile time.
+
+The fake test executable requires exactly --expect-channel followed by Unspecified, Development, or Release. Supply these arguments after -- when using dotnet run. The hosted workflow definitions explicitly expect Unspecified for their current unmarked fake build; that check is separate from the subsequent game DLL compilation and does not verify that DLL. Signature: OpenAI-Codex.
+
+The script is reserved for approved GitHub-hosted builds. Its existing GITHUB_ACTIONS environment-variable check does not authenticate the host. Signature: OpenAI-Codex.
+
+The mod Name remains Realistic City Time. Unspecified and Development preserve the existing development description. Only Release selects "Observation-only foundation. Does not change game time or speed." All three choices retain the existing observation-only behavior and do not enable time writes. The internal GameBuildChannel value is a build label, not proof of a trusted installation, release provenance, or game compatibility.
+
+In an approved GitHub-hosted build context, the existing command can explicitly select the Release channel as follows:
+
+~~~powershell
+./Game/Build-GameAssembly.ps1 -CompilerPath $compilerPath -ReferenceDirectory $referenceDirectory -OutputDirectory $freshOutputDirectory -Channel Release
+~~~
+
+Use -Channel Development for the explicit development channel, or omit -Channel for the existing default. Selecting a channel does not run a workflow, publish a release, or establish gameplay acceptance. Local fake tests and the isolated channel-selection fragment do not establish execution of the complete cloud-only script. Signature: OpenAI-Codex.
+
 **Decision evidence correction, 2026-11-13:** Project notes record normal 1x as one real minute per game minute already confirmed, although the original user message was not re-read in this review. The following clarification was too broad if it is understood to erase that record. The full 24-hour/day-night design, phase anchor and interruption policy remain subject to Main's provisional status and further decisions. Signature: OpenAI-Codex.
 
 A separate [controlled diagnostic host](../Diagnostics/ControlledReadOnlyHost/README.md) has its own source list and does not include this directory's `GameMod.cs`. Its fake checks and offline reference compilation do not establish real game behavior or authorize installation. Signature: OpenAI-Codex.

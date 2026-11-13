@@ -1,4 +1,5 @@
 # Signature: OpenAI-Codex_Responsible: Realistic_City_Time
+# Update signature: OpenAI-Codex_boundary_host
 # Cloud build/run wiring: OpenAI-Codex_Realistic_City_Time
 name: Realistic City Time pure model
 on:
@@ -42,4 +43,4 @@ jobs:
       - name: Compile arithmetic model and observation contract checks
         run: dotnet build tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-restore
       - name: Execute both check suites without implicit build or restore
-        run: dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-build --no-restore
+        run: dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-build --no-restore -- --expect-channel Unspecified

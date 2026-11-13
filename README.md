@@ -1,5 +1,7 @@
 # Realistic City Time
 
+The observation-only game source now has explicit build-channel selection. An omitted channel or Development preserves the existing development description; only an explicit Release selects the neutral observation-only description. The mod name remains Realistic City Time. This selection does not enable time writes, publish a release, or establish gameplay acceptance. See [game build channels](Game/README.md). Signature: OpenAI-Codex.
+
 A separate [NONRELEASE callback bridge](Diagnostics/NONRELEASE/RelativeEventCallbackBridge/README.md) directly implements the public threading interface for offline fake-callback research. It starts disabled, has no loader or automatic output, and is absent from the inspected game build. Its local admission boundary does not establish real callback return, host queue drainage, or game compatibility. Signature: OpenAI-Codex.
 
 A separate [relative event trace study](Diagnostics/RelativeEventTrace/README.md) records bounded synthetic callback markers and session-local pseudonymous thread tags. It is disabled by default, excluded from the normal game build, and not connected to the game. Its observation order does not establish native write order, actual frame identity, CPU parallelism, or save consistency. Signature: OpenAI-Codex.
@@ -52,8 +54,10 @@ The pending workflow runs these commands separately on GitHub-hosted infrastruct
 dotnet --version
 dotnet restore tests/ClockModel.Tests/ClockModel.Tests.csproj --configfile tests/ClockModel.Tests/NuGet.Config
 dotnet build tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-restore
-dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-build --no-restore
+dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-build --no-restore -- --expect-channel Unspecified
 ```
+
+The fake test executable requires exactly --expect-channel followed by Unspecified, Development, or Release. The expected value comes from the caller independently of compiler symbols; a missing or invalid expectation fails. The configured hosted test command passes Unspecified explicitly. Signature: OpenAI-Codex.
 
 The current test project explicitly includes arithmetic, observation, lifecycle, ownership, continuity, portable-scaler, and temporary-input sources and checks. It compiles the game entry against test-only API fakes, not game DLLs; `Program.Main` runs the suites sequentially and failures exit nonzero. This job does not publish an artifact. The foundation documentation job is separate and cannot stand in for these checks. The 2026-11-13 local batches were checked with isolated output paths; their hosted workflow has not run.
 

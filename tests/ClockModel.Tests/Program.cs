@@ -1,6 +1,7 @@
 // Signature: OpenAI-Codex_Responsible: Realistic_City_Time
 // Local implementation review: OpenAI-Codex_Realistic_City_Time
 // Update signature: OpenAI-Codex
+// Channel identity checks: OpenAI-Codex_clock_surface
 using System;
 using System.Reflection;
 
@@ -35,10 +36,11 @@ internal static class Program
     private static long Advance(object model, long ticks, decimal multiplier) =>
         (long)Call(model, "Advance", ticks, multiplier);
 
-    private static int Main()
+    private static int Main(string[] args)
     {
         try
         {
+            Test("build channel identity", () => ChannelIdentityTests.Run(args));
             if (Model == null) throw new Exception("Missing ClockModel: decimal multiplier behavior is not implemented");
             Test("default multiplier is one", () => Equal(1m, Model.GetField("DefaultMultiplier").GetValue(null)));
             foreach (var pair in new[] { ("1", 1m), ("10", 10m), ("1.25", 1.25m), ("9.999", 9.999m) })

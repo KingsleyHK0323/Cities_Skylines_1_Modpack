@@ -1,4 +1,5 @@
 # Signature: OpenAI-Codex
+# Update signature: OpenAI-Codex_boundary_host
 name: Realistic City Time observation DLL
 on:
   push:
@@ -23,7 +24,7 @@ jobs:
         run: |
           dotnet restore tests/ClockModel.Tests/ClockModel.Tests.csproj --configfile tests/ClockModel.Tests/NuGet.Config
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-restore
+          dotnet run --project tests/ClockModel.Tests/ClockModel.Tests.csproj --configuration Release --no-restore -- --expect-channel Unspecified
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Check out pinned encrypted reference supply
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
