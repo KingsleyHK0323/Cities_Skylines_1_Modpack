@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased — 2026-11-14 NONRELEASE callback bridge
+
+- Add a default-disabled, symbol-gated public-interface bridge for five fake callback kinds; it has no loader, automatic output, or game connection.
+- Reject null or foreign callback tickets before touching their state, recorder, or callback count; mark the receiving active or closing session incomplete. A ticket without an owner safely refuses End. Signature: OpenAI-Codex.
+- Gate local admission and stopping, with pending snapshots and conservative failure flags. Reference-only compilation and synthetic checks do not establish real game loading, callback return, or host queue drainage. Signature: OpenAI-Codex.
+
 ## Unreleased — 2026-11-14 relative event trace study
 
 - Add an isolated, default-disabled, one-shot event recorder with bounded in-memory records and session-local pseudonymous thread tags; it is not wired into the game or an existing diagnostic host.

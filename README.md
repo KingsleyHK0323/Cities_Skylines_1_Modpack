@@ -1,5 +1,7 @@
 # Realistic City Time
 
+A separate [NONRELEASE callback bridge](Diagnostics/NONRELEASE/RelativeEventCallbackBridge/README.md) directly implements the public threading interface for offline fake-callback research. It starts disabled, has no loader or automatic output, and is absent from the inspected game build. Its local admission boundary does not establish real callback return, host queue drainage, or game compatibility. Signature: OpenAI-Codex.
+
 A separate [relative event trace study](Diagnostics/RelativeEventTrace/README.md) records bounded synthetic callback markers and session-local pseudonymous thread tags. It is disabled by default, excluded from the normal game build, and not connected to the game. Its observation order does not establish native write order, actual frame identity, CPU parallelism, or save consistency. Signature: OpenAI-Codex.
 
 Source-available module in early development for Cities: Skylines 1. No game functionality has been accepted in gameplay. The local candidate observes time and offers a clearly temporary multiplier input, but does not save that value or change the game clock. Its source has been compiled against project reference copies and exercised with in-memory game fixtures; the resulting DLL has not been run in the game.

@@ -1,5 +1,7 @@
 # Isolated clock diagnostic candidate
 
+A separate [NONRELEASE callback bridge](NONRELEASE/RelativeEventCallbackBridge/README.md) maps five public-interface callbacks to bounded event markers for fake-host research. It starts disabled and is absent from the inspected game and controlled-host builds. Local pending and completion states do not establish real host queue drainage or callback return. Signature: OpenAI-Codex.
+
 For the separate event-only fake-callback study, see [Relative event trace](RelativeEventTrace/README.md). It does not use this clock sampler or join the normal game or controlled-host build. Signature: OpenAI-Codex.
 
 > **Standalone host update, 2026-11-13:** The internal sources described below remain detached from the normal game assembly. A separate [controlled host](ControlledReadOnlyHost/README.md) now has its own entry sources and build list, excluding `GameMod.cs`. It is disabled until a manual action and has only offline fake and reference-compile evidence; actual game UI, manager lookup, callback order and city identity remain unverified. The older statements below that no game host source exists describe the prior state. Signature: OpenAI-Codex.
