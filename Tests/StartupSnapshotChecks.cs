@@ -406,11 +406,323 @@ public static class StartupSnapshotChecks {
   Check(f.AreaInfo.UnexpectedWrites == 0, "fake model bridge never invokes the IAreas write interface");
   f.Release();
  }
+ // OpenAI-Codex_build_review
+ // Test-only bridge: all providers are local fakes and production submission remains disabled.
+ sealed class RecordingAreas : IAreas {
+  internal readonly FakeAreas Inner = new FakeAreas();
+  internal bool WriterEnabled;
+  internal int WriterCalls, BlockedCalls, LastX, LastZ;
+  internal bool? LastRequireMoney;
+  internal Func<bool> EntryInvalidObserver; internal bool? InvalidAtWriterEntry;
+  public int unlockedAreaCount { get { return Inner.unlockedAreaCount; } }
+  public bool IsAreaUnlocked(int x, int z) { return Inner.IsAreaUnlocked(x, z); }
+  public void UnlockArea(int x, int z, bool requireMoney) {
+   if (!WriterEnabled) { BlockedCalls++; throw new InvalidOperationException("unarmed fake writer"); }
+   if (x < 0 || x >= 5 || z < 0 || z >= 5 || requireMoney)
+    throw new InvalidOperationException("unexpected fake writer arguments");
+   if (EntryInvalidObserver != null) InvalidAtWriterEntry = EntryInvalidObserver();
+   WriterCalls++; LastX = x; LastZ = z; LastRequireMoney = requireMoney;
+#if !FULLMAP_FAKE_BRIDGE_RED
+   Inner.Values[z * 5 + x] = true;
+#endif
+  }
+ }
+ sealed class RecordingFixture {
+  internal readonly Loading Loading = new Loading();
+  internal readonly Areas Areas = new Areas();
+  internal readonly FakeLoading LoadInfo = new FakeLoading();
+  internal readonly RecordingAreas AreaInfo = new RecordingAreas();
+  internal readonly FakeThreading ThreadInfo = new FakeThreading();
+  internal readonly object Threading = Activator.CreateInstance(threadingExtension);
+  internal readonly StartupSnapshot Snapshot;
+  internal RecordingFixture() {
+   Loading.OnCreated(LoadInfo);
+   Areas.OnCreated(AreaInfo);
+   threadingExtension.GetMethod("OnCreated").Invoke(Threading, new object[] { ThreadInfo });
+   Loading.OnLevelLoaded(LoadMode.NewGame);
+   Check(Status() == "Pending" && ThreadInfo.Actions.Count == 1, "fake bridge starts with a real queued snapshot");
+   ThreadInfo.Deliver(0);
+   Snapshot = (StartupSnapshot)Read();
+   Check(Snapshot != null && Snapshot.Mode == LoadMode.NewGame && !Snapshot.ProvenanceVerified &&
+     !Snapshot.SimulationThreadVerified && !Snapshot.SimulationRunningVerified,
+     "fake bridge snapshot remains explicitly unverified");
+  }
+  internal void Release() {
+   Loading.OnReleased(); Areas.OnReleased(); threadingExtension.GetMethod("OnReleased").Invoke(Threading, null);
+  }
+ }
+ enum FakeBridgeState { Idle, Pending, Executed, Confirmed, Stopped, Unknown }
+ sealed class ScheduledFakeBridge {
+  readonly StartupSnapshot original;
+  readonly IAreas writer;
+  readonly IThreading scheduler;
+  readonly Initial25NoDebitRun run = new Initial25NoDebitRun();
+  readonly object stateGate = new object();
+  FakeBridgeState state;
+  bool queueSucceeded, callbackSucceeded;
+  void RecordFakeCallbackSuccess() {
+   lock (stateGate) {
+    if (state == FakeBridgeState.Unknown || state == FakeBridgeState.Stopped) return;
+    callbackSucceeded = true;
+    if (queueSucceeded) state = FakeBridgeState.Executed;
+   }
+  }
+  void RecordFakeQueueSuccess() {
+   lock (stateGate) {
+    if (state == FakeBridgeState.Unknown || state == FakeBridgeState.Stopped) return;
+    queueSucceeded = true;
+    if (callbackSucceeded) state = FakeBridgeState.Executed;
+   }
+  }
+  internal FakeBridgeState State {
+   get { lock (stateGate) { return state; } }
+   set { lock (stateGate) { if (state != FakeBridgeState.Unknown) state = value; } }
+  }
+  internal Initial25NoDebitDecision Candidate;
+  internal int CallbackCount;
+  internal bool LastCurrentBeforeWrite, QueueException;
+  internal Action BeforeWrite;
+  internal ScheduledFakeBridge(StartupSnapshot snapshot, IAreas areas, IThreading threading) {
+   original = snapshot; writer = areas; scheduler = threading;
+  }
+  static Initial25Tile[] Tiles(StartupSnapshot snapshot) {
+   bool[] values = snapshot.GetUnlocked();
+   Initial25Tile[] result = new Initial25Tile[25];
+   for (int i = 0; i < result.Length; i++) result[i] = new Initial25Tile(i % 5, i / 5, i, values[i]);
+   return result;
+  }
+  internal bool Start() {
+   if (State != FakeBridgeState.Idle) return false;
+   Candidate = run.Propose(Tiles(original), 5, 5, original.UnlockedCount,
+     original.Generation, original.Generation, original.Revision, original.Revision, original.Mode == LoadMode.NewGame);
+   if (Candidate.Kind != Initial25DecisionKind.Candidate || Candidate.RequireMoney != false ||
+       !Candidate.NativeIndex.HasValue || !Candidate.AttemptId.HasValue) { State = FakeBridgeState.Stopped; return false; }
+   State = FakeBridgeState.Pending;
+   int invoked = 0;
+   try {
+    scheduler.QueueSimulationThread(delegate {
+     Interlocked.Increment(ref CallbackCount);
+     if (Interlocked.Exchange(ref invoked, 1) != 0 || State != FakeBridgeState.Pending) return;
+     LastCurrentBeforeWrite = StartupSnapshots.IsCurrent(original);
+     if (!LastCurrentBeforeWrite) { run.FailPending(Candidate.AttemptId); State = FakeBridgeState.Stopped; return; }
+     try {
+      if (BeforeWrite != null) BeforeWrite();
+      int index = Candidate.NativeIndex.Value;
+      writer.UnlockArea(index % 5, index / 5, Candidate.RequireMoney.Value);
+     } catch (Exception) { run.FailPending(Candidate.AttemptId); State = FakeBridgeState.Unknown; return; }
+     if (!StartupSnapshots.IsCurrent(original)) { run.FailPending(Candidate.AttemptId); State = FakeBridgeState.Unknown; return; }
+     RecordFakeCallbackSuccess();
+    });
+    RecordFakeQueueSuccess();
+   } catch (Exception) { QueueException = true; run.FailPending(Candidate.AttemptId); State = FakeBridgeState.Unknown; }
+   return true;
+  }
+  internal Initial25DecisionKind Confirm(StartupSnapshot snapshot) {
+   if (State != FakeBridgeState.Executed || snapshot == null || !StartupSnapshots.IsCurrent(snapshot))
+    return Initial25DecisionKind.Unavailable;
+   Initial25NoDebitDecision decision = run.Observe(Tiles(snapshot), 5, 5, snapshot.UnlockedCount,
+     snapshot.Generation, snapshot.Generation, snapshot.Revision, snapshot.Revision, snapshot.Mode == LoadMode.NewGame);
+   if (decision.Kind == Initial25DecisionKind.Confirmed) State = FakeBridgeState.Confirmed;
+   return decision.Kind;
+  }
+ }
+ static void CheckIntegratedFakeBridge() {
+  int before = checks;
+  var originalTrap = new FakeAreas(); bool rejected = false;
+  bool[] originalTrapBaseline = (bool[])originalTrap.Values.Clone();
+  try { originalTrap.UnlockArea(0, 0, false); } catch (InvalidOperationException) { rejected = true; }
+  Check(rejected && originalTrap.UnexpectedWrites == 1 && !originalTrap.Values[0],
+    "original fake areas write trap is unchanged");
+  for (int i = 0; i < originalTrapBaseline.Length; i++)
+   Check(originalTrap.Values[i] == originalTrapBaseline[i], "original fake write trap preserves every fake tile");
+  var unarmed = new RecordingAreas(); rejected = false;
+  try { unarmed.UnlockArea(0, 0, false); } catch (InvalidOperationException) { rejected = true; }
+  Check(rejected && unarmed.BlockedCalls == 1 && unarmed.WriterCalls == 0 && !unarmed.Inner.Values[0],
+    "recording fake writer is disabled until explicitly enabled");
+
+  var f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true;
+   StartupSnapshot first = f.Snapshot;
+   var request = new NativeSubmissionRequest(first.Generation, first.Revision, 1, 2, 1, true, true);
+   Check(StartupSnapshots.PrepareNativeSubmission(first).Kind == Initial25DecisionKind.Unavailable &&
+     new DisabledNativeStartupSubmission().Submit(first, request) == NativeSubmissionAvailability.Unavailable,
+     "both real submission gates remain unavailable");
+   bool[] old = first.GetUnlocked();
+   var bridge = new ScheduledFakeBridge(first, f.AreaInfo, f.ThreadInfo);
+   Check(bridge.Start() && bridge.State == FakeBridgeState.Pending && bridge.Candidate.RequireMoney == false &&
+     f.ThreadInfo.Actions.Count == 2 && f.AreaInfo.WriterCalls == 0, "one fake writer action is queued");
+   int tile = bridge.Candidate.NativeIndex.Value;
+   Action saved = f.ThreadInfo.Actions[1];
+   saved();
+   Check(bridge.State == FakeBridgeState.Executed && bridge.CallbackCount == 1 &&
+     f.AreaInfo.WriterCalls == 1 && f.AreaInfo.LastX == tile % 5 && f.AreaInfo.LastZ == tile / 5 &&
+     f.AreaInfo.LastRequireMoney == false, "fake IAreas receives one exact no-debit call");
+   saved();
+   Check(Object.ReferenceEquals(saved, f.ThreadInfo.Actions[1]) && bridge.CallbackCount == 2 &&
+     f.AreaInfo.WriterCalls == 1, "same fake action really replays without another writer call");
+   Check(Request() == "Pending" && f.ThreadInfo.Actions.Count == 3, "a newer real snapshot is requested");
+   f.ThreadInfo.Deliver(2);
+   StartupSnapshot newer = (StartupSnapshot)Read();
+   Check(newer != null && newer.Generation == first.Generation && newer.Revision > first.Revision &&
+     newer.UnlockedCount == first.UnlockedCount + 1, "fresh fake snapshot reflects exactly one recorded writer call");
+   bool[] changed = newer.GetUnlocked();
+   for (int i = 0; i < changed.Length; i++)
+    Check(changed[i] == (i == tile || old[i]), "only the fake candidate tile changes");
+   Check(bridge.Confirm(newer) == Initial25DecisionKind.Confirmed && bridge.State == FakeBridgeState.Confirmed,
+     "real run confirms only the newer fake snapshot");
+   saved();
+   Check(bridge.CallbackCount == 3 && f.AreaInfo.WriterCalls == 1 && !bridge.Start() &&
+     f.AreaInfo.Inner.UnexpectedWrites == 0, "confirmed fake action replay cannot repeat the write");
+   Console.WriteLine("FAKE_BRIDGE_CONFIRMED writes=1 requireMoney=False snapshot=Confirmed");
+  } finally { f.Release(); }
+
+  f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true;
+   var bridge = new ScheduledFakeBridge(f.Snapshot, f.AreaInfo, f.ThreadInfo);
+   Check(bridge.Start(), "old fake action queued");
+   Action oldAction = f.ThreadInfo.Actions[1];
+   f.Loading.OnLevelUnloading(); f.Loading.OnLevelLoaded(LoadMode.NewGame);
+   Check(f.ThreadInfo.Actions.Count == 3, "new load queues its own fake snapshot");
+   oldAction(); oldAction();
+   Check(bridge.State == FakeBridgeState.Stopped && bridge.CallbackCount == 2 &&
+     f.AreaInfo.WriterCalls == 0 && !bridge.Start(), "old fake action after unload cannot write or retry");
+   f.ThreadInfo.Deliver(2);
+   Check(Read() != null && !IsCurrent(f.Snapshot), "new fake snapshot is independent of old action");
+   Console.WriteLine("FAKE_BRIDGE_OLD_ACTION callbacks=2 writes=0 stopped=True");
+  } finally { f.Release(); }
+
+  f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true; f.ThreadInfo.ThrowBefore = true;
+   var bridge = new ScheduledFakeBridge(f.Snapshot, f.AreaInfo, f.ThreadInfo);
+   Check(bridge.Start() && bridge.QueueException && bridge.State == FakeBridgeState.Unknown &&
+     f.ThreadInfo.Actions.Count == 1 && f.AreaInfo.WriterCalls == 0 && !bridge.Start(),
+     "queue exception before storage is unknown and cannot retry");
+   Console.WriteLine("FAKE_BRIDGE_THROW_BEFORE saved=0 writes=0 state=Unknown");
+  } finally { f.Release(); }
+
+  f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true; f.ThreadInfo.ThrowAfter = true;
+   var bridge = new ScheduledFakeBridge(f.Snapshot, f.AreaInfo, f.ThreadInfo);
+   Check(bridge.Start() && bridge.QueueException && bridge.State == FakeBridgeState.Unknown &&
+     f.ThreadInfo.Actions.Count == 2, "queue exception after storage is unknown");
+   Action saved = f.ThreadInfo.Actions[1]; saved(); saved();
+   Check(bridge.CallbackCount == 2 && f.AreaInfo.WriterCalls == 0 && bridge.State == FakeBridgeState.Unknown &&
+     !bridge.Start(), "saved fake action after queue exception is disabled even when replayed");
+   Console.WriteLine("FAKE_BRIDGE_THROW_SAVED callbacks=2 writes=0 state=Unknown");
+  } finally { f.Release(); }
+
+  f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true; f.ThreadInfo.Inline = true; f.ThreadInfo.ThrowAfter = true;
+   var bridge = new ScheduledFakeBridge(f.Snapshot, f.AreaInfo, f.ThreadInfo);
+   Check(bridge.Start() && bridge.QueueException && bridge.State == FakeBridgeState.Unknown &&
+     f.AreaInfo.WriterCalls == 1 && bridge.CallbackCount == 1 && f.ThreadInfo.Actions.Count == 2,
+     "inline fake writer ran before queue threw; outcome remains unknown");
+   Action saved = f.ThreadInfo.Actions[1]; saved(); saved();
+   Check(bridge.CallbackCount == 3 && f.AreaInfo.WriterCalls == 1 && !bridge.Start() &&
+     bridge.State == FakeBridgeState.Unknown, "inline failure is not retried or rolled back");
+   Console.WriteLine("FAKE_BRIDGE_THROW_INLINE callbacks=3 writes=1 state=Unknown");
+  } finally { f.Release(); }
+
+  f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true;
+   var bridge = new ScheduledFakeBridge(f.Snapshot, f.AreaInfo, f.ThreadInfo);
+   RecordingFixture unloading = f;
+   int eventOrder = 0, unloadOrder = 0, writerEntryOrder = 0;
+   unloading.AreaInfo.EntryInvalidObserver = delegate {
+    writerEntryOrder = ++eventOrder;
+    return !StartupSnapshots.IsCurrent(unloading.Snapshot);
+   };
+   bridge.BeforeWrite = delegate { unloading.Loading.OnLevelUnloading(); unloadOrder = ++eventOrder; };
+   Check(bridge.Start(), "controlled unload-window fake action queued");
+   f.ThreadInfo.Deliver(1);
+   Check(bridge.LastCurrentBeforeWrite && !IsCurrent(f.Snapshot) && f.AreaInfo.WriterCalls == 1 &&
+     bridge.State == FakeBridgeState.Unknown && !bridge.Start(),
+     "unload after last current check still permits the controlled fake call and yields unknown");
+   Check(unloadOrder == 1 && writerEntryOrder == 2 && unloading.AreaInfo.InvalidAtWriterEntry == true,
+     "fake writer entry occurs after unload and sees the snapshot invalid");
+   Console.WriteLine("FAKE_BRIDGE_WRITER_ENTRY unloadOrder=1 writerOrder=2 invalidAtEntry=True");
+   Console.WriteLine("FAKE_BRIDGE_UNLOAD_WINDOW lastCurrent=True fakeWrites=1 state=Unknown");
+  } finally { f.Release(); }
+  f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true; f.ThreadInfo.ThrowAfter = true;
+   var bridge = new ScheduledFakeBridge(f.Snapshot, f.AreaInfo, f.ThreadInfo);
+   RecordingFixture concurrent = f;
+   var entered = new ManualResetEvent(false); var resume = new ManualResetEvent(false);
+   Thread worker = null; Exception workerError = null; bool drained = false;
+   bridge.BeforeWrite = delegate {
+    entered.Set();
+    if (!resume.WaitOne(5000)) throw new InvalidOperationException("controlled fake callback release timed out");
+   };
+   f.ThreadInfo.BeforeReturn = delegate {
+    worker = new Thread(delegate() {
+     try { concurrent.ThreadInfo.Deliver(1); } catch (Exception exception) { workerError = exception; }
+    });
+    worker.IsBackground = true;
+    worker.Start();
+    if (!entered.WaitOne(3000)) throw new InvalidOperationException("controlled fake callback did not reach its barrier");
+   };
+   try {
+    Check(bridge.Start() && bridge.QueueException && bridge.State == FakeBridgeState.Unknown &&
+      f.AreaInfo.WriterCalls == 0, "queue exception becomes unknown while fake callback is paused");
+   } finally {
+    resume.Set();
+    if (worker != null) drained = worker.Join(5000);
+   }
+   Console.WriteLine("FAKE_BRIDGE_QUEUE_RACE state=" + bridge.State + " fakeWrites=" + f.AreaInfo.WriterCalls +
+     " drained=" + drained + " workerError=" + (workerError != null));
+   Check(drained && workerError == null && bridge.State == FakeBridgeState.Unknown &&
+     f.AreaInfo.WriterCalls == 1 && bridge.CallbackCount == 1 && !bridge.Start(),
+     "unknown fake state must remain terminal after callback resumes");
+   entered.Close(); resume.Close();
+  } finally { f.Release(); }
+
+  f = new RecordingFixture();
+  try {
+   f.AreaInfo.WriterEnabled = true; f.ThreadInfo.Inline = true; f.ThreadInfo.ThrowAfter = true;
+   var bridge = new ScheduledFakeBridge(f.Snapshot, f.AreaInfo, f.ThreadInfo);
+   RecordingFixture inlineFixture = f;
+   Initial25DecisionKind? earlyConfirmation = null;
+   bool beforeReturnEntered = false;
+   f.ThreadInfo.BeforeReturn = delegate {
+    beforeReturnEntered = true;
+    inlineFixture.ThreadInfo.BeforeReturn = null;
+    inlineFixture.ThreadInfo.ThrowAfter = false;
+    Check(Request() == "ObservedUnverified", "inline fake snapshot publishes during outer queue");
+    StartupSnapshot newer = (StartupSnapshot)Read();
+    Check(newer != null && newer.Generation == inlineFixture.Snapshot.Generation &&
+      newer.Revision > inlineFixture.Snapshot.Revision &&
+      newer.UnlockedCount == inlineFixture.Snapshot.UnlockedCount + 1,
+      "controlled early-confirmation snapshot is newer and includes the fake write");
+    earlyConfirmation = bridge.Confirm(newer);
+   };
+   Check(bridge.Start(), "inline throwing fake queue was attempted");
+   Console.WriteLine("FAKE_BRIDGE_EARLY_CONFIRM result=" + earlyConfirmation + " final=" + bridge.State +
+     " writes=" + f.AreaInfo.WriterCalls + " queueException=" + bridge.QueueException);
+   Check(beforeReturnEntered && earlyConfirmation == Initial25DecisionKind.Unavailable &&
+     bridge.QueueException && bridge.State == FakeBridgeState.Unknown && f.AreaInfo.WriterCalls == 1,
+     "fake confirmation cannot occur before queue returned successfully");
+   Action saved = f.ThreadInfo.Actions[1]; saved();
+   Check(bridge.CallbackCount == 2 && f.AreaInfo.WriterCalls == 1 && !bridge.Start() &&
+     bridge.State == FakeBridgeState.Unknown, "early-confirmation fake outcome remains unknown without retry");
+  } finally { f.Release(); }
+
+  Console.WriteLine("Passed " + (checks - before) +
+    " integrated fake bridge checks; no production submission or game validation.");
+ }
+
  public static void Run() {
   snapshots = typeof(Observation).Assembly.GetType("FullMapUnlockAndExpansion.StartupSnapshots");
   threadingExtension = typeof(Observation).Assembly.GetType("FullMapUnlockAndExpansion.Threading");
   if (snapshots == null || threadingExtension == null) throw new Exception("read-only startup snapshot adapter is missing");
   CheckModesAndOrder(); CheckAmbiguousLateCreation(); CheckLoadingCreationFailure(); CheckSchedulingAndLifecycle(); CheckInvalidationAndSnapshot(); CheckPauseRetries(); CheckFakeModelBridge();
+  CheckIntegratedFakeBridge();
   Console.WriteLine("Passed " + checks + " synthetic startup snapshot checks; provenance and real game behavior remain unverified.");
  }
 }

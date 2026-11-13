@@ -105,3 +105,10 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 - Exercise sequential fake area calls, explicit confirmation, one-shot callback replay and fake failure without asserting real game scheduling or transaction behavior.
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+## 2026-11-13 — synthetic snapshot-to-writer bridge
+
+- Extend the existing fake-boundary checks from a NewGame snapshot through one scheduled fake IAreas.UnlockArea call and a later confirming fake snapshot.
+- Cover old and replayed actions, scheduler exceptions, inline callbacks and the unload-after-check counterexample; preserve Unknown as a terminal single-bridge result.
+- Keep both native submission entries unavailable and document the unverified game, transaction and multi-bridge boundaries.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion

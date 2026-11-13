@@ -127,3 +127,10 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 The RED-only NativeMilestoneCandidateRedStub is an intentionally nonfunctional replacement; compile it instead of, not together with, the candidate source when reproducing the isolated RED check.
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+### Synthetic snapshot-to-writer bridge
+
+A test-only bridge exercises the existing StartupSnapshots implementation with fake loading, threading and area providers. It proposes one area through Initial25NoDebitRun, schedules an owned fake IAreas.UnlockArea call with requireMoney false, and confirms only after a later fake snapshot shows the expected single-grid change. The test explicitly bypasses the unavailable native submission entry solely for this synthetic exercise; neither production submission entry is enabled.
+
+The single-bridge checks include old and replayed actions, scheduler exceptions before or after action acceptance, an inline callback before scheduler return, and a controlled callback that continues after an exception. A result is not published as executed until the fake callback reaches its success marker at the end of its body and the fake scheduler returns successfully; the callback itself may not yet have returned, and unknown remains terminal for that bridge. A separate controlled example unloads after the last current-snapshot check and still reaches the fake writer, demonstrating the remaining check-to-call gap. The fake bridge checks IsCurrent before observing the supplied snapshot; an unload between that check and Observe or confirmation could allow an old snapshot to be confirmed. This is an unexecuted static possibility. A guarantee requires a synchronization boundary shared with unload; an extra check alone does not establish it. Multiple bridge instances are not globally coordinated. These checks do not authenticate a real city or simulation thread, cancel an already-entered call, establish game funds or rollback, or validate game integration.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
