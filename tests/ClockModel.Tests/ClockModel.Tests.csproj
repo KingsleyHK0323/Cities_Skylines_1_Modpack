@@ -1,17 +1,39 @@
 <!-- Signature: OpenAI-Codex_Responsible: Realistic_City_Time -->
 <!-- Observation contract batch: OpenAI-Codex_Realistic_City_Time -->
 <!-- Explicit cloud compilation inputs: OpenAI-Codex_Realistic_City_Time -->
+<!-- Continuity regression tests: OpenAI-Codex_Realistic_City_Time -->
+<!-- Update signature: OpenAI-Codex -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);SYNTHETIC_CLOCK_TESTS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="ClockInputTests.cs" />
+    <Compile Include="ClockContinuityTests.cs" />
+    <Compile Include="PortableClockScalerTests.cs" />
+    <Compile Include="SyntheticClockCoordinatorTests.cs" />
+    <Compile Include="SyntheticClockIntegrationTests.cs" />
+    <Compile Include="GameApiFakes.cs" />
+    <Compile Include="GameLoadingLifecycleTests.cs" />
+    <Compile Include="ClockRateSettingsTests.cs" />
+    <Compile Include="ClockRateInputTests.cs" />
+    <Compile Include="ClockRateSettingsUiTests.cs" />
+    <Compile Include="SyntheticRateStorage.cs" />
+    <Compile Include="SyntheticRateStorageTests.cs" />
     <Compile Include="GameClockStateTests.cs" />
+    <Compile Include="ClockControlBoundaryTests.cs" />
     <Compile Include="../../Game/GameClockState.cs" />
+    <Compile Include="../../Game/ClockControlBoundary.cs" />
+    <Compile Include="../../Game/PortableClockScaler.cs" />
+    <Compile Include="../../Game/SyntheticClockCoordinator.cs" />
+    <Compile Include="../../Game/GameMod.cs" />
+    <Compile Include="../../Game/ClockRateSettings.cs" />
+    <Compile Include="../../Game/ClockRateInput.cs" />
+    <Compile Include="../../Game/ClockRateSettingsUi.cs" />
     <Compile Include="../../src/RealisticCityTime/ClockModel.cs" />
     <Compile Include="../../src/RealisticCityTime/ClockInputSession.cs" />
   </ItemGroup>

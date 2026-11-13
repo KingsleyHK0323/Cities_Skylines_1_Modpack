@@ -1,4 +1,5 @@
 # Signature: OpenAI-Codex_Realistic_City_Time
+# Update signature: OpenAI-Codex
 # Cloud-only compiler entry point. This script does not obtain or publish reference assemblies.
 param(
     [Parameter(Mandatory=$true)][string]$CompilerPath,
@@ -20,6 +21,11 @@ $output = Join-Path $OutputDirectory 'RealisticCityTime.dll'
 if (Test-Path -LiteralPath $output) { throw 'Output already exists; use a fresh build directory.' }
 $compilerArgs += "/out:$output"
 $compilerArgs += (Join-Path $PSScriptRoot 'GameClockState.cs'), (Join-Path $PSScriptRoot 'GameMod.cs')
+$compilerArgs += (Join-Path $PSScriptRoot 'ClockControlBoundary.cs')
+$compilerArgs += (Join-Path $PSScriptRoot 'PortableClockScaler.cs')
+$compilerArgs += (Join-Path $PSScriptRoot 'ClockRateSettings.cs')
+$compilerArgs += (Join-Path $PSScriptRoot 'ClockRateInput.cs')
+$compilerArgs += (Join-Path $PSScriptRoot 'ClockRateSettingsUi.cs')
 & dotnet $CompilerPath @compilerArgs
 if ($LASTEXITCODE -ne 0) { throw "Game assembly compilation failed: $LASTEXITCODE" }
 if (-not (Test-Path -LiteralPath $output -PathType Leaf)) { throw 'Compiler produced no game assembly.' }

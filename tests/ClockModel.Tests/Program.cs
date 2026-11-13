@@ -1,5 +1,6 @@
 // Signature: OpenAI-Codex_Responsible: Realistic_City_Time
 // Local implementation review: OpenAI-Codex_Realistic_City_Time
+// Update signature: OpenAI-Codex
 using System;
 using System.Reflection;
 
@@ -69,6 +70,16 @@ internal static class Program
             Test("decimal syntax rejects multiple points and punctuation", () => {var m=New(3); foreach(var s in new[]{".","1..2","1/2","--1","１.２"}) Reject<ArgumentException>(()=>Call(m,"ParseMultiplier",s)); });
             ClockInputTests.Run();
             GameClockStateTests.Run();
+            ClockControlBoundaryTests.Run();
+            ClockContinuityTests.Run();
+            PortableClockScalerTests.Run();
+            SyntheticClockCoordinatorTests.Run();
+            SyntheticClockIntegrationTests.Run();
+            GameLoadingLifecycleTests.Run();
+            ClockRateSettingsTests.Run();
+            ClockRateInputTests.Run();
+            ClockRateSettingsUiTests.Run();
+            SyntheticRateStorageTests.Run();
             Console.WriteLine($"Passed {count} model checks plus observation contract checks; no live game reader or gameplay tested.");
             return 0;
         }

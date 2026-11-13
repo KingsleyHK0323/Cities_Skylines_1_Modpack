@@ -1,4 +1,5 @@
 // Signature: OpenAI-Codex_Realistic_City_Time
+// Update signature: OpenAI-Codex
 using System;
 using System.Globalization;
 using System.Numerics;
@@ -91,7 +92,8 @@ namespace RealisticCityTime
         /// <summary>Clears fractional ticks only; lifecycle policy belongs to a future adapter.</summary>
         public void Reset() { remainder = BigInteger.Zero; }
 
-        private void Validate(decimal multiplier)
+        // Shared with the observation boundary so invalid baseline multipliers fail closed.
+        internal void Validate(decimal multiplier)
         {
             if (multiplier < 1m || multiplier > 10m)
                 throw new ArgumentException("Multiplier must be between 1 and 10 inclusive.", nameof(multiplier));
