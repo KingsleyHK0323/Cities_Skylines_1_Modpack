@@ -1,4 +1,5 @@
 <!-- OpenAI-Codex_Full_Map_Unlock_And_Expansion -->
+<!-- OpenAI-Codex_release_isolation -->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,10 +7,17 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <DisableImplicitConfigurationDefines>true</DisableImplicitConfigurationDefines>
+    <DefineConstants>$(DefineConstants);FULLMAP_TEST_DIAGNOSTICS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../Source/GameObservation.cs" Link="GameObservation.cs" />
+    <Compile Include="../Source/AreaPreview.cs" Link="AreaPreview.cs" />
+    <Compile Include="../Source/NativeSubmissionCandidate.cs" Link="NativeSubmissionCandidate.cs" />
+    <Compile Include="../Source/DiagnosticPrototype.cs" Link="DiagnosticPrototype.cs" />
     <Compile Include="LifecycleChecks.cs" />
+    <Compile Include="StartupSnapshotChecks.cs" />
+    <Compile Include="NativeSubmissionChecks.cs" />
     <Compile Include="ICitiesBoundary.cs" />
   </ItemGroup>
 </Project>

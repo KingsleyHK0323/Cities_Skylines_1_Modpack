@@ -1,0 +1,25 @@
+<!-- OpenAI-Codex_Full_Map_Unlock_And_Expansion -->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Diagnostic</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>FullMapLifecycleCaptureCandidate</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <GameReferenceDir Condition="'$(GameReferenceDir)' == ''">$(MSBuildThisFileDirectory)..\..\Resource\Game_Data</GameReferenceDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Diagnostic' And '$(EnableLifecycleDiagnostics)' == 'true'">
+    <DefineConstants>$(DefineConstants);FULL_MAP_LIFECYCLE_DIAGNOSTIC</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="ICities"><HintPath>$(GameReferenceDir)\ICities.dll</HintPath><Private>False</Private></Reference>
+    <Compile Include="LifecycleCaptureCandidate.cs" />
+  </ItemGroup>
+  <Target Name="RequireIsolatedLifecycleDiagnostic" BeforeTargets="CoreCompile">
+    <Error Condition="'$(Configuration)' != 'Diagnostic' Or '$(EnableLifecycleDiagnostics)' != 'true'" Text="This candidate requires Configuration=Diagnostic and EnableLifecycleDiagnostics=true; Release is not supported." />
+    <Error Condition="$([System.String]::Copy('$(DefineConstants)').Contains('FULL_MAP_LIFECYCLE_DIAGNOSTIC_TEST'))" Text="Synthetic test controls cannot be included in the diagnostic candidate project." />
+    <Error Condition="!Exists('$(GameReferenceDir)\ICities.dll')" Text="Provide authorized ICities.dll via GameReferenceDir." />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

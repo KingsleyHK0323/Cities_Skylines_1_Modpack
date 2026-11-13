@@ -61,7 +61,7 @@ jobs:
           New-Item -ItemType Directory -Path $output | Out-Null
           $dll = Join-Path $output 'FullMapUnlockAndExpansion.dll'
           $arguments = @('/noconfig','/nostdlib+','/target:library','/langversion:7.3','/optimize+','/deterministic+',"/out:$dll")
-          foreach ($name in @('mscorlib.dll','System.dll','UnityEngine.dll','ICities.dll')) {
+          foreach ($name in @('mscorlib.dll','System.dll','System.Core.dll','UnityEngine.dll','ICities.dll')) { # OpenAI-Codex_Full_Map_Unlock_And_Expansion
             $reference = Join-Path $managed $name
             if (-not (Test-Path -LiteralPath $reference -PathType Leaf)) { throw 'Missing explicit reference.' }
             $arguments += "/reference:$reference"

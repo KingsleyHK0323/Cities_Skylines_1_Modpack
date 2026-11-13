@@ -8,15 +8,165 @@ public sealed class Initial25Tile {
  }
 }
 public enum Initial25PreviousAttempt { None, Pending, Failed, ObservedUnlocked }
-public enum Initial25DecisionKind { Unavailable, Waiting, Halted, Complete, Candidate }
+public enum Initial25DecisionKind { Unavailable, Waiting, Halted, Complete, Candidate, Confirmed }
 public sealed class Initial25NoDebitDecision {
  public readonly Initial25DecisionKind Kind;
  public readonly int? NativeIndex;
+ public readonly long? AttemptId;
  // This is a proposed argument, never proof that a game transaction did not debit funds.
  public readonly bool? RequireMoney;
- internal Initial25NoDebitDecision(Initial25DecisionKind kind, int? nativeIndex) {
-  Kind = kind; NativeIndex = nativeIndex;
+ internal Initial25NoDebitDecision(Initial25DecisionKind kind, int? nativeIndex) : this(kind, nativeIndex, null) { }
+ internal Initial25NoDebitDecision(Initial25DecisionKind kind, int? nativeIndex, long? attemptId) {
+  Kind = kind; NativeIndex = nativeIndex; AttemptId = attemptId;
   RequireMoney = kind == Initial25DecisionKind.Candidate ? (bool?)false : null;
+ }
+}
+// Isolated policy experiment, not a game hook or a write authorization. All context
+// values are supplied by the caller and are not authenticated against the game.
+public sealed class StartupMilestoneScopePreview {
+ private readonly object gate = new object();
+ private readonly object owner, provider;
+ private readonly System.Threading.Thread simulationThread;
+ private readonly long generation, attemptId;
+ private readonly int x, z;
+ private readonly bool valid;
+ private bool closed;
+ public StartupMilestoneScopePreview(object owner, object provider, System.Threading.Thread simulationThread,
+     long generation, long attemptId, int x, int z) {
+  this.owner = owner; this.provider = provider; this.simulationThread = simulationThread;
+  this.generation = generation; this.attemptId = attemptId; this.x = x; this.z = z;
+  valid = owner != null && provider != null && simulationThread != null && generation > 0 && attemptId > 0 &&
+      x >= 0 && x < 5 && z >= 0 && z < 5;
+ }
+ // True means only that this synthetic milestone exception may be considered once.
+ // It says nothing about the remaining native eligibility checks or game write safety.
+ public bool TryUse(bool? nativeMilestone, object currentOwner, object currentProvider, long? currentGeneration,
+     long? currentAttemptId, int? currentX, int? currentZ, bool? ordinaryNewGame, bool? loadingComplete, bool? insideNativeUnlock) {
+  lock (gate) {
+   if (closed || !valid || nativeMilestone != false || ordinaryNewGame != true || loadingComplete != true ||
+       insideNativeUnlock != true || !object.ReferenceEquals(owner, currentOwner) ||
+       !object.ReferenceEquals(provider, currentProvider) ||
+       !object.ReferenceEquals(simulationThread, System.Threading.Thread.CurrentThread) ||
+       currentGeneration != generation || currentAttemptId != attemptId || currentX != x || currentZ != z) return false;
+   closed = true;
+   return true;
+  }
+ }
+ public void Invalidate() { lock (gate) { closed = true; } }
+}
+// In-memory coordination for one supplied snapshot stream only. This neither performs a
+// game write nor authenticates the supplied tiles, startup flag, revisions, or funds.
+// A new instance or process has independent state; callers must supply stable snapshots.
+public sealed class Initial25NoDebitRun {
+ private enum Stage { Unstarted, Ready, Pending, Halted, Complete }
+ private readonly object gate = new object();
+ private Stage stage;
+ private long generation, revision, nextAttempt, pendingAttempt;
+ private int pendingIndex;
+ private bool pendingUnlocked;
+ private bool[] baseline;
+
+ private static Initial25NoDebitDecision Decision(Initial25DecisionKind kind) {
+  return new Initial25NoDebitDecision(kind, null);
+ }
+ private Initial25NoDebitDecision Halt() {
+  stage = Stage.Halted;
+  return Decision(Initial25DecisionKind.Halted);
+ }
+ private bool ChangedGeneration(long? capturedGeneration, long? currentGeneration) {
+  return stage != Stage.Unstarted &&
+      ((capturedGeneration.HasValue && capturedGeneration.Value != generation) ||
+       (currentGeneration.HasValue && currentGeneration.Value != generation));
+ }
+ private static bool[] ReadGrid(Initial25Tile[] snapshot, int? width, int? height, int? count,
+     long? capturedGeneration, long? currentGeneration, long? capturedRevision, long? currentRevision) {
+  if (AreaPreview.MissingForInitial25(snapshot, width, height, count, capturedGeneration,
+      currentGeneration, capturedRevision, currentRevision) == null) return null;
+  bool[] grid = new bool[25];
+  foreach (Initial25Tile tile in snapshot) grid[tile.NativeIndex] = tile.IsUnlocked.Value;
+  return grid;
+ }
+ private Initial25NoDebitDecision CheckPending(Initial25Tile[] tiles, int? width, int? height, int? count,
+     long? capturedGeneration, long? currentGeneration, long? capturedRevision, long? currentRevision, bool confirm) {
+  Initial25Tile[] snapshot = tiles == null ? null : (Initial25Tile[])tiles.Clone();
+  bool[] grid = ReadGrid(snapshot, width, height, count, capturedGeneration, currentGeneration, capturedRevision, currentRevision);
+  if (grid == null || capturedRevision.Value < revision) return Decision(Initial25DecisionKind.Waiting);
+  for (int i = 0; i < grid.Length; i++) {
+   if (i != pendingIndex && grid[i] != baseline[i]) return Halt();
+  }
+  bool unlocked = grid[pendingIndex];
+  if ((capturedRevision.Value == revision && unlocked != pendingUnlocked) || (pendingUnlocked && !unlocked)) return Halt();
+  revision = capturedRevision.Value;
+  pendingUnlocked = unlocked;
+  if (confirm && pendingUnlocked) {
+   baseline = grid;
+   stage = Stage.Ready;
+   return Decision(Initial25DecisionKind.Confirmed);
+  }
+  return Decision(Initial25DecisionKind.Waiting);
+ }
+ public Initial25NoDebitDecision Propose(Initial25Tile[] tiles, int? width, int? height, int? count,
+     long? capturedGeneration, long? currentGeneration, long? capturedRevision, long? currentRevision, bool? isNewGame) {
+  lock (gate) {
+   if (stage == Stage.Halted) return Decision(Initial25DecisionKind.Halted);
+   if (ChangedGeneration(capturedGeneration, currentGeneration) || (stage != Stage.Unstarted && isNewGame == false)) return Halt();
+   if (isNewGame != true || !capturedGeneration.HasValue || !currentGeneration.HasValue)
+    return Decision(stage == Stage.Pending ? Initial25DecisionKind.Waiting : Initial25DecisionKind.Unavailable);
+   if (stage == Stage.Pending) return CheckPending(tiles, width, height, count, capturedGeneration,
+       currentGeneration, capturedRevision, currentRevision, false);
+
+   Initial25Tile[] snapshot = tiles == null ? null : (Initial25Tile[])tiles.Clone();
+   bool[] grid = ReadGrid(snapshot, width, height, count, capturedGeneration, currentGeneration, capturedRevision, currentRevision);
+   if (grid == null) return Decision(Initial25DecisionKind.Unavailable);
+   if (stage != Stage.Unstarted) {
+    if (capturedRevision.Value < revision) return Decision(Initial25DecisionKind.Unavailable);
+    for (int i = 0; i < grid.Length; i++) if (grid[i] != baseline[i]) return Halt();
+   }
+   Initial25NoDebitDecision decision = AreaPreview.PreviewInitial25NoDebit(snapshot, width, height, count,
+       capturedGeneration, currentGeneration, capturedRevision, currentRevision, isNewGame,
+       Initial25PreviousAttempt.None, null, null, null);
+   if (decision.Kind == Initial25DecisionKind.Candidate || decision.Kind == Initial25DecisionKind.Complete) {
+    generation = capturedGeneration.Value;
+    revision = capturedRevision.Value;
+    baseline = grid;
+    if (decision.Kind == Initial25DecisionKind.Candidate) {
+     if (nextAttempt == long.MaxValue) return Halt();
+     pendingIndex = decision.NativeIndex.Value;
+     pendingAttempt = ++nextAttempt;
+     pendingUnlocked = false;
+     stage = Stage.Pending;
+     return new Initial25NoDebitDecision(Initial25DecisionKind.Candidate, pendingIndex, pendingAttempt);
+    } else stage = Stage.Complete;
+   }
+   return decision;
+  }
+ }
+ public Initial25NoDebitDecision Observe(Initial25Tile[] tiles, int? width, int? height, int? count,
+     long? capturedGeneration, long? currentGeneration, long? capturedRevision, long? currentRevision, bool? isNewGame) {
+  lock (gate) {
+   if (stage == Stage.Halted) return Decision(Initial25DecisionKind.Halted);
+   if (ChangedGeneration(capturedGeneration, currentGeneration) || (stage != Stage.Unstarted && isNewGame == false)) return Halt();
+   if (stage == Stage.Unstarted) return Decision(Initial25DecisionKind.Unavailable);
+   if (isNewGame != true || !capturedGeneration.HasValue || !currentGeneration.HasValue)
+    return Decision(stage == Stage.Pending ? Initial25DecisionKind.Waiting : Initial25DecisionKind.Unavailable);
+   if (stage != Stage.Pending) {
+    Initial25Tile[] snapshot = tiles == null ? null : (Initial25Tile[])tiles.Clone();
+    bool[] grid = ReadGrid(snapshot, width, height, count, capturedGeneration, currentGeneration, capturedRevision, currentRevision);
+    if (grid == null || capturedRevision.Value < revision) return Decision(Initial25DecisionKind.Unavailable);
+    for (int i = 0; i < grid.Length; i++) if (grid[i] != baseline[i]) return Halt();
+    revision = capturedRevision.Value;
+    return Decision(Initial25DecisionKind.Unavailable);
+   }
+   return CheckPending(tiles, width, height, count, capturedGeneration,
+       currentGeneration, capturedRevision, currentRevision, true);
+  }
+ }
+ public Initial25NoDebitDecision FailPending(long? attemptId) {
+  lock (gate) {
+   if (stage == Stage.Halted) return Decision(Initial25DecisionKind.Halted);
+   return stage == Stage.Pending && attemptId.HasValue && attemptId.Value == pendingAttempt
+       ? Halt() : Decision(Initial25DecisionKind.Unavailable);
+  }
  }
 }
 public static class AreaPreview {

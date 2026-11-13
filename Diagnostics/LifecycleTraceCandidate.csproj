@@ -1,0 +1,20 @@
+<!-- OpenAI-Codex_Full_Map_Unlock_And_Expansion -->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <OutputType>Library</OutputType>
+    <AssemblyName>FullMapLifecycleTraceCandidate</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <GameReferenceDir Condition="'$(GameReferenceDir)' == ''">$(MSBuildThisFileDirectory)..\..\Resource\Game_Data</GameReferenceDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="ICities"><HintPath>$(GameReferenceDir)\ICities.dll</HintPath><Private>False</Private></Reference>
+    <Compile Include="LifecycleTraceCandidate.cs" />
+  </ItemGroup>
+  <Target Name="RequireGameReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameReferenceDir)\ICities.dll')" Text="Provide authorized ICities.dll via GameReferenceDir." />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

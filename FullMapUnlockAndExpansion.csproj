@@ -1,4 +1,5 @@
 <!-- OpenAI-Codex_Full_Map_Unlock_And_Expansion -->
+<!-- OpenAI-Codex_release_isolation -->
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
@@ -8,16 +9,26 @@
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <GameReferenceDir Condition="'$(GameReferenceDir)' == ''">$(MSBuildThisFileDirectory)..\Resource\Game_Data</GameReferenceDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DefineConstants>$(DefineConstants);FULLMAP_RELEASE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core" />
     <Reference Include="ICities"><HintPath>$(GameReferenceDir)\ICities.dll</HintPath><Private>False</Private></Reference>
     <Reference Include="UnityEngine"><HintPath>$(GameReferenceDir)\UnityEngine.dll</HintPath><Private>False</Private></Reference>
     <Compile Include="Source\AreaPreview.cs" />
     <Compile Include="Source\GameObservation.cs" />
+    <Compile Include="Source\NativeSubmissionCandidate.cs" />
+    <Compile Include="Source\DiagnosticPrototype.cs" Condition="'$(Configuration)' != 'Release' And '$(EnableDiagnosticPrototype)' == 'true'" />
   </ItemGroup>
   <Target Name="RequireGameReferences" BeforeTargets="ResolveReferences">
     <Error Condition="!Exists('$(GameReferenceDir)\ICities.dll')" Text="Provide authorized ICities.dll via GameReferenceDir." />
     <Error Condition="!Exists('$(GameReferenceDir)\UnityEngine.dll')" Text="Provide authorized UnityEngine.dll via GameReferenceDir." />
+  </Target>
+  <Target Name="RejectReleaseDiagnosticSymbols" BeforeTargets="CoreCompile" Condition="'$(Configuration)' == 'Release'">
+    <Error Condition="$([System.String]::Copy('$(DefineConstants)').Contains('FULLMAP_TEST_DIAGNOSTICS'))" Text="Release cannot include test diagnostics." />
+    <Error Condition="$([System.String]::Copy('$(DefineConstants)').Contains('FULL_MAP_LIFECYCLE_DIAGNOSTIC'))" Text="Release cannot include lifecycle capture diagnostics." />
   </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

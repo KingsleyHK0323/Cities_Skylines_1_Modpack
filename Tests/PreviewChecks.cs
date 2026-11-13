@@ -2,6 +2,7 @@
 // Synthetic tests; neither game integration nor runtime acceptance is covered.
 using System;
 using System.Reflection;
+using System.Threading;
 class PreviewChecks {
  static int candidateChecks;
  static void Verify(bool ok, string name) { candidateChecks++; if (!ok) throw new Exception(name); }
@@ -174,6 +175,341 @@ class PreviewChecks {
  static string DecisionKind(object decision) { return decision.GetType().GetField("Kind").GetValue(decision).ToString(); }
  static int? DecisionIndex(object decision) { return (int?)decision.GetType().GetField("NativeIndex").GetValue(decision); }
  static bool? DecisionRequireMoney(object decision) { return (bool?)decision.GetType().GetField("RequireMoney").GetValue(decision); }
+ static long? DecisionAttempt(object decision) {
+  FieldInfo field = decision.GetType().GetField("AttemptId");
+  if (field == null) throw new Exception("single-run attempt identity is missing");
+  return (long?)field.GetValue(decision);
+ }
+ static object NewRun() {
+  Type type = typeof(AreaPreview).Assembly.GetType("Initial25NoDebitRun");
+  if (type == null) throw new Exception("single-run no-debit coordinator is missing");
+  return Activator.CreateInstance(type);
+ }
+ static object RunCall(object run, string method, Array samples, int? count,
+     long? capturedGeneration, long? currentGeneration, long? capturedRevision, long? currentRevision, bool? newGame) {
+  MethodInfo action = run.GetType().GetMethod(method, BindingFlags.Public | BindingFlags.Instance);
+  if (action == null) throw new Exception("single-run coordinator method is missing: " + method);
+  return action.Invoke(run, new object[] { samples, 5, 5, count, capturedGeneration, currentGeneration,
+      capturedRevision, currentRevision, newGame });
+ }
+ static object RunFailureFor(object run, long? attempt) {
+  MethodInfo method = run.GetType().GetMethod("FailPending", new Type[] { typeof(long?) });
+  if (method == null) throw new Exception("identified failure report is missing");
+  return method.Invoke(run, new object[] { attempt });
+ }
+ static object RunStep(object run, string method, bool?[] grid, int count, long generation, long revision, bool? newGame) {
+  return RunCall(run, method, grid == null ? null : CoordinateSamples(grid), count,
+      generation, generation, revision, revision, newGame);
+ }
+ static void CheckSingleRun() {
+  int priorChecks = candidateChecks;
+  var run = NewRun(); var grid = Grid(false); grid[12] = true;
+  Verify(DecisionKind(RunFailureFor(run, null)) == "Unavailable", "failure without proposal cannot start or stop a run");
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 1, 4, 1, false)) == "Unavailable", "existing or unknown game cannot start a run");
+  object first = RunStep(run, "Propose", grid, 1, 4, 1, true);
+  Verify(DecisionKind(first) == "Candidate" && DecisionIndex(first) == 7 && DecisionRequireMoney(first) == false, "one no-debit proposal");
+  object duplicate = RunStep(run, "Propose", grid, 1, 4, 1, true);
+  Verify(DecisionKind(duplicate) == "Waiting" && DecisionIndex(duplicate) == null && DecisionRequireMoney(duplicate) == null, "second proposal waits");
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 1, 4, 1, true)) == "Waiting", "same revision waits");
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 1, 4, 2, true)) == "Waiting", "new snapshot without target waits");
+  Verify(DecisionKind(RunFailureFor(run, DecisionAttempt(first))) == "Halted", "reported failure halts the run");
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 1, 4, 3, true)) == "Halted", "failed run cannot retry");
+  Verify(DecisionKind(RunFailureFor(run, DecisionAttempt(first))) == "Halted", "failure is terminal within the run");
+
+  run = NewRun();
+  Array firstSnapshot = CoordinateSamples(grid);
+  first = RunCall(run, "Propose", firstSnapshot, 1, 9, 9, 1, 1, true);
+  Verify(DecisionKind(first) == "Candidate", "fresh run may propose");
+  firstSnapshot.SetValue(CoordinateSample(0,0,0,true), 0);
+  grid[7] = true;
+  object confirmed = RunStep(run, "Observe", grid, 2, 9, 2, true);
+  Verify(DecisionKind(confirmed) == "Confirmed" && DecisionIndex(confirmed) == null, "new snapshot confirms only the proposed tile");
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 2, 9, 2, true)) == "Unavailable", "confirmation is not replayed");
+  object second = RunStep(run, "Propose", grid, 2, 9, 2, true);
+  Verify(DecisionKind(second) == "Candidate" && DecisionIndex(second) != 7 && DecisionRequireMoney(second) == false, "confirmed snapshot advances once");
+  grid[0] = true;
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 3, 9, 3, true)) == "Halted", "unrelated tile change halts pending run");
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 3, 9, 3, true)) == "Halted", "conflicted run cannot retry");
+
+  run = NewRun(); grid = Grid(false); grid[12] = true;
+  RunStep(run, "Propose", grid, 1, 1, 1, true);
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 1, 2, 2, true)) == "Halted", "different city generation halts");
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 1, 1, 3, true)) == "Halted", "old city cannot revive halted run");
+
+  run = NewRun(); Array bad = CoordinateSamples(grid); bad.SetValue(bad.GetValue(0), 1);
+  Verify(DecisionKind(RunCall(run, "Propose", bad, 1, 1, 1, 1, 1, true)) == "Unavailable", "duplicate coordinates cannot start");
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 1, 1, 1, true)) == "Candidate", "rejected snapshot did not create an attempt");
+
+  run = NewRun();
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 1, 1, 1, null)) == "Unavailable", "unknown startup cannot propose");
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 1, 1, 2, true)) == "Candidate", "known startup proposes");
+  Verify(DecisionKind(RunCall(run, "Observe", CoordinateSamples(grid), 1, 1, 1, 3, 4, true)) == "Waiting", "inconsistent revision cannot confirm");
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 1, 1, 1, true)) == "Waiting", "older snapshot cannot confirm");
+  grid[7] = true;
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 2, 1, 2, true)) == "Halted", "same revision with different content halts");
+  grid[7] = false;
+
+  run = NewRun();
+  RunStep(run, "Propose", grid, 1, 5, 1, true);
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 1, 5, 3, true)) == "Waiting", "newer unchanged snapshot waits");
+  grid[7] = true;
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 2, 5, 2, true)) == "Waiting", "older success cannot follow a newer unchanged snapshot");
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 2, 5, 3, true)) == "Halted", "same later revision with changed content halts");
+  grid[7] = false;
+
+  run = NewRun();
+  RunStep(run, "Propose", grid, 1, 5, 1, true);
+  grid[0] = true;
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 2, 5, 3, true)) == "Halted", "pending proposal detects unrelated snapshot change");
+  grid[0] = false;
+
+  run = NewRun();
+  RunStep(run, "Propose", grid, 1, 5, 1, true);
+  grid[7] = true;
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 2, 5, 3, true)) == "Waiting", "pending proposal does not confirm implicitly");
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 2, 5, 2, true)) == "Waiting", "pending proposal advances observed revision");
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 2, 5, 3, true)) == "Confirmed", "explicit observation confirms the latest supplied snapshot");
+  grid[7] = false;
+
+  run = NewRun();
+  first = RunStep(run, "Propose", grid, 1, 5, 1, true);
+  long? oldAttempt = DecisionAttempt(first);
+  grid[7] = true;
+  Verify(DecisionKind(RunStep(run, "Observe", grid, 2, 5, 2, true)) == "Confirmed", "first identified attempt confirmed");
+  second = RunStep(run, "Propose", grid, 2, 5, 2, true);
+  long? nextAttempt = DecisionAttempt(second);
+  Verify(oldAttempt.HasValue && nextAttempt.HasValue && oldAttempt != nextAttempt, "successive attempts have distinct identities");
+  Verify(DecisionKind(RunFailureFor(run, oldAttempt)) == "Unavailable", "late failure from an old attempt is ignored");
+  Verify(DecisionKind(RunFailureFor(run, null)) == "Unavailable", "unidentified failure is ignored");
+  Verify(DecisionKind(RunStep(run, "Propose", grid, 2, 5, 3, true)) == "Waiting", "old failure does not stop current attempt");
+  Verify(DecisionKind(RunFailureFor(run, nextAttempt)) == "Halted", "identified current failure halts even after revision advances");
+  grid[7] = false;
+
+  run = NewRun(); var full = Grid(true);
+  Verify(DecisionKind(RunStep(run, "Propose", full, 25, 3, 1, true)) == "Complete", "complete supplied snapshot");
+  full[0] = false;
+  Verify(DecisionKind(RunStep(run, "Propose", full, 24, 3, 2, true)) == "Halted", "completed run does not hide later changes");
+  full[0] = true; run = NewRun();
+  Verify(DecisionKind(RunStep(run, "Propose", full, 25, 3, 1, true)) == "Complete", "another run completes");
+  full[0] = false;
+  Verify(DecisionKind(RunStep(run, "Observe", full, 24, 3, 3, true)) == "Halted", "completed run detects conflicting observation");
+  full[0] = true;
+  Verify(DecisionKind(RunStep(run, "Propose", full, 25, 3, 2, true)) == "Halted", "older snapshot cannot hide completed-run conflict");
+
+  run = NewRun(); grid = Grid(false); grid[12] = true; int count = 1, funds = 1000; long revision = 1;
+  while (count < 25) {
+   object proposal = RunStep(run, "Propose", grid, count, 20, revision, true);
+   Verify(DecisionKind(proposal) == "Candidate" && DecisionRequireMoney(proposal) == false, "synthetic run proposes no debit");
+   int index = DecisionIndex(proposal).Value;
+   Verify(!grid[index].Value, "synthetic run does not repeat an unlocked tile");
+   if (DecisionRequireMoney(proposal).Value) funds -= 10;
+   grid[index] = true; count++; revision++;
+   Verify(DecisionKind(RunStep(run, "Observe", grid, count, 20, revision, true)) == "Confirmed", "synthetic step observed");
+  }
+  Verify(DecisionKind(RunStep(run, "Propose", grid, count, 20, revision, true)) == "Complete" && funds == 1000, "synthetic 25-area run does not debit synthetic funds");
+
+  run = NewRun(); grid = Grid(false); grid[12] = true;
+  var contenders = new object[16]; var errors = new Exception[16]; var threads = new Thread[16];
+  var start = new ManualResetEvent(false); Array concurrentSamples = CoordinateSamples(grid);
+  for (int i = 0; i < threads.Length; i++) {
+   int slot = i;
+   threads[i] = new Thread(delegate() { try { start.WaitOne(); contenders[slot] = RunCall(run, "Propose", concurrentSamples, 1, 6, 6, 1, 1, true); } catch (Exception ex) { errors[slot] = ex; } });
+   threads[i].Start();
+  }
+  start.Set(); foreach (Thread thread in threads) thread.Join(); start.Close();
+  int candidates = 0, waiters = 0; long? concurrentAttempt = null;
+  for (int i = 0; i < contenders.Length; i++) {
+   Verify(errors[i] == null && contenders[i] != null, "concurrent proposal did not throw");
+   if (DecisionKind(contenders[i]) == "Candidate") { candidates++; concurrentAttempt = DecisionAttempt(contenders[i]); }
+   if (DecisionKind(contenders[i]) == "Waiting") waiters++;
+  }
+  Verify(candidates == 1 && waiters == 15, "one run exposes only one outstanding candidate");
+  var separate = NewRun();
+  object separateCandidate = RunStep(separate, "Propose", grid, 1, 6, 1, true);
+  Verify(DecisionKind(separateCandidate) == "Candidate", "separate runs are not globally serialized");
+  Verify(DecisionAttempt(separateCandidate) == concurrentAttempt, "attempt identities are scoped to their run, not globally unique");
+  Console.WriteLine("Passed " + (candidateChecks - priorChecks) + " isolated single-run guard assertions; no game writes tested.");
+ }
+ static object NewScope(object owner, object provider, Thread simulationThread, long generation, long attempt, int x, int z) {
+  Type type = typeof(AreaPreview).Assembly.GetType("StartupMilestoneScopePreview");
+  if (type == null) throw new Exception("startup milestone scope preview is missing");
+  return Activator.CreateInstance(type, new object[] { owner, provider, simulationThread, generation, attempt, x, z });
+ }
+ static bool ScopeTry(object scope, bool? nativeMilestone, object owner, object provider, long? generation,
+     long? attempt, int? x, int? z, bool? newGame, bool? loadingComplete, bool? nativeUnlock) {
+  return (bool)scope.GetType().GetMethod("TryUse").Invoke(scope, new object[] { nativeMilestone, owner,
+      provider, generation, attempt, x, z, newGame, loadingComplete, nativeUnlock });
+ }
+ static bool FakeEligibility(object scope, object owner, object provider, int x, int z,
+     int count, int maximum, bool owned, bool adjacent, bool extensionAllows) {
+  if (x < 0 || x >= 5 || z < 0 || z >= 5 || count >= maximum) return false;
+  bool milestone = ScopeTry(scope, false, owner, provider, 8, 3, x, z, true, true, true);
+  if (!milestone || owned || !adjacent) return false;
+  return extensionAllows;
+ }
+ static void CheckMilestoneScope() {
+  int priorChecks = candidateChecks;
+  object owner = new object(), provider = new object(), other = new object();
+  object scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  Verify(!ScopeTry(scope, null, owner, provider, 8, 3, 2, 1, true, true, true), "unknown native milestone cannot be overridden");
+  Verify(!ScopeTry(scope, true, owner, provider, 8, 3, 2, 1, true, true, true), "native allowance needs no override");
+  Verify(!ScopeTry(scope, false, other, provider, 8, 3, 2, 1, true, true, true), "wrong loading owner rejected");
+  Verify(!ScopeTry(scope, false, owner, other, 8, 3, 2, 1, true, true, true), "wrong area provider rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 9, 3, 2, 1, true, true, true), "changed city rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, null, 3, 2, 1, true, true, true), "unknown generation rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 4, 2, 1, true, true, true), "other attempt rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 3, 1, true, true, true), "other coordinate rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 5, 0, true, true, true), "out-of-range coordinate rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, false, true, true), "non-new game rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, null, true, true), "unknown startup rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, false, true), "loading-incomplete rejected");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, true, false), "outside native unlock rejected");
+  bool wrongThreadAccepted = true; Exception wrongThreadError = null;
+  Thread otherThread = new Thread(delegate() { try { wrongThreadAccepted = ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, true, true); } catch (Exception ex) { wrongThreadError = ex; } });
+  otherThread.Start(); otherThread.Join();
+  Verify(wrongThreadError == null && !wrongThreadAccepted, "other thread rejected without consuming scope");
+  Verify(ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, true, true), "matching single synthetic call accepted");
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, true, true), "nested or repeated call rejected");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  bool untrustedNestedFirst = ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, true, true);
+  bool intendedAfterNested = ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, true, true);
+  Verify(untrustedNestedFirst && !intendedAfterNested, "untrusted nested call can consume scope; it is not game authorization");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  Verify(ScopeTry(scope, false, owner, provider, 8, 3, 2, 1, true, true, true), "independent scopes are not globally serialized");
+
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  object queuedScope = scope; bool queuedAllowed = true;
+  Action queued = delegate { queuedAllowed = ScopeTry(queuedScope, false, owner, provider, 8, 3, 2, 1, true, true, true); };
+  scope.GetType().GetMethod("Invalidate").Invoke(scope, null);
+  queued();
+  Verify(!queuedAllowed, "simulated queued callback after invalidation rejected");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 5, 0);
+  Verify(!ScopeTry(scope, false, owner, provider, 8, 3, 5, 0, true, true, true), "invalid scope cannot permit coordinate alias");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  Verify(!FakeEligibility(scope, owner, provider, 2, 1, 25, 25, false, true, true), "synthetic maximum still applies");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  Verify(!FakeEligibility(scope, owner, provider, 2, 1, 1, 25, true, true, true), "synthetic owned tile remains rejected");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  Verify(!FakeEligibility(scope, owner, provider, 2, 1, 1, 25, false, false, true), "synthetic adjacency still applies");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  Verify(!FakeEligibility(scope, owner, provider, 2, 1, 1, 25, false, true, false), "synthetic other extension refusal remains effective");
+  scope = NewScope(owner, provider, Thread.CurrentThread, 8, 3, 2, 1);
+  Verify(FakeEligibility(scope, owner, provider, 2, 1, 1, 25, false, true, true), "only synthetic milestone gate is permitted");
+  Console.WriteLine("Passed " + (candidateChecks - priorChecks) + " isolated milestone-scope assertions; no patch or game call tested.");
+ }
+ // In-memory, single-controller fixture only; the wrong-thread case is an explicit exception.
+ // It is not an IAreas adapter, a real scheduler, or a concurrent-queue implementation.
+ sealed class FakeStartupHarness {
+  public readonly object Owner = new object();
+  public object Provider = new object();
+  public long Generation = 1, Revision = 1;
+  public bool? NewGame = true, LoadingComplete = true, Paused = false;
+  public bool Stopped, SimulateReentry;
+  public int Requests;
+  public bool? LastRequireMoney;
+  public int? PendingIndex;
+  public long? PendingAttempt;
+  public Initial25DecisionKind? NestedStatus;
+  public readonly bool?[] Grid = PreviewChecks.Grid(false);
+  readonly Initial25NoDebitRun run = new Initial25NoDebitRun();
+  readonly object boundProvider;
+  readonly long boundGeneration;
+  readonly Thread simulationThread;
+  Action queued;
+  public FakeStartupHarness() {
+   Grid[12] = true; boundProvider = Provider; boundGeneration = Generation; simulationThread = Thread.CurrentThread;
+  }
+  bool CurrentContext() {
+   return !Stopped && NewGame == true && LoadingComplete == true && Paused == false &&
+       Generation == boundGeneration && object.ReferenceEquals(Provider, boundProvider) &&
+       object.ReferenceEquals(Thread.CurrentThread, simulationThread);
+  }
+  Initial25Tile[] Snapshot() {
+   Initial25Tile[] tiles = new Initial25Tile[25];
+   for (int i = 0; i < 25; i++) tiles[i] = new Initial25Tile(i % 5, i / 5, i, Grid[i]);
+   return tiles;
+  }
+  int Count() { int count = 0; foreach (bool? tile in Grid) if (tile == true) count++; return count; }
+  public bool Queue() {
+   if (Stopped || queued != null) return false;
+   long queuedGeneration = Generation; object queuedProvider = Provider;
+   queued = delegate {
+    if (!CurrentContext() ||
+        Generation != queuedGeneration || !object.ReferenceEquals(Provider, queuedProvider)) { Stopped = true; return; }
+    Initial25NoDebitDecision decision = run.Propose(Snapshot(), 5, 5, Count(), Generation, Generation, Revision, Revision, NewGame);
+    if (decision.Kind == Initial25DecisionKind.Halted) { Stopped = true; return; }
+    if (decision.Kind != Initial25DecisionKind.Candidate) return;
+    if (SimulateReentry) NestedStatus = run.Propose(Snapshot(), 5, 5, Count(), Generation, Generation, Revision, Revision, NewGame).Kind;
+    int index = decision.NativeIndex.Value;
+    var scope = new StartupMilestoneScopePreview(Owner, Provider, simulationThread, Generation, decision.AttemptId.Value, index % 5, index / 5);
+    if (!scope.TryUse(false, Owner, Provider, Generation, decision.AttemptId, index % 5, index / 5, NewGame, LoadingComplete, true)) {
+     run.FailPending(decision.AttemptId); Stopped = true; return;
+    }
+    Requests++; LastRequireMoney = decision.RequireMoney; PendingIndex = index; PendingAttempt = decision.AttemptId;
+   };
+   return true;
+  }
+  public void Deliver() { Action action = queued; queued = null; if (action != null) action(); }
+  public Initial25DecisionKind Observe() {
+   if (!CurrentContext()) { Stopped = true; return run.FailPending(PendingAttempt).Kind; }
+   Initial25NoDebitDecision result = run.Observe(Snapshot(), 5, 5, Count(), Generation, Generation, Revision, Revision, NewGame);
+   if (result.Kind == Initial25DecisionKind.Halted) Stopped = true;
+   return result.Kind;
+  }
+  public Initial25DecisionKind Fail() {
+   Initial25NoDebitDecision result = run.FailPending(PendingAttempt);
+   if (result.Kind == Initial25DecisionKind.Halted) Stopped = true;
+   return result.Kind;
+  }
+ }
+ static void CheckSyntheticDispatch() {
+  int priorChecks = candidateChecks;
+  var fake = new FakeStartupHarness();
+  Verify(fake.Queue() && !fake.Queue(), "one queued fake action only");
+  Verify(fake.Requests == 0, "queueing alone does not confirm or execute");
+  fake.Generation++;
+  fake.Deliver();
+  Verify(fake.Stopped && fake.Requests == 0 && !fake.Queue(), "unload before dispatch stops the fake run");
+
+  fake = new FakeStartupHarness(); fake.Queue(); fake.Provider = new object(); fake.Deliver();
+  Verify(fake.Stopped && fake.Requests == 0, "provider change before dispatch stops the fake run");
+  fake = new FakeStartupHarness(); fake.Queue(); fake.Deliver();
+  fake.Provider = new object(); fake.Grid[fake.PendingIndex.Value] = true; fake.Revision++;
+  Verify(fake.Observe() == Initial25DecisionKind.Halted && !fake.Queue() && fake.Requests == 1, "provider change after dispatch cannot confirm");
+  fake = new FakeStartupHarness(); fake.Queue();
+  FakeStartupHarness wrongThreadFake = fake;
+  Thread wrongThread = new Thread(delegate() { wrongThreadFake.Deliver(); });
+  wrongThread.Start(); wrongThread.Join();
+  Verify(fake.Stopped && fake.Requests == 0, "fake dispatch on another thread cannot request an unlock");
+  fake = new FakeStartupHarness(); fake.Queue(); fake.Paused = true; fake.Deliver();
+  Verify(fake.Stopped && fake.Requests == 0, "paused fake city stops the pending action");
+  fake = new FakeStartupHarness(); fake.NewGame = false; fake.Queue(); fake.Deliver();
+  Verify(fake.Stopped && fake.Requests == 0, "non-new fake city remains unchanged");
+  fake = new FakeStartupHarness(); fake.LoadingComplete = null; fake.Queue(); fake.Deliver();
+  Verify(fake.Stopped && fake.Requests == 0, "unknown readiness stops the fake action");
+  fake = new FakeStartupHarness(); fake.Queue(); fake.Deliver(); fake.LoadingComplete = false;
+  fake.Grid[fake.PendingIndex.Value] = true; fake.Revision++;
+  Verify(fake.Observe() == Initial25DecisionKind.Halted && !fake.Queue(), "lost readiness after dispatch cannot confirm");
+
+  fake = new FakeStartupHarness(); fake.SimulateReentry = true; fake.Queue(); fake.Deliver();
+  Verify(fake.Requests == 1 && fake.LastRequireMoney == false && fake.PendingIndex.HasValue, "fake dispatch records one no-debit candidate");
+  Verify(fake.NestedStatus == Initial25DecisionKind.Waiting, "nested callback cannot obtain another candidate");
+  Verify(fake.Queue(), "fake caller can request a status check"); fake.Deliver();
+  Verify(fake.Requests == 1, "later fake dispatch cannot duplicate a pending request");
+  fake.Revision++;
+  Verify(fake.Observe() == Initial25DecisionKind.Waiting && fake.Requests == 1, "missing fake completion waits without retry");
+  fake.Grid[fake.PendingIndex.Value] = true; fake.Revision++;
+  Verify(fake.Observe() == Initial25DecisionKind.Confirmed, "newer fake snapshot confirms target only");
+  fake.Queue(); fake.Deliver();
+  Verify(fake.Requests == 2, "next fake request follows explicit confirmation");
+
+  fake = new FakeStartupHarness(); fake.Queue(); fake.Deliver();
+  fake.Grid[0] = true; fake.Revision++;
+  Verify(fake.Observe() == Initial25DecisionKind.Halted && !fake.Queue() && fake.Requests == 1, "external fake grid change stops retries");
+  fake = new FakeStartupHarness(); fake.Queue(); fake.Deliver();
+  Verify(fake.Fail() == Initial25DecisionKind.Halted && !fake.Queue() && fake.Requests == 1, "reported fake failure stops retries");
+  Console.WriteLine("Passed " + (candidateChecks - priorChecks) + " synthetic dispatch assertions; no IAreas adapter or game writes tested.");
+ }
  static void CheckNoDebitStartup() {
   int priorChecks = candidateChecks;
   var city = Grid(false); city[12] = true;
@@ -277,5 +613,8 @@ class PreviewChecks {
   CheckInitial25();
   CheckCoordinateIdentity();
   CheckNoDebitStartup();
+  CheckSingleRun();
+  CheckMilestoneScope();
+  CheckSyntheticDispatch();
  }
 }
