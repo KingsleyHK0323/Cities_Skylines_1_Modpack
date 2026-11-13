@@ -266,7 +266,9 @@ sealed class ManagerForm : Form {
         foreach(var entry in staticText){entry.Key.Text=T(entry.Value);entry.Key.AccessibleName=T(entry.Value);}
         int themeIndex=Array.IndexOf(themeIds,selectedTheme);themeChoice.Items.Clear();themeChoice.Items.AddRange(new object[]{T("Follow Windows"),T("Light"),T("Dark")});themeChoice.SelectedIndex=Math.Max(0,themeIndex);
         languageChoice.SelectedIndex=Math.Max(0,Array.IndexOf(languageIds,Presentation.Language));languageChoice.AccessibleName=T("Language");themeChoice.AccessibleName=T("Theme");
-        string[] headers={"Select","Module","Status","Installed version","Published version"};for(int i=0;i<headers.Length;i++)grid.Columns[i].HeaderText=T(headers[i]);
+        // Previous display headers retained: {"Select","Module","Status","Installed version","Published version"}.
+        // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+        string[] headers={"Select","Module","Status","Version managed by Dev Manager","Published version"};for(int i=0;i<headers.Length;i++)grid.Columns[i].HeaderText=T(headers[i]);
         grid.AccessibleName=T("Registered mods and per-module source status");detail.AccessibleName=T("Source details and operation results");search.AccessibleName=T("Find a module");target.AccessibleName=T("Active installation destination");
         foreach(DataGridViewRow row in grid.Rows){var item=row.Tag as IDictionary<string,object>;if(item!=null){row.Cells[1].Value=DisplayName(item);row.Cells[2].Value=PlayerStatus(item);}}
         applyingPreferences=false;UpdateButtons();ShowDetails();RenderRecoveryNotice();
@@ -350,7 +352,9 @@ sealed class ManagerForm : Form {
         if (raw.StartsWith("queued")) return T("Verification queued");
         if (raw == "Local files require inspection") return T("Files need attention");
         if (Flag(item,"canRequestUpdate")) return T("Update available (verify before install)");
-        if (Flag(item,"canRequestInstall")) return T("Not installed (candidate requires checks)");
+        // Previous display text retained: if (Flag(item,"canRequestInstall")) return T("Not installed (candidate requires checks)");
+        // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+        if (Flag(item,"canRequestInstall")) return T("No Dev Manager installation recorded at this destination (candidate requires checks)");
         if (raw == "current") return T("Installed (up to date)");
         // Signature: OpenAI-Codex. A matching candidate is not fully verified yet.
         if (Flag(item,"matchesCandidate")) return T("Installed (source matches; verification pending)");
@@ -365,6 +369,8 @@ sealed class ManagerForm : Form {
         string checkedText = TextValue(item,"checkedAtMs");
         if (checkedText.Length > 0) checkedText = new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(checkedText)).ToLocalTime().ToString("g");
         detail.Text = TextValue(item,"name") + Environment.NewLine + TextValue(item,"configurationText") + Environment.NewLine + TextValue(item,"reasonText") + Environment.NewLine + T("Last check: {0}",checkedText.Length > 0 ? checkedText : T("Not checked yet")) + Environment.NewLine + T("Development evidence: {0}",TextValue(item,"developmentText")) + Environment.NewLine + T("Branch: {0}",TextValue(item,"branch")) + Environment.NewLine + T("Source SHA: {0}",TextValue(item,"sourceSha"));
+        // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+        detail.Text += Environment.NewLine + T("Other installation sources, including Steam Workshop, are not checked.");
         if(TextValue(item,"reasonDiagnostic").Length>0)detail.Text+=Environment.NewLine+T("Technical details: {0}",TextValue(item,"reasonDiagnostic"));
     }
     void Send(string command, IDictionary<string, object> extra) {

@@ -32,6 +32,12 @@ unsubscribed when the form is disposed. Flat offline `translations.json` resourc
 cover normal controls and backend-facing messages; unrecognized diagnostics retain
 their original text beside a translated explanation.
 
+The module version and missing-installation status describe Dev Manager records
+at the selected destination. Details state that other installation sources,
+including Steam Workshop, are not checked.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 Settings use an exclusive cross-process transaction: merge under lock, validate the
 8192-byte serialized limit, back up, stage/fsync and atomically replace. In-memory
 destinations change only after commit; interrupted staging preserves the old file.

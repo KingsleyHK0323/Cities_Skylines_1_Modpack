@@ -2029,6 +2029,9 @@ test('desktop expires cached observations and resumes automatic checks after clo
   service.sources.set('ui-fixture', { status: 'candidate / verification required', checkedAtMs: 5000, developmentConfirmed: false,
     latestPublished: { status: 'candidate', buildId: 'new' } });
   const noDestination = service.rows()[0];
+  destination = true;
+  const noManaged = service.rows()[0];
+  assert.deepEqual([noManaged.canRequestInstall, noManaged.canInstall, noManaged.canRequestUpdate, noManaged.canUninstall], [true, false, false, false]);
   destination = true; installed = { moduleId: 'ui-fixture', buildId: 'old' };
   const updateUnconfirmed = service.rows()[0];
   assert.equal(noDestination.canRequestInstall, false); assert.equal(updateUnconfirmed.canRequestUpdate, false);
@@ -2097,6 +2100,22 @@ static class FreshnessProbe {
       string status = Presentation.T("Candidate found (select a destination to check installation)");
       Check(language == "en" || status != "Candidate found (select a destination to check installation)", "candidate status not translated: " + language);
     }
+    // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+    var noManaged = (IDictionary<string,object>)backendRows[2];
+    var expectedManagedStatus = new Dictionary<string,string> {
+      {"en", "No Dev Manager installation recorded at this destination (candidate requires checks)"},
+      {"zh-Hant", "此目的地沒有 Dev Manager 的安裝紀錄（候選版本仍需核對）"},
+      {"zh-Hans", "此目标位置没有 Dev Manager 的安装记录（候选版本仍需核对）"},
+      {"ja", "この保存先に Dev Manager のインストール記録はありません（候補は要確認）"}
+    };
+    foreach (var pair in expectedManagedStatus) {
+      Presentation.Language = pair.Key;
+      Check((string)statusMethod.Invoke(form, new object[] { noManaged }) == pair.Value, "managed installation scope was not shown: " + pair.Key);
+    }
+    Check((bool)noManaged["canRequestInstall"] && !(bool)noManaged["canInstall"] && !(bool)noManaged["canRequestUpdate"] && !(bool)noManaged["canUninstall"], "display changed operation eligibility");
+    var catalogField = typeof(Presentation).GetField("languages", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+    catalogField.SetValue(null, new Dictionary<string,object>());
+    Check((string)statusMethod.Invoke(form, new object[] { noManaged }) == expectedManagedStatus["en"], "missing catalog did not retain scoped English fallback");
     var invalid = new Dictionary<string,object> { {"checkedAtMs", "invalid"}, {"canInstall", true} };
     Check(SourceFreshness.Expire(invalid, 5000, "expired"), "invalid timestamp accepted");
     var old = new Dictionary<string,object> { {"checkedAtMs", 5000L}, {"canInstall", true} };
@@ -2123,8 +2142,28 @@ static class FreshnessProbe {
     "$result=$a.EntryPoint.Invoke($null,@()); if($result -ne 0){throw 'Freshness probe failed'}";
   const output = execFileSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', command],
     { windowsHide: true, encoding: 'utf8', timeout: 10000, env: { ...process.env, DEV_MANAGER_FRESHNESS_PROBE: executable,
-      DEV_MANAGER_SYNTHETIC_ROWS: JSON.stringify({ signature: 'OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager', rows: [noDestination, updateUnconfirmed] }) } });
+      // Retained prior fixture shape: rows: [noDestination, updateUnconfirmed].
+      DEV_MANAGER_SYNTHETIC_ROWS: JSON.stringify({ signature: 'OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager', rows: [noDestination, updateUnconfirmed, noManaged] }) } });
   assert.equal(output.trim(), 'PASS');
+});
+
+test('desktop identifies managed installation scope in details and all four languages', () => {
+  const source = readFileSync('desktop/DevManager.cs', 'utf8');
+  const details = source.slice(source.indexOf('    void ShowDetails() {'), source.indexOf('    void Send('));
+  const scope = 'Other installation sources, including Steam Workshop, are not checked.';
+  const header = 'Version managed by Dev Manager';
+  assert.ok(details.includes(`T("${scope}")`), 'selection details must state that other sources are unchecked');
+  assert.ok(source.includes(`"Status","${header}","Published version"`), 'the displayed version column must state its scope');
+  const languages = JSON.parse(readFileSync('translations.json', 'utf8')).languages;
+  const expected = {
+    en: [header, scope],
+    'zh-Hant': ['由 Dev Manager 管理的版本', '尚未檢查其他安裝來源（包括 Steam Workshop）。'],
+    'zh-Hans': ['由 Dev Manager 管理的版本', '尚未检查其他安装来源（包括 Steam Workshop）。'],
+    ja: ['Dev Manager が管理するバージョン', 'Steam Workshop を含む他のインストール元は確認していません。']
+  };
+  for (const [language, values] of Object.entries(expected)) {
+    assert.deepEqual([languages[language][header], languages[language][scope]], values, language);
+  }
 });
 
 test('virtual locked update preserves concurrent state and commits an unchanged snapshot', async t => {

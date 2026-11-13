@@ -2,6 +2,11 @@
 
 ## 2026-11-14
 
+- Scope the missing-installation status and managed-version column to the
+  selected destination, and explain that other installation sources remain
+  unchecked in the details view. Operation eligibility is unchanged.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 - Preserve saved settings when a destination is unavailable, block file operations
   until a validated choice, and avoid treating settings access errors as absence.
   Read-only destination probes refuse to create missing metadata.

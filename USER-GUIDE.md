@@ -36,6 +36,13 @@ are reserved for the Dev Manager `Setup.exe`, not module DLLs or a modpack ZIP.
 Historical source code remains internal and is not a player download option.
 **Check GitHub** requests another check. GitHub may delay anonymous requests;
 the details show the next allowed retry. There is no immediate automatic retry.
+
+**Version managed by Dev Manager** refers to the selected destination. A status
+stating that no Dev Manager installation is recorded there does not establish
+whether the module is installed from another source. The details say that other
+sources, including Steam Workshop, are not checked.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 **Verification queued** means request allowance is unavailable or the module is
 waiting for its turn. Automatic checks rotate modules instead of repeatedly
 checking only the first entries. Candidate discovery does not complete installation
