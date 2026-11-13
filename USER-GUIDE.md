@@ -100,6 +100,12 @@ Do not edit or move these records while an operation is running.
 An observed candidate can be shown before a destination is selected or while an
 installed module's update order is still unconfirmed. This does not authorize an
 installation or establish that an update is newer.
+A matching build ID does not prove the installed artifact is identical. If its
+manifest differs, or its installation record lacks comparable artifact identity,
+the status stays unknown and automatic updates are unavailable. Review the status
+message and ask the publisher to resolve the source identity before retrying.
+The table shows the update as unconfirmed; select the row to see the reason.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 The application revalidates selected sources, build provenance, complete required

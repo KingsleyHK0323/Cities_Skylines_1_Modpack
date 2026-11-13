@@ -113,6 +113,16 @@ and `publishedAt`; no release ID is required. Existing Release/bundle records
 remain readable/removable. Legacy records without ordering evidence are not
 automatically adopted or upgraded. No unknown files are overwritten.
 
+A matching build ID is current only when an artifact-branch installation also
+matches the candidate artifact branch and the SHA-256 of the exact manifest bytes.
+Different verified manifest hashes produce an identity mismatch. A historical or
+invalid record without comparable artifact provenance produces an unknown identity;
+these states both block automatic updates without removing installed files. A new
+artifact commit with identical manifest bytes can remain current. Other providers
+retain their existing comparison behavior, and different build IDs still require
+forward update-order evidence.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 ## Migration and remaining acceptance
 
 ### Shared discovery and request budget

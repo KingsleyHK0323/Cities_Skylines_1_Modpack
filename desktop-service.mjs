@@ -16,6 +16,20 @@ const freshObservationTime = (checkedAt, now) => Number.isFinite(checkedAt) && N
   now >= checkedAt && now - checkedAt < 3600000;
 const pausedReason = 'Development is paused for this module. Installation and updates are unavailable.';
 const pausedBatchReason = 'This batch was not attempted because another selected module is paused.';
+// Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+const artifactIdentityReasons = {
+  unknown: 'The installed build identity cannot be verified against the artifact manifest. Automatic update is unavailable.',
+  different: 'The published artifact manifest differs from the installed build although the build ID matches. Automatic update is unavailable.'
+};
+function artifactIdentityIssue(provider, installed, candidate) {
+  if (provider !== 'artifact-branch' || !installed || candidate?.status !== 'candidate' || installed.buildId !== candidate.buildId) return null;
+  const prior = installed.publication;
+  const validHash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+  if (prior?.provider !== 'artifact-branch' || typeof prior.artifactBranch !== 'string' ||
+      typeof candidate.artifactBranch !== 'string' || prior.artifactBranch !== candidate.artifactBranch ||
+      !validHash(prior.manifestSha256) || !validHash(candidate.manifestSha256)) return 'unknown';
+  return prior.manifestSha256 === candidate.manifestSha256 ? null : 'different';
+}
 function immutableComparison(options) {
   if (options?.method !== 'GET' || typeof options.url !== 'string') return null;
   const match = /^https:\/\/api\.github\.com\/repos\/([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)\/compare\/([a-f0-9]{40})\.\.\.([a-f0-9]{40})$/.exec(options.url);
@@ -113,7 +127,8 @@ export class DesktopService {
       const usable = source?.latestPublished?.status === 'candidate' && source.developmentConfirmed === true && !engineeringPaused && !stale && !localError && this.targetReady();
       const candidate = engineeringPaused ? undefined : source?.latestPublished?.buildId ?? source?.discoveryCandidate?.buildId;
       const canRequest = !!candidate && !engineeringPaused && !stale && !localError && this.targetReady();
-      const comparison = source?.developmentConfirmed && candidate && !stale ? installed ? installed.buildId===candidate?'current':'different-build':'not-installed' : source?.status ?? 'unknown';
+      const identityUnverified = artifactIdentityIssue(this.provider, installed, source?.latestPublished);
+      const comparison = identityUnverified ? 'unknown' : source?.developmentConfirmed && candidate && !stale ? installed ? installed.buildId===candidate?'current':'different-build':'not-installed' : source?.status ?? 'unknown';
       return { moduleId: module.moduleId, name: module.name, branch: module.branch,
         engineeringPaused,configurationPending,
         displayName:module.name+(engineeringPaused?' (development paused)':configurationPending?' (not configured)':''),
@@ -127,8 +142,9 @@ export class DesktopService {
         reason: localError ? 'Unknown, changed or unsafe local files are preserved.' : engineeringPaused ? pausedReason : stale ? 'The source observation is stale. Check GitHub again before installing.' :
           source?.reason ?? source?.updateOrder?.reason ?? (source?.developmentConfirmed ? 'Published metadata checked; actual DLL bytes and assembly identity are checked before changes.' : module.unavailableReason ?? 'Not checked yet.'),
         checkedAtMs: engineeringPaused ? null : source?.checkedAtMs ?? null, canInstall: usable && !installed,
-        canUpdate: usable && !!installed && source.updateOrder?.allowed === true,
-        canRequestInstall: canRequest && !installed, canRequestUpdate: canRequest && !!installed && source.updateOrder?.allowed === true,
+        ...(identityUnverified ? { matchesCandidate: false, reason: artifactIdentityReasons[identityUnverified] } : {}),
+        canUpdate: !identityUnverified && usable && !!installed && source.updateOrder?.allowed === true,
+        canRequestInstall: canRequest && !installed, canRequestUpdate: !identityUnverified && canRequest && !!installed && source.updateOrder?.allowed === true,
         canUninstall: !localError && !!installed && this.targetReady() };
     });
   }
@@ -342,6 +358,8 @@ export class DesktopService {
               !freshObservationTime(source.checkedAtMs, this.now())) throw new Error('SOURCE_UNAVAILABLE');
           sourceTimes.set(module.moduleId, source.checkedAtMs);
           const installed=approved.get(module.moduleId);
+          if (operation === 'update' && artifactIdentityIssue(this.provider, installed, source.latestPublished))
+            throw new Error('ARTIFACT_IDENTITY_UNVERIFIED');
           if(operation==='update' && installed?.buildId===source.latestPublished.buildId) {unchanged.add(module.moduleId);continue;}
           if (operation === 'update') {
             let orderQueued = false;

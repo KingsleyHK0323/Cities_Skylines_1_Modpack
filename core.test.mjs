@@ -1140,8 +1140,11 @@ test('partially mapped artifact entries refuse contradictory identities or missi
 });
 
 test('artifact discovery distinguishes matching installed builds and keeps known publisher mapping during a queued check',async()=>{
-  const {DesktopService}=await import('./desktop-service.mjs');const f=artifactFixture();
-  const entry={...f.entry,publisherConfigured:false};const installed={moduleId:entry.moduleId,buildId:f.manifest.buildId};
+  const {DesktopService}=await import('./desktop-service.mjs');const {detectArtifactModule}=await import('./artifact-source.mjs');const f=artifactFixture();
+  const entry={...f.entry,publisherConfigured:false};const candidate=(await detectArtifactModule({entry,request:f.request,nowMs:f.nowMs})).latestPublished;
+  const installed={moduleId:entry.moduleId,buildId:candidate.buildId,publication:{provider:'artifact-branch',artifactBranch:candidate.artifactBranch,
+    artifactCommit:candidate.artifactCommit,manifestSha256:candidate.manifestSha256,sourceSha:candidate.sourceSha,runId:candidate.runId,
+    attempt:candidate.attempt,publishedAt:candidate.publishedAt,buildStartedAt:candidate.buildStartedAt}};
   const service=new DesktopService({registry:[entry],request:f.request,now:()=>f.nowMs,installer:{audit:()=>({installed})}});
   await service.refresh();const row=service.rows()[0];assert.equal(row.matchesCandidate,true);assert.equal(row.canRequestUpdate,false);assert.equal(row.configurationPending,false);
   service.sources.set(entry.moduleId,{status:'queued / verification required',checkedAtMs:f.nowMs,latestPublished:{status:'unknown'},reason:'Queued for source verification: the shared request budget is exhausted.'});
@@ -3042,5 +3045,139 @@ test('slow successful or failed bodies do not restart the quota cooldown', async
       if (pending) await pending.catch(() => {});
       https.request = originalRequest;
     }
+  }
+});
+
+// Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+async function sameBuildManifestFixture() {
+  const { detectArtifactModule } = await import('./artifact-source.mjs');
+  const { verifyPublication } = await import('./core.mjs');
+  const { DesktopService } = await import('./desktop-service.mjs');
+  const f = artifactFixture();
+  const original = await detectArtifactModule({ entry: f.entry, request: f.request, nowMs: f.nowMs });
+  assert.equal(original.developmentConfirmed, true);
+  const c = original.latestPublished;
+  const publication = { provider: 'artifact-branch', sourceSha: c.sourceSha, artifactBranch: c.artifactBranch,
+    artifactCommit: c.artifactCommit, manifestSha256: c.manifestSha256, runId: c.runId, attempt: c.attempt,
+    buildStartedAt: c.buildStartedAt, publishedAt: c.publishedAt };
+  verifyPublication(publication);
+  let installed = { moduleId: f.entry.moduleId, buildId: c.buildId, publication };
+  const calls = { downloads: 0, writes: 0 };
+  const installer = { audit: () => ({ installed: structuredClone(installed) }),
+    update: () => { calls.writes++; throw new Error('UNEXPECTED_WRITE'); },
+    uninstall: () => { calls.writes++; throw new Error('UNEXPECTED_WRITE'); } };
+  const service = new DesktopService({ registry: [f.entry], request: f.request, installer, now: () => f.nowMs,
+    assertGameClosed: async () => true, assetTransport: async () => { calls.downloads++; throw new Error('UNEXPECTED_DOWNLOAD'); } });
+  return { f, service, installer, calls, original, setInstalled: value => { installed = value; }, getInstalled: () => structuredClone(installed) };
+}
+function changeSameBuildManifest(f) {
+  f.manifest.files.push({ path: 'files/Extra.dll', name: 'Extra.dll', assemblyName: 'Extra', size: 1, sha256: 'e'.repeat(64) });
+  f.advanceArtifact('d'.repeat(40));
+}
+test('artifact identity conflict: fully verified same build with changed manifest is not reported current', async () => {
+  const { detectArtifactModule } = await import('./artifact-source.mjs');
+  const q = await sameBuildManifestFixture(); changeSameBuildManifest(q.f);
+  const candidate = await detectArtifactModule({ entry: q.f.entry, request: q.f.request, nowMs: q.f.nowMs });
+  assert.equal(candidate.developmentConfirmed, true);
+  assert.equal(candidate.latestPublished.buildId, q.original.latestPublished.buildId);
+  assert.notEqual(candidate.latestPublished.manifestSha256, q.original.latestPublished.manifestSha256);
+  const row = (await q.service.refresh()).rows[0];
+  assert.equal(row.matchesCandidate, false);
+  assert.equal(row.status, 'unknown');
+  assert.equal(row.canRequestUpdate, false);
+  assert.match(row.reason, /manifest differs/i);
+  assert.deepEqual(q.calls, { downloads: 0, writes: 0 });
+});
+test('artifact identity conflict: manual update refuses instead of returning current', async () => {
+  const q = await sameBuildManifestFixture(); changeSameBuildManifest(q.f);
+  await assert.rejects(q.service.execute('update', [q.f.entry.moduleId]), /ARTIFACT_IDENTITY_UNVERIFIED/);
+  assert.deepEqual(q.calls, { downloads: 0, writes: 0 });
+});
+test('artifact identity conflict: identical manifest remains current after artifact commit advances', async () => {
+  const q = await sameBuildManifestFixture(); q.f.advanceArtifact('d'.repeat(40));
+  const result = await q.service.execute('update', [q.f.entry.moduleId]);
+  assert.equal(result.results[0].status, 'current');
+  assert.equal(result.rows[0].status, 'current');
+  assert.equal(result.rows[0].matchesCandidate, true);
+  assert.deepEqual(q.calls, { downloads: 0, writes: 0 });
+});
+test('artifact identity conflict: historical provider has no manifest identity but remains removable', async () => {
+  const { verifyPublication } = await import('./core.mjs');
+  const q = await sameBuildManifestFixture(); const old = q.getInstalled(); const p = old.publication;
+  old.publication = { provider: 'module-release', sourceSha: p.sourceSha, releaseId: 42,
+    publishedAt: p.publishedAt, runId: p.runId, attempt: p.attempt, buildStartedAt: p.buildStartedAt };
+  verifyPublication(old.publication); q.setInstalled(old);
+  const row = (await q.service.refresh()).rows[0];
+  assert.equal(row.status, 'unknown'); assert.equal(row.matchesCandidate, false);
+  assert.equal(row.canRequestUpdate, false); assert.equal(row.canUninstall, true);
+  assert.match(row.reason, /cannot be verified/i);
+  await assert.rejects(q.service.execute('update', [q.f.entry.moduleId]), /ARTIFACT_IDENTITY_UNVERIFIED/);
+  assert.deepEqual(q.calls, { downloads: 0, writes: 0 });
+});
+test('artifact identity conflict: non-string installed fingerprint cannot establish equality', async () => {
+  const q = await sameBuildManifestFixture(); const old = q.getInstalled();
+  old.publication.manifestSha256 = [old.publication.manifestSha256]; q.setInstalled(old);
+  const row = (await q.service.refresh()).rows[0];
+  assert.equal(row.status, 'unknown'); assert.equal(row.matchesCandidate, false);
+  await assert.rejects(q.service.execute('update', [q.f.entry.moduleId]), /ARTIFACT_IDENTITY_UNVERIFIED/);
+});
+test('artifact identity conflict: row uses the current audited record after discovery', async () => {
+  const q = await sameBuildManifestFixture(); await q.service.refresh([], { full: true });
+  await q.service.refresh([q.f.entry.moduleId], { full: true });
+  const old = q.getInstalled(); old.publication.manifestSha256 = 'f'.repeat(64); q.setInstalled(old);
+  const row = q.service.rows()[0];
+  assert.equal(row.status, 'unknown'); assert.equal(row.matchesCandidate, false);
+});
+test('artifact identity conflict: update checks its approved snapshot after a conflicting refresh audit', async () => {
+  const { detectArtifactModule } = await import('./artifact-source.mjs');
+  const q = await sameBuildManifestFixture(); changeSameBuildManifest(q.f);
+  const candidate = (await detectArtifactModule({ entry: q.f.entry, request: q.f.request, nowMs: q.f.nowMs })).latestPublished;
+  const different = q.getInstalled(); const matching = structuredClone(different);
+  matching.publication.artifactCommit = candidate.artifactCommit; matching.publication.manifestSha256 = candidate.manifestSha256;
+  let audits = 0; q.installer.audit = () => ({ installed: structuredClone(++audits === 2 ? matching : different) });
+  await assert.rejects(q.service.execute('update', [q.f.entry.moduleId]), /ARTIFACT_IDENTITY_UNVERIFIED/);
+  assert.deepEqual(q.calls, { downloads: 0, writes: 0 });
+});
+
+test('artifact identity conflict: existing non-artifact source can still show the same build as current', async () => {
+  const q = await sameBuildManifestFixture(); const old = q.getInstalled(); const p = old.publication;
+  old.publication = { provider: 'module-release', sourceSha: p.sourceSha, releaseId: 42,
+    publishedAt: p.publishedAt, runId: p.runId, attempt: p.attempt, buildStartedAt: p.buildStartedAt };
+  q.setInstalled(old); q.service.provider = 'module-release';
+  q.service.sources.set(q.f.entry.moduleId, { status: 'candidate', developmentConfirmed: true, checkedAtMs: q.f.nowMs,
+    latestPublished: { status: 'candidate', buildId: old.buildId }, reason: 'Published metadata checked.' });
+  const row = q.service.rows()[0]; assert.equal(row.status, 'current'); assert.equal(row.matchesCandidate, true);
+});
+test('artifact identity conflict: legacy providers retain verified forward updates for a different build', async () => {
+  const { assessUpdateOrder } = await import('./update-order.mjs');
+  const { verifyPublication } = await import('./core.mjs');
+  for (const provider of ['module-release', 'modpack-bundle']) {
+    const publication = { provider, sourceSha: 'a'.repeat(40), releaseId: 42, runId: 100, attempt: 1,
+      publishedAt: '2026-11-03T00:00:10Z', buildStartedAt: '2026-11-03T00:00:00Z' };
+    verifyPublication(publication);
+    const installed = { moduleId: 'example', buildId: 'Example-dev-100-1', publication };
+    const candidate = { buildId: 'Example-dev-101-1', sourceSha: publication.sourceSha, branch: 'Example',
+      runId: 101, attempt: 1, buildStartedAt: '2026-11-03T01:00:00Z', publishedAt: '2026-11-03T01:00:10Z' };
+    const result = await assessUpdateOrder(installed, candidate, 'Owner/Repo', async () => { throw new Error('UNEXPECTED_NETWORK'); });
+    assert.equal(result.allowed, true);
+  }
+});
+
+test('artifact identity conflict: distinct reasons and operation errors have translations in all supported languages', async () => {
+  const { localizeReason, localizeReply, translationCatalog } = await import('./localization.mjs');
+  const changed = await sameBuildManifestFixture(); changeSameBuildManifest(changed.f);
+  const changedRow = (await changed.service.refresh()).rows[0];
+  const historical = await sameBuildManifestFixture(); const record = historical.getInstalled();
+  historical.setInstalled({ moduleId: record.moduleId, buildId: record.buildId });
+  const unknownRow = (await historical.service.refresh()).rows[0];
+  assert.match(changedRow.reason, /manifest differs/i); assert.match(unknownRow.reason, /cannot be verified/i);
+  for (const language of ['en', 'zh-Hant', 'zh-Hans', 'ja']) {
+    for (const row of [changedRow, unknownRow]) {
+      const localized = localizeReason(language, row.reason);
+      assert.equal(localized.diagnostic, ''); assert.equal(localized.text, translationCatalog.languages[language][row.reason]);
+      assert.ok(localized.text);
+    }
+    const reply = localizeReply({ error: 'ARTIFACT_IDENTITY_UNVERIFIED' }, { preferences: { language } });
+    assert.equal(reply.errorText, translationCatalog.languages[language][unknownRow.reason]);
   }
 });

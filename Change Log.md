@@ -19,6 +19,11 @@
   update-order decisions after installation or source-head changes.
   Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
+- Keep matching build IDs unknown when artifact manifest identities differ or
+  comparable installation provenance is unavailable; block automatic updates.
+  Preserve matching-manifest and historical provider behavior.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 - Preserve selections hidden by search, show their count and block install, update
   and removal until every selection is visible or cleared. Candidate-selection
   buttons now change visible rows only. Distinguish an observed candidate from an

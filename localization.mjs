@@ -23,6 +23,7 @@ export function localizeReason(language,reason=''){
 const errors={
   CLOSE_GAME_BEFORE_CHANGING_FILES:'Close the game before changing module files.',SELECT_A_MODS_DESTINATION_FIRST:'Choose a Mods destination first.',
   SOURCE_UNAVAILABLE:'The selected source cannot be verified.',INSTALLATION_STATE_CHANGED:'The installation state changed. Check again.',
+  ARTIFACT_IDENTITY_UNVERIFIED:'The installed build identity cannot be verified against the artifact manifest. Automatic update is unavailable.',
   ASSEMBLY_IDENTITY_UNVERIFIED:'The package or assembly identity could not be verified.',ARTIFACT_FILE_UNVERIFIED:'The package or assembly identity could not be verified.',
   API_BUDGET_QUEUED_TRY_A_SMALLER_BATCH_AFTER_RETRY:'Request budget exhausted. Wait for retry or select fewer modules.',
   INVALID_PRESENTATION_PREFERENCES:'Settings could not be saved. Existing data is preserved for inspection.',EXISTING_PREFERENCES_REQUIRE_INSPECTION:'Settings could not be saved. Existing data is preserved for inspection.',

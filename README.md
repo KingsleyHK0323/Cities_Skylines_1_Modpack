@@ -70,6 +70,11 @@ An artifact without its matching source branch remains unavailable. A failed or
 incomplete shared source snapshot is reported as unknown; an observed request
 limit or locally enforced cooldown is reported as queued. Cached manifests never grant update-order evidence
 for a changed installation snapshot or source branch head.
+For the same build ID, compare the installed artifact branch and exact manifest
+SHA-256 with the observed candidate. A different manifest or missing comparable
+provenance stays unknown and blocks automatic updates; an artifact commit change
+alone does not mean that the manifest changed.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 HTTP error status and rate-limit headers are preserved even when an error body is
 empty or not JSON. A successful response with invalid JSON or a failed body is
 still rejected, but its received rate-limit headers are applied to the local cooldown.
