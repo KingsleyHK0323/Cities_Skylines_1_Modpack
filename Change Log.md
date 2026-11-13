@@ -5,6 +5,7 @@
 - Add a disabled, isolated transactional calendar candidate and focused fake-host checks for one eligible frame, supplied 1x elapsed ticks, display monotonicity, owner fencing and coherent fake snapshots.
 - Retain explicit limits on zero-frame eligibility, pending intervals, reference-timer ownership, event mapping, save/load and uncertain commits; no game or Harmony integration is enabled.
 - Recheck the shared fence before reporting arm success, and document the bounded callback wait counterexample and required fake-host lock discipline. Signature: OpenAI-Codex.
+- Add one named fake case for an already advanced frame with unchanged date and offset; rejection preserves the existing partial snapshot without claiming rollback. Signature: OpenAI-Codex.
 - Signature: OpenAI-Codex.
 
 

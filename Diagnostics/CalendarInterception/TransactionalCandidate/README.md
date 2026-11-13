@@ -31,6 +31,8 @@ A reference load path resets the display reference to the current frame and its 
 
 Changing O changes the interpreted dates of other frame indices by d - P per committed fake frame. A synthetic event-frame mapping is checked. Event ordering, event range overflow, missing or duplicate events, day/night behavior, native save/load, other mods, Unity and Mono remain unverified.
 
+A named fake check supplies a snapshot whose frame has already advanced while the date and offset remain unchanged. The candidate refuses to arm and makes no further fake commit; the pre-existing partial state remains. This does not roll back that frame or establish a safe Harmony or game adapter. Signature: OpenAI-Codex.
+
 ## Focused in-memory checks
 
 From the module root, the following PowerShell 7 commands compile only these two source files in memory and run the fake-host checks. They do not load Harmony or game assemblies.

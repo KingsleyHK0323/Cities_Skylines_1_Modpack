@@ -933,6 +933,32 @@ public static class TransactionalCandidateChecks
         }
     }
 
+    private static void PartialFrameSnapshotIsRejectedWithoutRollback()
+    {
+        FrameSnapshot original = Initial();
+        FrameSnapshot partial = new FrameSnapshot(checked(original.Frame + 1U),
+            original.ReferenceFrame, original.PerFrameTicks, original.OffsetTicks,
+            original.DateTicks, original.Timer, original.LastPublishedTicks);
+        Check(!Coherent(partial), "the fake frame increment without metadata update is incoherent");
+
+        FakeStore store = new FakeStore(partial);
+        TransactionalCalendarCandidate candidate = new TransactionalCalendarCandidate(store);
+        Check(!candidate.TryArm(0L), "an already partial frame cannot arm the candidate");
+        Check(!candidate.IsArmed, "the candidate stays disarmed after observing a partial frame");
+        Check(store.Attempts == 0 && store.Commits == 0,
+            "refusing the partial frame does not attempt a fake commit");
+        Check(candidate.Advance(OneSecond, 1, true, false) != AdvanceResult.Advanced,
+            "an already partial frame cannot subsequently advance");
+        FrameSnapshot observed = store.Save();
+        Check(Object.ReferenceEquals(observed, partial),
+            "the preexisting partial snapshot object remains published");
+        Check(observed.Frame == original.Frame + 1U && observed.DateTicks == original.DateTicks
+            && observed.OffsetTicks == original.OffsetTicks,
+            "the preexisting frame increment remains and the date and offset stay unchanged");
+        Check(store.Attempts == 0 && store.Commits == 0,
+            "the later advancement attempt does not commit or roll back the partial snapshot");
+    }
+
     public static int Run()
     {
         assertions = 0;
@@ -965,6 +991,7 @@ public static class TransactionalCandidateChecks
         ExternalStoreFenceImmediatelyDisarms();
         FenceBetweenReadCaptureAndArmReturn();
         CallbackWaitForFenceIsBounded();
+        PartialFrameSnapshotIsRejectedWithoutRollback();
         return assertions;
     }
 }
