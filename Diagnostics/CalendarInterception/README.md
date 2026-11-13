@@ -2,6 +2,8 @@
 
 This source-only diagnostic locates the observed `SimulationManager.SimulationStep` date-addition shape in an instruction snapshot. It has no Harmony or game-assembly reference, does not install a patch, and is not included in the checked normal game or controlled-host source lists. It cannot control time. The implementation and checks can be compiled together in memory with PowerShell 7 `Add-Type`; no game assembly is loaded by the checks.
 
+A separate [transactional fake-host intervention](TransactionalCandidate/README.md) exercises actual writes to isolated fake snapshots under a stronger atomic host contract. It does not change the matcher contract, authenticate a game target or provide a game adapter. Signature: OpenAI-Codex.
+
 ## Contract
 
 A future adapter supplies an independently trusted `SimulationManager` runtime type, the original `MethodInfo`, and one stable, ordered array of `CalendarInstruction` values. Each value carries the `OpCode` and operand from the corresponding input instruction. For example, an adapter can construct each entry from a Harmony `CodeInstruction` object's `opcode` and `operand`; ~~the adapter and Harmony are not included here.~~ A fixture-only adapter exists in [HarmonyFixture](HarmonyFixture/README.md); no production adapter or Harmony DLL is included. Signature: OpenAI-Codex. A `Unique` result gives the index of the addition call in that same ordered input, not an IL byte offset.

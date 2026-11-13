@@ -14,6 +14,8 @@ A separate <!-- [calendar IL matcher](Diagnostics/CalendarInterception/README.md
 
 A separate <!-- [Harmony fake-target study](Diagnostics/CalendarInterception/HarmonyFixture/README.md) -->Harmony fake-target study ~~(source retained locally and excluded from this backup)~~ ([source](Diagnostics/CalendarInterception/HarmonyFixture/README.md)) exercised a passive interception in an isolated x86 .NET Framework process. It does not implement 1x time or validate game/Mono behavior; the local compiler reported 13 warnings. Signature: OpenAI-Codex.
 
+A separate [transactional fake-host calendar candidate](Diagnostics/CalendarInterception/TransactionalCandidate/README.md) can update complete fake clock snapshots from supplied monotonic ticks. It is disabled by default, excluded from normal game builds, and does not patch or write the game clock. Its atomic publication, owner and save conditions are fake-host requirements, not verified game guarantees. Signature: OpenAI-Codex.
+
 Repository branch: [Realistic_City_Time](https://github.com/KingsleyHK0323/Cities_Skylines_1_Modpack/tree/Realistic_City_Time).
 
 ## Confirmed direction

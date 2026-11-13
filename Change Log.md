@@ -1,5 +1,13 @@
 # Change Log
 
+## Unreleased — 2026-11-13 transactional fake-clock candidate
+
+- Add a disabled, isolated transactional calendar candidate and focused fake-host checks for one eligible frame, supplied 1x elapsed ticks, display monotonicity, owner fencing and coherent fake snapshots.
+- Retain explicit limits on zero-frame eligibility, pending intervals, reference-timer ownership, event mapping, save/load and uncertain commits; no game or Harmony integration is enabled.
+- Recheck the shared fence before reporting arm success, and document the bounded callback wait counterexample and required fake-host lock discipline. Signature: OpenAI-Codex.
+- Signature: OpenAI-Codex.
+
+
 ## Unreleased — 2026-11-13 Harmony fake-target research
 
 - Add a separately invoked x86 fake-target fixture and a parameterized local test launcher; neither is connected to the normal game assembly or a native clock writer.
