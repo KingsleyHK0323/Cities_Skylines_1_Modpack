@@ -112,3 +112,11 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 - Keep both native submission entries unavailable and document the unverified game, transaction and multi-bridge boundaries.
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+
+## 2026-11-14 — synthetic lifecycle scheduler observation
+
+- Add guarded, default-disabled records for caller-reported queue outcomes and individually labelled callback entries and exits, with recorder-local pseudonymous managed-thread tags.
+- Exercise the data-only candidate through a fake scheduler; preserve the existing JSONL fields while documenting new event codes, independently captured snapshots, cross-thread token transfer and incomplete observations after stop or overflow.
+- Keep the experiment out of the main game source list; no actual scheduler, area write, game runtime or release archive is validated.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion

@@ -6,6 +6,8 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <!-- OpenAI-Codex_review_model -->
+    <DefineConstants>$(DefineConstants);FULLMAP_LIFECYCLE_SCHEDULER_EXPERIMENT</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LifecycleTraceCandidate.cs" />
