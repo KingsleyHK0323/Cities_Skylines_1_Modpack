@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { createHash, randomUUID } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import { safeRelative, safeModuleId, verifyPackage, verifyPublication } from './core.mjs';
 
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -200,12 +201,19 @@ export class IsolatedInstaller {
     return { moduleId: id, installed: record ? structuredClone(record) : null };
   }
 
-  install(pkg) { return this.transact('install', pkg.moduleId, pkg); }
-  update(pkg) { return this.transact('update', pkg.moduleId, pkg); }
-  uninstall(id) { return this.transact('uninstall', id); }
+  install(pkg, expected, verifyFreshness) { return this.transact('install', pkg.moduleId, pkg, expected, verifyFreshness); }
+  update(pkg, expected, verifyFreshness) { return this.transact('update', pkg.moduleId, pkg, expected, verifyFreshness); }
+  uninstall(id, expected) { return this.transact('uninstall', id, undefined, expected); }
 
-  transact(operation, id, input) {
+  transact(operation, id, input, expected, verifyFreshness) {
     safeModuleId(id);
+    // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+    if (expected === undefined || (operation === 'install' ? expected !== null :
+        !expected || typeof expected !== 'object' || Array.isArray(expected) || expected.moduleId !== id))
+      throw new Error('INSTALLATION_SNAPSHOT_REQUIRED');
+    if (verifyFreshness !== undefined && typeof verifyFreshness !== 'function') throw new Error('INVALID_SOURCE_FRESHNESS_GUARD');
+    let approved;
+    try { approved = structuredClone(expected); } catch { throw new Error('INSTALLATION_SNAPSHOT_REQUIRED'); }
     // Snapshot caller buffers; later callbacks cannot substitute bytes after verification.
     const pkg = input && { moduleId: id, buildId: input.buildId, ...(input.publication ? { publication: structuredClone(input.publication) } : {}),
       files: input.files?.map(f => ({ ...f, bytes: Buffer.isBuffer(f.bytes) ? Buffer.from(f.bytes) : f.bytes })) };
@@ -233,6 +241,8 @@ export class IsolatedInstaller {
       if (exists(journal)) throw new Error('Incomplete transaction requires manual recovery');
       this.load();
       const old = Object.hasOwn(this.state.modules, id) ? this.state.modules[id] : null;
+      if (!isDeepStrictEqual(old, approved)) throw new Error('INSTALLATION_STATE_CHANGED');
+      if (verifyFreshness) verifyFreshness();
       const occupied = fs.readdirSync(this.root).filter(name => name.toLowerCase() === folder.toLowerCase());
       if (operation === 'install' ? old || occupied.length : !old || occupied.length !== 1 || occupied[0] !== folder)
         throw new Error('Existing or unowned module destination');
@@ -252,6 +262,7 @@ export class IsolatedInstaller {
       if (old) verifyTree(active, old);
       else if (exists(active)) throw new Error('Destination appeared during staging');
       if (pkg) verifyTree(stage, record);
+      if (verifyFreshness) verifyFreshness();
       writeNew(journal, JSON.stringify({ schema: 1, token, operation, id, stage, backup, active }),
         () => { journalMayRemain = true; });
       journalCreated = true;

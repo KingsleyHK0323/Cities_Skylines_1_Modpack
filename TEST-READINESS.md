@@ -1,5 +1,67 @@
 # Development test readiness
 
+## Source state and mapping: 2026-11-13
+
+Shared ref failures without rate-limit evidence remain unavailable, and an
+artifact without its source branch is not offered for installation. Cached
+manifest data does not carry update-order evidence across changed installation
+or source-head snapshots. Injected offline cases cover these distinctions and a
+module whose mapping is supplied by its manifest; they do not demonstrate real
+published artifacts, actual managed assembly inspection or game loading.
+An in-memory HTTP response exercises the actual API transport and request pool
+for non-JSON errors, rate-limit cooldown, invalid successful JSON and failed
+response bodies, including cooldown headers received before these failures. No
+network request is made by this test.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+## Selection and candidate display: 2026-11-13
+
+The desktop blocks install, update and removal while checked rows are hidden by
+the search, and retains hidden checks when selecting eligible visible rows. The
+summary explains how to review or clear them. Candidate displays distinguish an
+unselected destination and unconfirmed update order from an unavailable source.
+Headless checks exercise the selection policy, synthetic backend rows, status
+precedence and four-language formatting. The button, filter, list rebuild and
+operation wiring was reviewed statically; real Windows GUI interaction, scrolling,
+accessibility and actual installation were not tested.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+## Local safety update: 2026-11-13
+
+Update ordering is evaluated against the initial complete installation snapshot;
+the cooperative transaction lock compares that snapshot before staging. Source
+freshness is rechecked through the lock boundary. Synthetic service and virtual
+filesystem tests exercise concurrent replacement and unchanged updates without
+touching a real Mods directory. The desktop clock helper is compiled and exercised
+headlessly; interactive GUI, real file-transaction and game acceptance are pending.
+This does not establish protection from other programs that ignore the lock.
+Value comparison cannot reveal an intervening transaction that restores an
+identical record and contents. Owned primary file bytes are checked separately,
+but NTFS alternate data streams are not enumerated and their behavior during
+backup or removal is unverified. A clock change during staging is checked before
+journal creation; a remaining timing window after that check is not eliminated.
+
+A synthetic cold-cache case with 15 modules and two distinct update comparisons
+per module needs 62 fake API calls. Under the unchanged 50-call hourly limit, the
+first attempt stops as queued and a second simulated window completes that case
+using previously verified immutable comparisons. This is not a guarantee for all
+batches or live GitHub behavior. Synthetic tests also cover paused-module guards,
+mixed batches and user-initiated removal; GUI and actual installation are pending.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+## Batch game-process guard: 2026-11-04
+
+The local source checks game state before every module transaction and reports
+unattempted modules if the game starts or the check fails during a batch.
+Synthetic in-memory tests cover install, update, removal and all four message
+languages; actual GUI behavior and game-process timing remain unverified. An
+external game launch can still race an individual check and file transaction.
+
+Signature: OpenAI-Codex_dev_manager_development
+
 ## Status update: 2026-11-04 (Asia/Hong_Kong)
 
 The assessment below is a historical 2026-11-03 snapshot. Its statements that no

@@ -41,15 +41,29 @@ waiting for its turn. Automatic checks rotate modules instead of repeatedly
 checking only the first entries. Candidate discovery does not complete installation
 checks. If a large batch exhausts the allowance, wait for retry or select a smaller
 batch; unverified files are never installed to work around the limit.
+When update verification needs more than one allowance window, the App can reuse
+verified immutable commit comparisons during the same session. A later attempt
+still checks the current source and local installation. A batch can remain queued
+if the source changes or the required request allowance is unavailable.
 No artifact branch, missing evidence, an API error or a stale observation means
 the source is unavailable. This is not an installed-module failure.
+An artifact with no matching source branch also remains unavailable. For a failed
+shared source snapshot, a known request limit or local cooldown is reported as
+queued; other failures remain unavailable. A 403 without limit details is initially
+unavailable and can still start a temporary local cooldown. Other checks may also
+be queued while waiting for their turn. Retry after checking the connection or the
+reported allowance.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+If the system clock moves backward, cached candidates are treated as stale and a
+new automatic check is scheduled; request limits can delay that check.
 
 The current registry marks 12 modules as **not configured** and AI Gaming as
 **development paused**. These labels are shown in the module list and summary.
 A verified publisher manifest can establish a pending module's mapping; registry
 presence alone never authorizes downloading it. Development pause is displayed
-separately from source verification and does not prevent removing an intact
-installation already owned by this manager.
+separately from source verification. Paused modules cannot be installed or updated;
+if a batch includes one, none of the selected modules are changed. An intact
+installation already owned by this manager can still be removed by the user.
 
 “Installed (source matches; verification pending)” means the installed build ID
 matches the observed candidate. It does not mean that the candidate has been fully
@@ -76,8 +90,17 @@ Do not edit or move these records while an operation is running.
 3. Search for modules. Check individual boxes or use the candidate selection buttons.
    **Select visible** selects every visible row, including unavailable entries;
    the action remains disabled if any selected row cannot perform that action.
+    Selections hidden by a search remain checked. The summary shows their count and
+    all three operations stay disabled until you clear the search to review every
+    selection, or use **Clear selection**. Candidate-selection buttons change only
+    visible rows and leave hidden selections unchanged.
 4. Click **Install selected** or **Update selected**. That click starts the operation.
 5. Read each module's result before starting the game yourself.
+
+An observed candidate can be shown before a destination is selected or while an
+installed module's update order is still unconfirmed. This does not authorize an
+installation or establish that an update is newer.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 The application revalidates selected sources, build provenance, complete required
 assets and actual managed assembly names before changing files. An update needs
@@ -89,6 +112,14 @@ Every selected package is prepared before writes. Transactions then commit one
 module at a time. If a later module fails, earlier committed modules remain and
 the remaining modules are not attempted. Inspect results rather than assuming
 that a whole batch either succeeded or rolled back together.
+
+If another manager instance changes a selected installation after it was
+checked, the affected operation stops. Check the latest state before retrying.
+The cooperative lock does not prevent unrelated programs from changing files.
+Checks cover owned primary file contents; NTFS alternate data streams and their
+behavior during backup or removal have not been verified.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 ## Remove
 

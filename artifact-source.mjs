@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto';
 import { safeRelative } from './core.mjs';
 import { allowedInstallationAsset } from './asset-policy.mjs';
+import { isForwardComparisonBody } from './update-order.mjs';
 
 const sha=value=>typeof value==='string'&&/^[a-f0-9]{40}$/.test(value);
 const positive=value=>Number.isSafeInteger(value)&&value>0;
@@ -10,11 +11,19 @@ const require=condition=>{if(!condition)throw new Error('ARTIFACT_SOURCE_UNVERIF
 const encodePath=path=>path.split('/').map(encodeURIComponent).join('/');
 export const artifactBranchFor=entry=>`Development_Build/${entry.branch}`;
 export const artifactFileUrl=(repository,commit,path)=>`https://raw.githubusercontent.com/${repository}/${commit}/${encodePath(path)}`;
+export function hasCompleteResponseHeaders(headers) {
+  try {
+    if (!headers || typeof headers !== 'object' || Array.isArray(headers)) return false;
+    const prototype = Object.getPrototypeOf(headers);
+    return (prototype === null || prototype === Object.prototype) &&
+      Reflect.ownKeys(headers).every(key => typeof key === 'string' && key.toLowerCase() !== 'link');
+  } catch { return false; }
+}
 
 export async function readArtifactRefs(repository,request,cachePhase='initial'){
   const url=`https://api.github.com/repos/${repository}/git/matching-refs/heads/`;
   const response=await request({url,method:'GET',redirect:'manual',credentials:'omit',cachePhase,signal:AbortSignal.timeout(30000)});
-  require(response.status===200&&response.url===url&&response.redirected===false&&Array.isArray(response.body)&&response.body.length<=4096&&!response.headers?.link);
+  require(response.status===200&&response.url===url&&response.redirected===false&&Array.isArray(response.body)&&response.body.length<=4096&&hasCompleteResponseHeaders(response.headers));
   const refs=new Map();
   for(const ref of response.body){require(typeof ref.ref==='string'&&ref.ref.startsWith('refs/heads/')&&ref.object?.type==='commit'&&sha(ref.object.sha)&&!refs.has(ref.ref));refs.set(ref.ref,ref.object.sha);}
   return refs;
@@ -64,7 +73,7 @@ export async function detectArtifactModule({entry,request,nowMs=Date.now(),timeo
       const sourceRefUrl=`${base}/git/ref/heads/${encodePath(entry.branch)}`;
       const sourceHead=await readRef(sourceRefUrl,`refs/heads/${entry.branch}`);
       if(sourceHead!==manifest.sourceSha){const comparison=await get(`${base}/compare/${manifest.sourceSha}...${sourceHead}`);
-        require(comparison.status==='ahead'&&comparison.base_commit?.sha===manifest.sourceSha&&comparison.behind_by===0&&positive(comparison.ahead_by));}
+        require(isForwardComparisonBody(comparison,manifest.sourceSha,sourceHead));}
       const run=await get(`${base}/actions/runs/${manifest.runId}/attempts/${manifest.attempt}`);
       require(run.id===manifest.runId&&run.run_attempt===manifest.attempt&&run.head_sha===manifest.sourceSha&&run.head_branch===entry.branch&&
         run.repository?.full_name===entry.repository&&run.head_repository?.full_name===entry.repository&&run.status==='completed'&&run.conclusion==='success'&&

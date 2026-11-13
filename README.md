@@ -66,11 +66,23 @@ Releases or modpack ZIPs; real published branch acceptance is pending.
 Automatic artifact checks use shared ref snapshots and cached immutable manifests,
 with bounded rotating verification and a shared rolling-hour request budget.
 Discovery remains separate from full pre-install source/run/file validation.
+An artifact without its matching source branch remains unavailable. A failed or
+incomplete shared source snapshot is reported as unknown; an observed request
+limit or locally enforced cooldown is reported as queued. Cached manifests never grant update-order evidence
+for a changed installation snapshot or source branch head.
+HTTP error status and rate-limit headers are preserved even when an error body is
+empty or not JSON. A successful response with invalid JSON or a failed body is
+still rejected, but its received rate-limit headers are applied to the local cooldown.
+The API transport applies rate-limit headers as they arrive, before the response
+body finishes. Requests already sent can still finish during that cooldown.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 The desktop registers all 15 project modules. Missing published sources stay
 unavailable; registry membership is not a promise that a module can be downloaded.
 The current registry shows 12 modules awaiting publisher configuration and AI Gaming
 with development paused. Valid artifact manifests can establish pending mappings.
-Pause is informational and does not prevent managing intact owned installations.
+For a paused module, individual source checks, installation and updates are
+disabled. A batch containing one stops before source checks or downloads. An
+intact owned installation can still be removed by the user.
 The existing static browser preview below remains a separate synthetic demo.
 
 The desktop uses anonymous HTTPS GitHub requests, shared artifact-ref discovery,
@@ -80,16 +92,65 @@ They are not exposed by the desktop source control or backend source selection.
 Normal button clicks
 start single/batch operations; no additional confirmation dialog is required.
 Select an existing Mods destination first. No game folder is accessed by default.
+Filtered-out selections remain checked; install, update and removal are disabled
+until the search is cleared to review every selected module or the selection is
+cleared. Candidate-selection buttons affect visible rows only.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 An installed build matching the observed candidate is shown separately from an
 unavailable source; the candidate still requires verification. Signature: OpenAI-Codex
 
+Source observations expire after one hour. A missing or invalid observation time,
+or a system clock moved behind that observation, makes its candidate unavailable
+until a fresh check. Existing blocked reference names are checked against both
+the DLL filename and the declared assembly identity, including renamed files.
+This denylist is not a complete inventory of game or framework assemblies.
+The service checks source freshness after refresh, after package preparation and
+again under the transaction lock before and after staging. The desktop expires
+cached rows and schedules a new check after a backward system-clock adjustment.
+The local request allowance and observed server cooldowns use elapsed time, and
+concurrent responses cannot shorten an active cooldown. Date-based server limits
+use the response date when available; otherwise they depend on the local clock.
+Each full pre-install check revalidates refs, manifest, run and local ownership.
+Verified forward comparisons may be reused in memory for the same repository and
+ordered immutable commit pair; incomplete, failed or paginated responses are not
+cached. Only explicitly anonymous requests qualify. At most 512 such proofs are
+retained for the App process, without response headers; least recently used proofs
+are displaced as new ones arrive. A compare response that explicitly reports a
+different or invalid head is rejected. Mixed-repository batches are refused and
+must be checked separately. If the allowance is insufficient, selected updates
+remain queued and no package is downloaded; a later attempt can reuse valid
+proofs. Completion depends on the sources, available allowance and fresh checks,
+not the number of modules.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 Active modules are direct children `Mods/CS1DevManager-<module>/`. Staging,
 ownership records and retained backups are outside Mods in a sibling
 `CS1DevManagerData-<identifier>` directory. Unknown or changed files are preserved.
+The initial complete ownership record is the update-order baseline and is checked
+again under the cooperative transaction lock before staging. Concurrent changes
+stop the affected operation; this is not a lock against unrelated external tools.
+An intervening change that restores an identical record and contents is not
+detectable from value comparison; owned primary file contents are separately
+checked under the lock. NTFS alternate data streams are not enumerated, and their
+backup and removal behavior has not been verified.
+Direct internal installer callers must supply an explicit expected snapshot:
+`install(package, null)`, `update(package, installedRecord)` or
+`uninstall(moduleId, installedRecord)`. Omitting it is rejected. This changes
+the earlier internal method signatures.
 Prepared batches are verified before mutation, but commits are per module: a later
 failure keeps earlier successful modules and stops the remainder. Removal retains
 the owned directory as a backup rather than permanently deleting it.
+
+If a transaction fails or finishes with an inspection warning, the result lists
+each remaining selected module as not attempted; earlier results are retained.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+The game-process check also runs before each module transaction. If the game is
+running or its status cannot be verified, earlier completed modules remain and
+the current and remaining modules are reported as not attempted. This reduces,
+but does not eliminate, the race between checking and an external game launch.
+Signature: OpenAI-Codex_dev_manager_development
 
 Run `node --test core.test.mjs filesystem.test.mjs` for development checks.
 Filesystem tests use synthetic temporary destinations and compiled synthetic DLLs.

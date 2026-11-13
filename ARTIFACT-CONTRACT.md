@@ -66,6 +66,13 @@ are rejected. Only listed files are installed; the branch is not extracted as a
 whole. LFS pointer text does not satisfy the declared DLL hash/assembly checks;
 automatic LFS resolution is not implemented.
 
+The existing blocked reference list is applied case-insensitively to both the
+installed DLL name and declared assembly identity, including renamed files. It
+includes the recorded `Assembly-CSharp` and `System.Xml` identities. This is not
+a complete inventory of all game versions or framework components.
+
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 ## Verification
 
 1. Read the exact artifact ref and pin its full commit SHA.
@@ -73,6 +80,8 @@ automatic LFS resolution is not implemented.
    base64 byte length and Git blob SHA-1. Validate every manifest identity/field.
 3. Read the source branch head. The manifest source must equal it or be an
    ancestor confirmed by GitHub compare: `ahead`, matching base, zero behind.
+   An explicitly returned head commit must match the requested full head SHA;
+   an omitted head field is not assumed to be an error by the existing contract.
 4. Check the exact `runId`/`attempt`: successful and completed, matching source
    SHA/branch, repository/head repository, configured workflow, push or manual
    dispatch. Validate build start/update times against the observation clock.
@@ -110,7 +119,10 @@ automatically adopted or upgraded. No unknown files are overwritten.
 
 Automatic checks share the GitHub `git/matching-refs/heads/` snapshot rather than
 performing five API requests per module. The whole bounded response is required;
-unexpected pagination or incomplete refs are not accepted as a complete list.
+missing or malformed response headers, a pagination `Link` header in any casing,
+or incomplete refs are not accepted as a complete list.
+Mixed-repository batches are refused before the ref query; check each repository
+separately.
 Read the snapshot again after the round to detect source/artifact ref changes.
 Read a changed module's manifest at its pinned commit; reuse hash-checked immutable
 manifest contents when the artifact commit is unchanged. Discovery is explicitly

@@ -1,6 +1,64 @@
 # Change Log
 
+## 2026-11-13
+
+- Apply trusted API rate-limit headers before response bodies finish, preventing
+  later queued requests from starting during an already observed cooldown.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Apply received rate-limit headers even when an otherwise successful API response
+  has invalid JSON or its body fails; keep rejecting it for source verification.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Preserve HTTP error status and rate-limit headers without consuming an error
+  body; successful API responses still require valid JSON.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Report shared source failures as unavailable unless a request limit is known,
+  refuse a candidate whose source branch is absent, and avoid reusing cached
+  update-order decisions after installation or source-head changes.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Preserve selections hidden by search, show their count and block install, update
+  and removal until every selection is visible or cleared. Candidate-selection
+  buttons now change visible rows only. Distinguish an observed candidate from an
+  unavailable source when the destination or update order is still unconfirmed.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
+- Reject existing blocked game and framework reference identities even if their
+  DLL filenames are changed. This retains the existing, non-exhaustive denylist.
+- Mark candidate observations stale when their timestamps are missing or invalid,
+  or when the system clock moves behind the recorded observation time.
+- Report every remaining module as not attempted after a transaction error or
+  inspection warning, including a non-Error thrown value.
+- Require explicit initial ownership snapshots for transactions and compare the
+  complete record under the cooperative lock before staging; bind update-order
+  verification to that same snapshot and stop on concurrent changes.
+- Recheck source freshness before download and under the transaction lock, and
+  expire desktop state and reschedule checks after a backward clock adjustment.
+- Recheck freshness after staging before creating a journal; preserve staged data
+  and the prior installation when that check fails. Use elapsed time for local
+  request limits and server cooldowns, retain longer concurrent cooldowns, and
+  interpret numeric retry-after values as seconds.
+- Add the recorded `Assembly-CSharp` and `System.Xml` reference identities to
+  the existing non-exhaustive blocked set.
+- Preserve queued update verification across request windows using bounded,
+  verified immutable comparison evidence; recheck full source and local state
+  before downloads and distinguish an exhausted allowance from an older build.
+- Reject contradictory returned comparison heads, isolate anonymous cache keys,
+  rotate old cached evidence, and refuse mixed-repository batches so they must be
+  checked separately.
+- Reject install/update batches containing paused modules before source checks,
+  retain user-initiated removal and localize the not-attempted results.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 ## 2026-11-04
+
+- Recheck the game process before each install, update or removal transaction;
+  halt the remaining batch when the process is running or its state is unknown,
+  preserve previously completed results and localize the unattempted status.
+  An external launch can still race an individual transaction.
+  Signature: OpenAI-Codex_dev_manager_development
 
 - Update the development-test readiness note with the published beta.1 installer
   and two observed artifact branches, while retaining the historical assessment.

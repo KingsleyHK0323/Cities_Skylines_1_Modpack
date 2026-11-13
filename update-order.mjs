@@ -1,5 +1,12 @@
 // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 // Different opaque IDs do not establish a safe forward update.
+export function isForwardComparisonBody(body, base, head) {
+  const sha = value => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
+  return sha(base) && sha(head) && !!body && typeof body === 'object' && !Array.isArray(body) &&
+    body.status === 'ahead' && body.base_commit?.sha === base &&
+    (!Object.hasOwn(body, 'head_commit') || body.head_commit?.sha === head) && body.behind_by === 0 &&
+    Number.isSafeInteger(body.ahead_by) && body.ahead_by > 0;
+}
 export async function assessUpdateOrder(installed, candidate, repository, request) {
   if (!installed || installed.buildId === candidate.buildId) return {allowed:false,reason:'No different installed build requires updating.'};
   const prior=installed.publication;
@@ -9,7 +16,7 @@ export async function assessUpdateOrder(installed, candidate, repository, reques
     try{
       const url=`https://api.github.com/repos/${repository}/compare/${prior.artifactCommit}...${candidate.artifactCommit}`;
       const response=await request({url,method:'GET',redirect:'manual',credentials:'omit',cachePhase:'update-order',signal:AbortSignal.timeout(15000)});const comparison=response.body;
-      if(response.status!==200||response.url!==url||response.redirected!==false||comparison.status!=='ahead'||comparison.base_commit?.sha!==prior.artifactCommit||comparison.behind_by!==0||!Number.isSafeInteger(comparison.ahead_by)||comparison.ahead_by<1)throw new Error();
+      if(response.status!==200||response.url!==url||response.redirected!==false||!isForwardComparisonBody(comparison,prior.artifactCommit,candidate.artifactCommit))throw new Error();
     }catch{return {allowed:false,reason:'Artifact branch ancestry is unknown, older or divergent.'};}
   }
   if (!prior || !/^[a-f0-9]{40}$/.test(prior.sourceSha) || !/^[a-f0-9]{40}$/.test(candidate.sourceSha) ||
@@ -35,8 +42,8 @@ export async function assessUpdateOrder(installed, candidate, repository, reques
     const url=`https://api.github.com/repos/${repository}/compare/${prior.sourceSha}...${candidate.sourceSha}`;
     const response=await request({url,method:'GET',redirect:'manual',credentials:'omit',cachePhase:'update-order',signal:AbortSignal.timeout(15000)});
     const comparison=response.body;
-    if(response.status===200 && response.url===url && !response.redirected && comparison.status==='ahead' &&
-      comparison.base_commit?.sha===prior.sourceSha && comparison.behind_by===0 && Number.isSafeInteger(comparison.ahead_by) && comparison.ahead_by>0)
+    if(response.status===200 && response.url===url && response.redirected===false &&
+      isForwardComparisonBody(comparison,prior.sourceSha,candidate.sourceSha))
       return {allowed:true,reason:'A later publication with verified forward source ancestry is available.'};
   } catch {}
   return {allowed:false,reason:'Published build differs; source ancestry is unknown, older or divergent. It is not auto-selected for update.'};

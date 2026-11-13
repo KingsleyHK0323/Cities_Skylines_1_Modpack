@@ -117,8 +117,63 @@ sealed class RecoveryNotice {
     }
 }
 
+// Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+static class SourceFreshness {
+    static bool Flag(IDictionary<string,object> row,string key){object value;return row.TryGetValue(key,out value)&&value is bool&&(bool)value;}
+    static bool Number(object value,out double number){
+        number=0;if(value==null||value is string||value is bool)return false;
+        switch(Type.GetTypeCode(value.GetType())){
+            case TypeCode.Byte: case TypeCode.SByte: case TypeCode.Int16: case TypeCode.UInt16:
+            case TypeCode.Int32: case TypeCode.UInt32: case TypeCode.Int64: case TypeCode.UInt64:
+            case TypeCode.Single: case TypeCode.Double: case TypeCode.Decimal:
+                try{number=Convert.ToDouble(value,System.Globalization.CultureInfo.InvariantCulture);return !Double.IsNaN(number)&&!Double.IsInfinity(number);}catch{return false;}
+            default:return false;
+        }
+    }
+    public static bool Expire(IDictionary<string,object> row,double now,string reason){
+        object raw;bool hasTime=row.TryGetValue("checkedAtMs",out raw)&&raw!=null;
+        object status;row.TryGetValue("status",out status);
+        object latest;row.TryGetValue("latestBuild",out latest);
+        bool candidate=Flag(row,"canInstall")||Flag(row,"canUpdate")||Flag(row,"canRequestInstall")||Flag(row,"canRequestUpdate")||
+            Flag(row,"matchesCandidate")||Convert.ToString(status)=="current"||!String.IsNullOrEmpty(Convert.ToString(latest));
+        if(!hasTime&&!candidate)return false;
+        double checkedAt;
+        if(hasTime&&Number(raw,out checkedAt)&&!Double.IsNaN(now)&&!Double.IsInfinity(now)&&now>=checkedAt&&now-checkedAt<3600000)return false;
+        row["canInstall"]=false;row["canUpdate"]=false;row["canRequestInstall"]=false;row["canRequestUpdate"]=false;
+        row["matchesCandidate"]=false;row["status"]="stale / unknown";row["reasonText"]=reason;row["reasonDiagnostic"]="";
+        return true;
+    }
+}
+
+sealed class AutomaticRefreshClock {
+    DateTime lastSeen; DateTime nextCheck;
+    public AutomaticRefreshClock(DateTime now){Reset(now);}
+    public void Reset(DateTime now){lastSeen=now;nextCheck=now.AddHours(1);}
+    public void DeferUntil(DateTime time){if(time>nextCheck)nextCheck=time;}
+    public bool TakeDue(DateTime now,bool ready,bool busy){
+        if(now<lastSeen){nextCheck=now;}
+        lastSeen=now;
+        if(!ready||busy||now<nextCheck)return false;
+        nextCheck=now.AddHours(1);return true;
+    }
+}
+
+sealed class DetailViewState {
+    bool showingResults;
+    public void ShowResults(){showingResults=true;}
+    public void ShowSelection(){showingResults=false;}
+    public bool ShouldRefreshSelection(bool selectedChanged){return selectedChanged&&!showingResults;}
+}
+
+// Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+static class SelectionSafety {
+    public static int HiddenCount(IEnumerable<KeyValuePair<bool,bool>> rows) { return rows.Count(row => row.Key && !row.Value); }
+    public static bool EligibleSelection(bool selected,bool visible,bool eligible) { return visible ? eligible : selected; }
+}
+
 sealed class ManagerForm : Form {
     readonly RecoveryNotice recoveryNotice=new RecoveryNotice(); readonly Label recoveryWarning=new Label();TableLayoutPanel mainLayout;
+    readonly DetailViewState detailView=new DetailViewState();
     readonly ComboBox languageChoice=new ComboBox(), themeChoice=new ComboBox();
     readonly Dictionary<Control,string> staticText=new Dictionary<Control,string>();
     readonly string[] languageIds={"en","zh-Hant","zh-Hans","ja"}, themeIds={"system","light","dark"};
@@ -135,7 +190,7 @@ sealed class ManagerForm : Form {
     readonly ProgressBar activity = new ProgressBar();
     readonly Button refresh = new Button(), install = new Button(), update = new Button(), remove = new Button();
     Process backend; bool busy; bool firstCheckSent; long nextId; string targetPath = ""; string mode = "unconfigured";
-    readonly Timer automatic = new Timer(); DateTime nextCheck = DateTime.UtcNow.AddHours(1);
+    readonly Timer automatic = new Timer(); readonly AutomaticRefreshClock refreshClock = new AutomaticRefreshClock(DateTime.UtcNow);
     static string TextValue(IDictionary<string, object> item, string key) { object v; return item.TryGetValue(key, out v) && v != null ? v.ToString() : ""; }
     static bool Flag(IDictionary<string, object> item, string key) { object v; return item.TryGetValue(key, out v) && v is bool && (bool)v; }
     Button MakeButton(string label, EventHandler click) {
@@ -197,12 +252,8 @@ sealed class ManagerForm : Form {
             if (backend != null && !backend.HasExited) { backend.StandardInput.Close(); }
         };
         automatic.Interval = 60000; automatic.Tick += delegate {
-            foreach (DataGridViewRow row in grid.Rows) { var data = row.Tag as IDictionary<string, object>; object stamp;
-                if (data != null && data.TryGetValue("checkedAtMs",out stamp) && stamp != null && (DateTime.UtcNow - new DateTime(1970,1,1)).TotalMilliseconds - Convert.ToDouble(stamp) >= 3600000) {
-                    data["canInstall"] = false; data["canUpdate"] = false; data["canRequestInstall"] = false; data["canRequestUpdate"] = false; data["reasonText"] = T("Observation expired. Check GitHub again before installing."); row.Cells[2].Value = T("stale / unknown");
-                }
-            }
-            UpdateButtons(); if (!busy && firstCheckSent && DateTime.UtcNow >= nextCheck) { nextCheck = DateTime.UtcNow.AddHours(1); Send("refresh",null); }
+            var now=DateTime.UtcNow;ExpireCachedRows(now);UpdateButtons();
+            if (refreshClock.TakeDue(now,firstCheckSent,busy)) Send("refresh",null);
         }; automatic.Start();
         CaptureText(this);ApplyLanguage();ApplyTheme();
         Microsoft.Win32.SystemEvents.UserPreferenceChanged+=SystemPreferencesChanged;
@@ -262,19 +313,39 @@ sealed class ManagerForm : Form {
     List<IDictionary<string, object>> Selected() {
         return grid.Rows.Cast<DataGridViewRow>().Where(row => Convert.ToBoolean(row.Cells[0].Value ?? false)).Select(row => row.Tag as IDictionary<string, object>).Where(item => item != null).ToList();
     }
+    int HiddenSelectedCount() {
+        return SelectionSafety.HiddenCount(grid.Rows.Cast<DataGridViewRow>().Select(row =>
+            new KeyValuePair<bool,bool>(Convert.ToBoolean(row.Cells[0].Value ?? false),row.Visible)));
+    }
     void SetBusy(bool value) { busy = value; activity.Visible = value; tools.Enabled = !value; search.Enabled = !value; grid.Enabled = !value;languageChoice.Enabled=!value;themeChoice.Enabled=!value; UpdateButtons(); }
     void UpdateButtons() {
         if (install == null || update == null || remove == null) return;
         var items = Selected(); var rows = grid.Rows.Cast<DataGridViewRow>().Select(row => row.Tag as IDictionary<string,object>).Where(row => row != null).ToList();
-        summary.Text = T("{0} selected. {1} not configured; {2} development paused. Only owned files can be changed.",items.Count,rows.Count(row => Flag(row,"configurationPending")),rows.Count(row => Flag(row,"engineeringPaused")));
-        install.Enabled = !busy && items.Count > 0 && items.All(item => Flag(item,"canRequestInstall") || Flag(item,"canInstall"));
-        update.Enabled = !busy && items.Count > 0 && items.All(item => Flag(item,"canRequestUpdate") || Flag(item,"canUpdate"));
-        remove.Enabled = !busy && items.Count > 0 && items.All(item => Flag(item,"canUninstall")); refresh.Enabled = !busy;
+        int hidden = HiddenSelectedCount();
+        summary.Text = hidden > 0 ? T("{0} selected, {1} hidden. Clear search to review or clear selection.",items.Count,hidden) :
+            T("{0} selected. {1} not configured; {2} development paused. Only owned files can be changed.",items.Count,rows.Count(row => Flag(row,"configurationPending")),rows.Count(row => Flag(row,"engineeringPaused")));
+        bool canAct = !busy && hidden == 0 && items.Count > 0;
+        install.Enabled = canAct && items.All(item => Flag(item,"canRequestInstall") || Flag(item,"canInstall"));
+        update.Enabled = canAct && items.All(item => Flag(item,"canRequestUpdate") || Flag(item,"canUpdate"));
+        remove.Enabled = canAct && items.All(item => Flag(item,"canUninstall")); refresh.Enabled = !busy;
     }
     void ApplyFilter() { foreach (DataGridViewRow row in grid.Rows) row.Visible = Convert.ToString(row.Cells[1].Value).IndexOf(search.Text, StringComparison.OrdinalIgnoreCase) >= 0; UpdateButtons(); }
-    void SelectEligible(string flag) { foreach (DataGridViewRow row in grid.Rows) { var item = row.Tag as IDictionary<string,object>; row.Cells[0].Value = row.Visible && item != null && Flag(item,flag); } UpdateButtons(); }
+    void ExpireCachedRows(DateTime now) {
+        double nowMs=(now-new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc)).TotalMilliseconds;
+        bool selectedChanged=false;
+        foreach(DataGridViewRow row in grid.Rows){var item=row.Tag as IDictionary<string,object>;
+            if(item!=null&&SourceFreshness.Expire(item,nowMs,T("Observation expired. Check GitHub again before installing."))){
+                row.Cells[2].Value=PlayerStatus(item);if(Object.ReferenceEquals(row,grid.CurrentRow))selectedChanged=true;
+            }
+        }
+        if(detailView.ShouldRefreshSelection(selectedChanged))ShowDetails();
+    }
+    void SelectEligible(string flag) { foreach (DataGridViewRow row in grid.Rows) { var item = row.Tag as IDictionary<string,object>;
+        bool selected = Convert.ToBoolean(row.Cells[0].Value ?? false); bool next = SelectionSafety.EligibleSelection(selected,row.Visible,item != null && Flag(item,flag));
+        if (selected != next) row.Cells[0].Value = next; } UpdateButtons(); }
     string PlayerStatus(IDictionary<string,object> item) {
         string raw = TextValue(item,"status");
+        if(raw=="Development paused")return T("Development paused");
         if(raw=="stale / unknown")return T("stale / unknown");
         if (raw.StartsWith("queued")) return T("Verification queued");
         if (raw == "Local files require inspection") return T("Files need attention");
@@ -283,10 +354,14 @@ sealed class ManagerForm : Form {
         if (raw == "current") return T("Installed (up to date)");
         // Signature: OpenAI-Codex. A matching candidate is not fully verified yet.
         if (Flag(item,"matchesCandidate")) return T("Installed (source matches; verification pending)");
+        // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+        if (TextValue(item,"latestBuild").Length > 0) return T(TextValue(item,"installedBuild").Length > 0 ?
+            "Installed (candidate found; update not confirmed)" : "Candidate found (select a destination to check installation)");
         return T(TextValue(item,"installedBuild").Length > 0 ? "Installed (source unavailable)" : "Source unavailable");
     }
     void ShowDetails() {
         if (grid.CurrentRow == null) return; var item = grid.CurrentRow.Tag as IDictionary<string, object>; if (item == null) return;
+        detailView.ShowSelection();
         string checkedText = TextValue(item,"checkedAtMs");
         if (checkedText.Length > 0) checkedText = new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(checkedText)).ToLocalTime().ToString("g");
         detail.Text = TextValue(item,"name") + Environment.NewLine + TextValue(item,"configurationText") + Environment.NewLine + TextValue(item,"reasonText") + Environment.NewLine + T("Last check: {0}",checkedText.Length > 0 ? checkedText : T("Not checked yet")) + Environment.NewLine + T("Development evidence: {0}",TextValue(item,"developmentText")) + Environment.NewLine + T("Branch: {0}",TextValue(item,"branch")) + Environment.NewLine + T("Source SHA: {0}",TextValue(item,"sourceSha"));
@@ -300,7 +375,11 @@ sealed class ManagerForm : Form {
         backend.StandardInput.WriteLine(Program.Json.Serialize(request)); backend.StandardInput.Flush();
     }
     void RunOperation(string operation) {
+        if(operation!="uninstall"){ExpireCachedRows(DateTime.UtcNow);UpdateButtons();}
+        if(HiddenSelectedCount()>0){detail.Text=T("Clear search to review all selected modules, or clear selection.");return;}
         var items = Selected(); if (items.Count == 0) return;
+        if((operation=="install"&&items.Any(item=>!Flag(item,"canRequestInstall")&&!Flag(item,"canInstall")))||
+           (operation=="update"&&items.Any(item=>!Flag(item,"canRequestUpdate")&&!Flag(item,"canUpdate")))){detail.Text=T("Observation expired. Check GitHub again before installing.");return;}
         Send(operation, new Dictionary<string, object> { { "modules", items.Select(item => TextValue(item,"moduleId")).ToArray() } });
     }
     void ChooseDestination() {
@@ -330,18 +409,18 @@ sealed class ManagerForm : Form {
                     var selected = new HashSet<string>(Selected().Select(item => TextValue(item,"moduleId"))); grid.Rows.Clear();
                     foreach (object raw in (IEnumerable)value) { var row = (IDictionary<string, object>)raw; string commit = TextValue(row,"sourceSha");
                         int index = grid.Rows.Add(selected.Contains(TextValue(row,"moduleId")), DisplayName(row), PlayerStatus(row), TextValue(row,"installedBuild"), TextValue(row,"latestBuild")); grid.Rows[index].Tag = row; }
-                    ApplyFilter(); ShowDetails();
+                    ExpireCachedRows(DateTime.UtcNow);ApplyFilter(); ShowDetails();
                 }
-                if (result.TryGetValue("results", out value)) { detail.Text = String.Join(Environment.NewLine, ((IEnumerable)value).Cast<IDictionary<string, object>>().Select(item => TextValue(item,"moduleId") + ": " + TextValue(item,"statusText") + " " + TextValue(item,"reasonText")+(TextValue(item,"reasonDiagnostic").Length>0?Environment.NewLine+T("Technical details: {0}",TextValue(item,"reasonDiagnostic")):""))); }
+                if (result.TryGetValue("results", out value)) { detail.Text = String.Join(Environment.NewLine, ((IEnumerable)value).Cast<IDictionary<string, object>>().Select(item => TextValue(item,"moduleId") + ": " + TextValue(item,"statusText") + " " + TextValue(item,"reasonText")+(TextValue(item,"reasonDiagnostic").Length>0?Environment.NewLine+T("Technical details: {0}",TextValue(item,"reasonDiagnostic")):""))); detailView.ShowResults(); }
                 if (result.TryGetValue("rate", out value)) { var rate = (IDictionary<string, object>)value; object retry;
-                    if (rate.TryGetValue("retryAtMs",out retry) && Convert.ToDouble(retry) > (DateTime.UtcNow - new DateTime(1970,1,1)).TotalMilliseconds) { var retryTime = new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(retry)); if (retryTime > nextCheck) nextCheck = retryTime; detail.Text += Environment.NewLine + T("GitHub request allowance is unavailable. Retry after {0}. No immediate retry is scheduled.",retryTime.ToLocalTime().ToString("g")); } }
+                    if (rate.TryGetValue("retryAtMs",out retry) && Convert.ToDouble(retry) > (DateTime.UtcNow - new DateTime(1970,1,1)).TotalMilliseconds) { var retryTime = new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(retry)); refreshClock.DeferUntil(retryTime); detail.Text += Environment.NewLine + T("GitHub request allowance is unavailable. Retry after {0}. No immediate retry is scheduled.",retryTime.ToLocalTime().ToString("g")); } }
                 if(TextValue(result,"settingsWarningText").Length>0)detail.Text+=Environment.NewLine+TextValue(result,"settingsWarningText");
             }
             SetBusy(false);
             progress.Text = Flag(message,"ok") ? T("Ready. Source state is based on the last check; game loading is unverified.") : T("Not completed: {0}",TextValue(message,"errorText"));
-            if (!Flag(message,"ok")) detail.Text = TextValue(message,"errorText") + Environment.NewLine + T("No success is assumed. Inspect the selected source or destination before retrying.")+Environment.NewLine+T("Technical details: {0}",TextValue(message,"error"));
+            if (!Flag(message,"ok")) {detail.Text = TextValue(message,"errorText") + Environment.NewLine + T("No success is assumed. Inspect the selected source or destination before retrying.")+Environment.NewLine+T("Technical details: {0}",TextValue(message,"error"));detailView.ShowResults();}
             if(catalogUnavailable)detail.Text+=Environment.NewLine+T("Technical details: {0}","TRANSLATION_RESOURCE_UNAVAILABLE; English fallback");
-            if (Flag(message,"ok") && !firstCheckSent) { firstCheckSent = true; nextCheck = DateTime.UtcNow.AddHours(1); Send("refresh",null); }
+            if (Flag(message,"ok") && !firstCheckSent) { firstCheckSent = true; refreshClock.Reset(DateTime.UtcNow); Send("refresh",null); }
         } catch { SetBusy(false); progress.Text = T("Invalid backend response. Restart before changing files."); tools.Enabled = false;languageChoice.Enabled=false;themeChoice.Enabled=false; }
     }
 }
