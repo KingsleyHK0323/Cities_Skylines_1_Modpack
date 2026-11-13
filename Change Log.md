@@ -1,5 +1,21 @@
 # Change Log
 
+## 2026-11-14
+
+- Preserve saved settings when a destination is unavailable, block file operations
+  until a validated choice, and avoid treating settings access errors as absence.
+  Read-only destination probes refuse to create missing metadata.
+  Report and preserve newly created test workspaces when initialization or saving fails.
+  Keep existing metadata distinct from first initialization, compare observed
+  destination identities and stop on detected disappearance or replacement.
+  Record that path-based checks and cross-session absence remain limited.
+  Retain observed present and absent Mods destination identities across re-selection
+  and mode changes, and clarify the separate confirmed Mods-directory code path.
+  Refuse a previously unidentifiable test workspace for the rest of the session.
+  Retain verified sandbox identities across mode changes; preserve failed Mods
+  metadata validation as unknown until matching directory identities are rechecked.
+  Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 ## 2026-11-13
 
 - Apply trusted API rate-limit headers before response bodies finish, preventing

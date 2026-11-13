@@ -8,6 +8,7 @@ const validate=value=>{
   if(!value||value.schema!==1||!['sandbox','game-mods','unconfigured'].includes(value.mode)||value.sandbox!==null&&typeof value.sandbox!=='string')throw new Error('LOCAL_STATE_INVALID');return value;
 };
 const regular=(file,io)=>{const stat=io.lstatSync(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1)throw new Error('LOCAL_STATE_UNSAFE');return stat;};
+const present=(file,io)=>{try{io.lstatSync(file);return true;}catch(error){if(error?.code==='ENOENT')return false;throw error;}};
 export class SettingsStore {
   constructor(file,{fault=()=>{},io=fs}={}){this.file=file;this.fault=fault;this.io=io;this.lastLoadResult=null;}
   read(){
@@ -23,7 +24,7 @@ export class SettingsStore {
     }finally{io.closeSync(fd);}
     return {state:validate(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes))),bytes};
   }
-  load(){this.lastLoadResult=this.io.existsSync(this.file)?{state:this.read().state}:this.update(current=>current);return this.lastLoadResult.state;}
+  load(){this.lastLoadResult=present(this.file,this.io)?{state:this.read().state}:this.update(current=>current);return this.lastLoadResult.state;}
   update(transform){
     const io=this.io;
     const lock=`${this.file}.lock`;let lockFd;
@@ -31,7 +32,7 @@ export class SettingsStore {
     let identity;let committed=false;let updated;let failure;let warning;let cleanupFailure;
     try{
       identity=io.fstatSync(lockFd);
-      const old=io.existsSync(this.file)?this.read():null;
+      const old=present(this.file,io)?this.read():null;
       updated=validate(transform(old?old.state:defaults()));
       const bytes=Buffer.from(JSON.stringify(updated),'utf8');if(bytes.length>8192)throw new Error('LOCAL_STATE_OVERSIZED');
       if(old){
@@ -45,7 +46,7 @@ export class SettingsStore {
       }finally{io.closeSync(stageFd);}
       this.fault('before-rename');
       if(old){if(!this.read().bytes.equals(old.bytes))throw new Error('LOCAL_STATE_CHANGED');}
-      else if(io.existsSync(this.file))throw new Error('LOCAL_STATE_CHANGED');
+      else if(present(this.file,io))throw new Error('LOCAL_STATE_CHANGED');
       io.renameSync(stage,this.file);committed=true;this.fault('after-rename');
     }catch(error){failure=error;}
     finally{
@@ -60,3 +61,11 @@ export class SettingsStore {
     throw failure??new Error('LOCAL_STATE_SAVE_FAILED');
   }
 }
+
+/*
+Retained pre-recovery implementation lines for review; not executed.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+  load(){this.lastLoadResult=this.io.existsSync(this.file)?{state:this.read().state}:this.update(current=>current);return this.lastLoadResult.state;}
+      const old=io.existsSync(this.file)?this.read():null;
+      else if(io.existsSync(this.file))throw new Error('LOCAL_STATE_CHANGED');
+*/

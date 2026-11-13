@@ -41,6 +41,32 @@ simultaneous operation/cleanup failures preserve both original errors and report
 recovery required. First-start and post-commit warnings retain the committed
 outcome and do not claim rollback or automatic recovery. Preference saves reject
 another instance's changed destination instead of silently adopting it.
+If a saved destination cannot be validated, retain its settings and allow a
+validated replacement while refusing file operations. Missing settings files are
+distinguished from access errors, and read-only probes cannot create metadata.
+Synthetic fixtures cover these paths; real desktop and filesystem acceptance remain pending.
+The first-initialization fixture confirms reaching an intercepted directory-creation
+attempt; it does not write complete metadata or perform a real installation.
+A newly requested test workspace is retained and identified if initialization or saving fails.
+During one session, previously observed manager metadata must retain its verified
+root and metadata identities; an unavailable or changed destination blocks
+operations. A newly selected Mods folder without metadata may be initialized on
+first use. The settings do not retain proof that metadata existed in a prior
+session. Path-based checks cannot eliminate every external replacement race.
+During the same session, reselecting a previously inspected Mods destination or
+switching away and back preserves its observed root and metadata presence.
+Verified test-workspace identities are also retained during the session.
+If the first validation of a saved test workspace fails before its identity is
+known, this session refuses that same workspace even if it is subsequently
+repaired. A validated game Mods destination remains selectable. Restarting does
+not prove the identity of the original workspace. Failed
+Mods metadata validation is an unknown state, not proof of absence. Recovery
+after repair requires matching directory identities observed around the failed
+check and complete revalidation; unobservable original identities remain blocked
+for that path. These checks do not authenticate earlier metadata contents.
+An ENOENT probe is classified as absence; concurrent path changes can prevent it
+from proving which component disappeared.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 Read the [user guide](USER-GUIDE.md) for save/inspection behavior. Headless probes
 and isolated tests are not live GUI, installer or gameplay acceptance.
 
@@ -397,10 +423,18 @@ This validates declarations and an externally pinned snapshot, not DLL identity,
 actual file bytes, workflow provenance or source freshness. Live trust-anchor
 delivery, replay protection and publisher integration remain unimplemented.
 
+**Scope of the next paragraph: direct construction for the isolated test workspace only.**
+
 `IsolatedInstaller` supports actual install/update/uninstall operations only in
 directories immediately under the current OS temporary directory named
 `cs1-dev-manager-test-<random suffix>`. Other roots are rejected before metadata
 creation. It cannot currently be pointed at a real game or Steam installation.
+The temporary-root restriction in the preceding paragraph applies to direct
+test-workspace construction. The separate `forModsDirectory` factory can
+accept an explicitly confirmed local game Mods directory, subject to its ownership
+and safety checks. This describes a code path; real GUI and game acceptance have
+not been established.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
 
 Each module has a dedicated directory. Canonical module IDs are lowercase ASCII
 letters, digits, underscores and hyphens; Windows device names are rejected.

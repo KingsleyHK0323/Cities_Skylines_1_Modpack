@@ -12,6 +12,7 @@ const exists = p => { try { fs.lstatSync(p); return true; } catch (e) { if (e.co
 const sameIdentity = (a, b) => a.dev === b.dev && a.ino === b.ino;
 const marker = 'CS1_DEV_MANAGER_ISOLATED_V1\n';
 const selectedModsAuthority = Symbol('explicit-user-selected-mods');
+const readOnlyInstallers = new WeakSet();
 export function metadataForModsDirectory(modsRoot) {
   const root = path.resolve(modsRoot);
   const identity = process.platform === 'win32' ? root.toLowerCase() : root;
@@ -107,6 +108,26 @@ function verifyTree(directory, record) {
 }
 
 export class IsolatedInstaller {
+  // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+  static inspectSandbox(root) { return new IsolatedInstaller(root, { readOnly: true }); }
+  static inspectModsRoot(modsRoot) {
+    if (typeof modsRoot !== 'string' || !path.isAbsolute(modsRoot) || modsRoot.startsWith('\\\\'))
+      throw new Error('Explicit local Mods-directory confirmation is required');
+    const root = path.resolve(modsRoot);
+    if (root === path.parse(root).root) throw new Error('A volume root cannot be a Mods destination');
+    directoryChain(root);
+    return inspect(root, true);
+  }
+  // Observe identities without trusting or changing the metadata contents.
+  static inspectModsMetadataIdentity(modsRoot) {
+    const rootIdentity = IsolatedInstaller.inspectModsRoot(modsRoot);
+    const metaIdentity = inspect(metadataForModsDirectory(path.resolve(modsRoot)), true);
+    return { rootIdentity, metaIdentity };
+  }
+  // Existing workspaces must not recreate missing metadata between inspection and use.
+  static openExistingSandbox(root, expectedIdentity) {
+    return new IsolatedInstaller(root, { expectedPresence: 'existing', expectedIdentity });
+  }
   static forModsDirectory(modsRoot, { confirmed = false, create = false, fault = () => {} } = {}) {
     if (!confirmed || typeof modsRoot !== 'string' || !path.isAbsolute(modsRoot) || modsRoot.startsWith('\\\\'))
       throw new Error('Explicit local Mods-directory confirmation is required');
@@ -114,19 +135,33 @@ export class IsolatedInstaller {
     if (parent === path.parse(parent).root) throw new Error('A volume root cannot be a Mods destination');
     directoryChain(parent);
     const metadata = metadataForModsDirectory(parent);
+    const expectedPresence = arguments[1]?.expectedPresence;
+    const expectedIdentity = arguments[1]?.expectedIdentity;
+    if (expectedPresence !== undefined && !['existing', 'absent'].includes(expectedPresence))
+      throw new Error('INVALID_METADATA_EXPECTATION');
     if (exists(metadata)) {
+      if (expectedPresence === 'absent') throw new Error('METADATA_PRESENCE_CHANGED');
       directoryChain(metadata);
       if (readRegular(path.join(metadata, 'marker')).toString() !== marker)
         throw new Error('Unknown existing manager directory; preserving files');
+      if (create) return new IsolatedInstaller(parent, { fault, authority: selectedModsAuthority,
+        expectedPresence: 'existing', expectedIdentity });
     } else {
+      if (expectedPresence === 'existing') throw new Error('METADATA_PRESENCE_CHANGED');
       if (fs.readdirSync(parent).some(name => name.toLowerCase().startsWith('cs1devmanager-')))
         throw new Error('Unknown manager-prefixed directory; preserving files');
       if (!create) return null;
+      if (create && arguments[1]?.expectedRoot) return new IsolatedInstaller(parent, { fault, authority: selectedModsAuthority,
+        expectedPresence: 'absent', expectedRoot: arguments[1].expectedRoot });
+      if (create) return new IsolatedInstaller(parent, { fault, authority: selectedModsAuthority, expectedPresence: 'absent' });
     }
+    if (!create) return new IsolatedInstaller(parent, { fault, authority: selectedModsAuthority, readOnly: true });
     return new IsolatedInstaller(parent, { fault, authority: selectedModsAuthority });
   }
 
   constructor(root, { fault = () => {}, authority = null } = {}) {
+    const readOnly = arguments[1]?.readOnly === true;
+    if (readOnly) readOnlyInstallers.add(this);
     if (typeof root !== 'string' || !path.isAbsolute(root)) throw new Error('Explicit absolute root required');
     this.root = path.resolve(root);
     // Ordinary construction stays isolated; production requires the explicit factory.
@@ -135,10 +170,21 @@ export class IsolatedInstaller {
       throw new Error('Only an isolated manager test directory under the current temporary root is supported');
     directoryChain(this.root);
     this.rootIdentity = inspect(this.root, true);
+    if (arguments[1]?.expectedRoot && !sameIdentity(this.rootIdentity, arguments[1].expectedRoot))
+      throw new Error('DESTINATION_IDENTITY_CHANGED');
     this.directoryPrefix = authority === selectedModsAuthority ? 'CS1DevManager-' : '';
     this.meta = authority === selectedModsAuthority ? metadataForModsDirectory(this.root) : path.join(this.root, '.dev-manager');
     this.fault = fault;
     const fresh = !exists(this.meta);
+    const expectedPresence = arguments[1]?.expectedPresence;
+    const expectedIdentity = arguments[1]?.expectedIdentity;
+    if (expectedPresence !== undefined && !['existing', 'absent'].includes(expectedPresence))
+      throw new Error('INVALID_METADATA_EXPECTATION');
+    if ((fresh && expectedPresence === 'existing') || (!fresh && expectedPresence === 'absent'))
+      throw new Error('METADATA_PRESENCE_CHANGED');
+    if (expectedIdentity && (fresh || !sameIdentity(this.rootIdentity, expectedIdentity.root) ||
+        !sameIdentity(inspect(this.meta, true), expectedIdentity.meta))) throw new Error('DESTINATION_IDENTITY_CHANGED');
+    if (fresh && readOnly) throw new Error('Read-only destination validation requires existing manager metadata');
     if (fresh) fs.mkdirSync(this.meta);
     inspect(this.meta, true);
     this.metaIdentity = inspect(this.meta, true);
@@ -206,6 +252,7 @@ export class IsolatedInstaller {
   uninstall(id, expected) { return this.transact('uninstall', id, undefined, expected); }
 
   transact(operation, id, input, expected, verifyFreshness) {
+    if (readOnlyInstallers.has(this)) throw new Error('READ_ONLY_INSTALLER');
     safeModuleId(id);
     // Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
     if (expected === undefined || (operation === 'install' ? expected !== null :

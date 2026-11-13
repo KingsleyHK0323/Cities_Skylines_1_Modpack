@@ -24,6 +24,8 @@ const errors={
   CLOSE_GAME_BEFORE_CHANGING_FILES:'Close the game before changing module files.',SELECT_A_MODS_DESTINATION_FIRST:'Choose a Mods destination first.',
   SOURCE_UNAVAILABLE:'The selected source cannot be verified.',INSTALLATION_STATE_CHANGED:'The installation state changed. Check again.',
   ARTIFACT_IDENTITY_UNVERIFIED:'The installed build identity cannot be verified against the artifact manifest. Automatic update is unavailable.',
+  DESTINATION_UNAVAILABLE:'The saved destination is unavailable or unsafe. Choose another destination before file operations.',
+  DESTINATION_SELECTION_CHANGED_EXTERNALLY:'The destination changed in another App. Your selection was not saved. Reconfirm the destination or restart.',
   ASSEMBLY_IDENTITY_UNVERIFIED:'The package or assembly identity could not be verified.',ARTIFACT_FILE_UNVERIFIED:'The package or assembly identity could not be verified.',
   API_BUDGET_QUEUED_TRY_A_SMALLER_BATCH_AFTER_RETRY:'Request budget exhausted. Wait for retry or select fewer modules.',
   INVALID_PRESENTATION_PREFERENCES:'Settings could not be saved. Existing data is preserved for inspection.',EXISTING_PREFERENCES_REQUIRE_INSPECTION:'Settings could not be saved. Existing data is preserved for inspection.',
@@ -44,13 +46,20 @@ export function localizeReply(message,state){
   const {language}=presentationPreferences(state);const copy={...message};
   if(copy.event==='progress')copy.textLocalized=localizeProgress(language,copy.text);
   if(copy.error)copy.errorText=translate(language,errors[copy.error]??'Operation could not finish. Review details before retrying.');
+  if(copy.error && typeof copy.result?.retainedSandboxPath==='string') copy.errorText += ' ' + translate(language,'A new test workspace was retained at {0}. Check saved settings before retrying.',copy.result.retainedSandboxPath);
   if(copy.result){
     copy.result={...copy.result,preferences:presentationPreferences(state)};
     if(copy.result.settingsWarning)copy.result.settingsWarningText=translate(language,copy.result.settingsLockMayRemain?'Settings were saved, but a recovery lock may remain. Inspect it before retrying; no automatic lock removal is performed.':'Settings were saved, but recovery data needs inspection before the next save.');
     if(copy.result.rows)copy.result.rows=copy.result.rows.map(row=>{const reason=localizeReason(language,row.reason);return {...row,reasonText:reason.text,reasonDiagnostic:reason.diagnostic,configurationText:translate(language,row.configuration),developmentText:translate(language,row.development)};});
-    if(copy.result.target){const target=copy.result.target;copy.result.target={...target,scopeText:target.mode==='unconfigured'?translate(language,'Choose your existing game Mods folder in Destination to enable file operations. The test workspace is optional.'):target.mode==='sandbox'?translate(language,'Test workspace only. These files are not loaded by the game.'):translate(language,'Only owned module folders are managed. Retained backups: {0}',target.backupPath??'')};}
+    if(copy.result.target){const target=copy.result.target;copy.result.target={...target,scopeText:target.unavailable===true?translate(language,'The saved destination is unavailable or unsafe. Choose another destination before file operations.'):target.mode==='unconfigured'?translate(language,'Choose your existing game Mods folder in Destination to enable file operations. The test workspace is optional.'):target.mode==='sandbox'?translate(language,'Test workspace only. These files are not loaded by the game.'):translate(language,'Only owned module folders are managed. Retained backups: {0}',target.backupPath??'')};}
     // Signature: OpenAI-Codex_dev_manager_development
     if(copy.result.results)copy.result.results=copy.result.results.map(result=>{const reason=localizeReason(language,result.reason);return {...result,statusText:translate(language,({committed:'Completed',current:'Already current','committed-with-warning':'Completed; inspection required',failed:'Failed; files preserved where possible','not-attempted':'Not attempted'})[result.status]??'Operation could not finish. Review details before retrying.'),reasonText:reason.text,reasonDiagnostic:reason.diagnostic};});
   }
   return copy;
 }
+
+/*
+Retained pre-recovery implementation lines for review; not executed.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+    if(copy.result.target){const target=copy.result.target;copy.result.target={...target,scopeText:target.mode==='unconfigured'?translate(language,'Choose your existing game Mods folder in Destination to enable file operations. The test workspace is optional.'):target.mode==='sandbox'?translate(language,'Test workspace only. These files are not loaded by the game.'):translate(language,'Only owned module folders are managed. Retained backups: {0}',target.backupPath??'')};}
+*/

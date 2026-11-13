@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { safeRelative, verifyPackage, installationPlan, uninstallPlan, updateStatus, coexistenceWarning, catalogStatus } from './core.mjs';
+import './destination-recovery.test.mjs';
 const bytes = Buffer.from('synthetic fixture, not a game DLL');
 const sha256 = createHash('sha256').update(bytes).digest('hex');
 const pkg = () => ({ moduleId: 'example', buildId: 'build-a', files: [{ path: 'mod.dll', bytes, sha256 }] });

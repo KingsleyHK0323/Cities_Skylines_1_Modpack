@@ -183,6 +183,29 @@ with an explanation rather than silently switching destinations. Reconfirm the
 destination or restart before retrying. Preference selectors update only the
 chosen field, preserving other preference values and unknown settings.
 
+If the saved destination is unavailable or unsafe, the App preserves the saved
+selection and explains the issue. Choose a validated existing Mods folder or an
+initialized test workspace before installing, updating or removing modules. An
+access error is not treated as a missing settings file.
+A newly created test workspace is retained and its path reported if initialization
+or saving fails; inspect saved settings before retrying.
+If previously observed manager metadata disappears, becomes unreadable or changes
+identity during a session, operations stop and the files require inspection.
+The App does not have a persistent record proving whether a Mods folder had
+manager metadata in a previous session. Path checks cannot eliminate every
+external replacement race.
+During the same session, choosing a destination again or switching away and back
+does not discard the previously observed Mods root or metadata presence.
+The same session also retains verified test-workspace identities.
+If the App could not verify a test workspace on first inspection, it cannot
+confirm that workspace later in the same session, even after repair. Choose a
+validated game Mods destination instead. The current interface does not offer a
+command to create an alternate test workspace; restarting does not prove identity. If Mods manager
+metadata cannot be verified, the App does not assume it was absent. A repair can
+be rechecked when the original directory identities were observable and match;
+otherwise choose another destination. This does not authenticate old metadata contents.
+Signature: OpenAI-Codex_Cities_Skylines_1_Modpack_Dev_Manager
+
 These controls are implemented in the Windows desktop App. Current verification
 uses headless native resource/theme probes and isolated backend restart/failure
 tests; visual layout, live Windows preference notifications and accessibility
