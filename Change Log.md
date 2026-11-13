@@ -98,3 +98,10 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 - Add a separately guarded Harmony transpiler experiment for an owned fake method, with single-use scope checks and same-thread nested-call failure cases. Keep its cross-thread reentry and uncertain cleanup limitations explicit; no game target is patched.
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+## 2026-11-13 — scoped fake and identity-projection follow-up
+
+- Extend the owned fake scope with registered-entry coordination and explicitly document pre-registration, lock-wait, late-decision and finalizer-pairing limits.
+- Add a disconnected, triple-guarded identity-only native instruction projection experiment without registration, activation, game writes or milestone override.
+- Exercise sequential fake area calls, explicit confirmation, one-shot callback replay and fake failure without asserting real game scheduling or transaction behavior.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion

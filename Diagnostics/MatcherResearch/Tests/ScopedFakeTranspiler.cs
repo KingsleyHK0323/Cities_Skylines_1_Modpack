@@ -11,10 +11,16 @@ namespace ScopedFakeResearch {
  // Test-only scope: callers and the fake gate are controlled by this process.
  internal sealed class FakeScope {
   internal const int Armed = 1, Consumed = 2, Stopped = 3, Denied = 4;
-  [ThreadStatic]
+  private static readonly object EntryGate = new object();
   private static FakeScope activeScope;
+  private static int activeTargets;
+  private static long nextEntryId;
+  private static bool trackingUnknown;
+  [ThreadStatic]
+  private static Stack<long> entries;
   private readonly Thread owner;
   private FakeInvocation expected;
+  private long targetEntryId;
   private int state, depth, targetEntries, overrides, decisions;
 
   internal FakeScope(bool allowed) {
@@ -35,15 +41,45 @@ namespace ScopedFakeResearch {
   internal void Stop() { Interlocked.Exchange(ref state, Stopped); }
 
   internal static void ObserveActiveTargetEntry() {
-   FakeScope active = activeScope;
-   if (active != null) active.ObserveTargetEntry();
+   lock (EntryGate) {
+    if (entries == null) entries = new Stack<long>();
+    if (activeTargets == Int32.MaxValue || nextEntryId == Int64.MaxValue) {
+     trackingUnknown = true;
+     if (activeScope != null) activeScope.Stop();
+     entries.Push(0);
+     return;
+    }
+    long entry = ++nextEntryId;
+    entries.Push(entry);
+    activeTargets++;
+    FakeScope active = activeScope;
+    if (active != null) active.ObserveTargetEntry(entry);
+   }
+  }
+
+  internal static void ObserveTargetExit() {
+   lock (EntryGate) {
+    if (entries == null || entries.Count == 0) {
+     trackingUnknown = true;
+     if (activeScope != null) activeScope.Stop();
+     return;
+    }
+    long entry = entries.Pop();
+    if (entry == 0 || activeTargets <= 0) {
+     trackingUnknown = true;
+     if (activeScope != null) activeScope.Stop();
+     return;
+    }
+    activeTargets--;
+   }
   }
 
   // This entry witness applies only to the fixed fake target in this process.
-  internal void ObserveTargetEntry() {
-   if (Interlocked.CompareExchange(ref depth, 0, 0) == 0) return;
-   if (!Object.ReferenceEquals(Thread.CurrentThread, owner)) { Stop(); return; }
-   if (Interlocked.Increment(ref targetEntries) != 1) Stop();
+  private void ObserveTargetEntry(long entry) {
+   targetEntries++;
+   if (depth != 1 || activeTargets != 1 || targetEntries != 1 || targetEntryId != 0 ||
+       !Object.ReferenceEquals(Thread.CurrentThread, owner)) { Stop(); return; }
+   targetEntryId = entry;
   }
 
   internal bool Execute(FakeInvocation invocation, bool nativeResult) {
@@ -53,28 +89,33 @@ namespace ScopedFakeResearch {
     Stop();
     return ScopedFakeTranspilerChecks.Target(invocation, nativeResult);
    }
-   if (activeScope != null) {
-    activeScope.Stop();
-    if (!Object.ReferenceEquals(activeScope, this)) Stop();
-    return ScopedFakeTranspilerChecks.Target(invocation, nativeResult);
-   }
-   if (Interlocked.CompareExchange(ref depth, 0, 0) != 0) {
-    Stop();
-    return ScopedFakeTranspilerChecks.Target(invocation, nativeResult);
-   }
    if (!Object.ReferenceEquals(invocation, expected))
     return ScopedFakeTranspilerChecks.Target(invocation, nativeResult);
-   Interlocked.Exchange(ref depth, 1);
-   activeScope = this;
+   bool activated = false;
+   lock (EntryGate) {
+    if (trackingUnknown || activeTargets != 0 || activeScope != null || depth != 0) {
+     if (activeScope != null) activeScope.Stop();
+     Stop();
+    } else if (state == Armed) {
+     depth = 1;
+     activeScope = this;
+     activated = true;
+    }
+   }
+   if (!activated) return ScopedFakeTranspilerChecks.Target(invocation, nativeResult);
    try {
     return ScopedFakeTranspilerChecks.Target(invocation, nativeResult);
    } catch {
     Stop();
     throw;
    } finally {
-    activeScope = null;
-    Interlocked.Exchange(ref depth, 0);
-    Interlocked.CompareExchange(ref state, Stopped, Armed);
+    lock (EntryGate) {
+     if (!Object.ReferenceEquals(activeScope, this)) { trackingUnknown = true; Stop(); }
+     if (activeTargets != 0) Stop();
+     if (Object.ReferenceEquals(activeScope, this)) activeScope = null;
+     depth = 0;
+     Interlocked.CompareExchange(ref state, Stopped, Armed);
+    }
    }
   }
 
@@ -82,15 +123,22 @@ namespace ScopedFakeResearch {
    Interlocked.Increment(ref decisions);
    if (!Object.ReferenceEquals(invocation, expected) || depth != 1 ||
        !Object.ReferenceEquals(Thread.CurrentThread, owner)) return original;
-   try {
-    if (!invocation.Eligible) { Stop(); return original; }
-    if (invocation.ThrowFilter) throw new InvalidOperationException("Controlled fake filter error.");
-    if (Interlocked.CompareExchange(ref state, Consumed, Armed) != Armed) return original;
-    if (!original) Interlocked.Increment(ref overrides);
-    return true;
-   } catch (Exception) {
-    Stop();
-    return original;
+   lock (EntryGate) {
+    try {
+     if (trackingUnknown || !Object.ReferenceEquals(activeScope, this) || activeTargets != 1 ||
+         entries == null || entries.Count == 0 || entries.Peek() != targetEntryId || targetEntryId == 0) {
+      Stop();
+      return original;
+     }
+     if (!invocation.Eligible) { Stop(); return original; }
+     if (invocation.ThrowFilter) throw new InvalidOperationException("Controlled fake filter error.");
+     if (Interlocked.CompareExchange(ref state, Consumed, Armed) != Armed) return original;
+     if (!original) Interlocked.Increment(ref overrides);
+     return true;
+    } catch (Exception) {
+     Stop();
+     return original;
+    }
    }
   }
  }
@@ -115,6 +163,8 @@ namespace ScopedFakeResearch {
   internal static void EnterTarget(FakeInvocation invocation) {
    FakeScope.ObserveActiveTargetEntry();
   }
+
+  internal static void ExitTarget() { FakeScope.ObserveTargetExit(); }
 
   internal static IList<CodeInstruction> Rewrite(IEnumerable<CodeInstruction> source, out bool matched) {
    matched = false;

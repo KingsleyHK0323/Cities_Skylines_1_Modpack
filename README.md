@@ -109,9 +109,21 @@ The separate, test-only ScopedFakeTranspiler and ScopedFakeTranspilerChecks sour
 
 An intentionally undrained fake worker produced UNKNOWN and skipped unpatch in a separate short-lived process; this does not prove that an unknown patch operation was rolled back. Patch or unpatch failure remains unknown, and removing a patch by method does not establish preservation of another owner using that same patch method. The test did not establish producer atomicity, live game behavior or general Harmony interoperability.
 
-The fake guard uses thread-local state. A direct call on another thread with a null or different scope may not notify the outer scope, so a cross-thread reentry can remain undetected; this was reproduced in a controlled fake process, not in the game. Already returned decisions cannot be revoked. Neither the fake experiment nor the reference-only matcher authorizes a real game patch or a 25-area writer.
+The earlier thread-local fake guard allowed cross-thread reentry to go undetected, as reproduced in a controlled fake process. The newer fake guard uses a short global lock and stops when an overlapping entry has been registered before the decision. A call already inside the wrapper but not yet registered, or waiting for that same lock, may remain unseen until after the decision; an issued result cannot be revoked. A finalizer without a matching entry witness may also disturb an outer registration. These are research boundaries, not authorization for a real game patch or a 25-area writer.
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 The reflection-only reference projection checks require game reference DLLs lawfully supplied by the user and their authorized dependencies. They are not included in this repository; do not commit, upload or redistribute game reference DLLs.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+### Identity-only native projection research
+
+NativeMilestoneTranspilerCandidate is an internal, disconnected research source guarded by FULLMAP_MATCHER_EXPERIMENT, FULLMAP_HARMONY_ADAPTER_EXPERIMENT and FULLMAP_NATIVE_TRANSPILER_EXPERIMENT, and excluded when RELEASE or FULLMAP_RELEASE is defined. It registers no patch and has no activation or writer. Its disabled Harmony entry returns the original enumerable without reading it. A separate builder copies the input instructions and label lists, rejects exception blocks, validates the same private 77-instruction projection, then inserts a filter that always preserves the original gate Boolean.
+
+A real Harmony fake-target check observed unchanged fake results and owner-specific removal. A separate reflection-only reference fixture produced the 81-instruction projection and passed structural rejection checks; those 81 instructions were not executed. The host compiler emitted 13 CS1685 warnings. The builder's enumerable may block, its capture is not atomic, generator ownership is not authenticated, and its returned instructions are mutable. Subsequent Harmony transforms and actual Mono/Unity emission remain unverified. It cannot perform milestone overrides or authenticate a city, simulation thread or provider.
+
+The sequential 25-area dispatch checks use one in-memory controller. They exercise 24 fake UnlockArea calls with false arguments, recorded coordinates, explicit fake observations, one-shot callback replay and explicit failure handling. They do not run the game's scheduler or transaction, authenticate real city state, establish real funds are unchanged, or add a timeout to Waiting.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+The RED-only NativeMilestoneCandidateRedStub is an intentionally nonfunctional replacement; compile it instead of, not together with, the candidate source when reproducing the isolated RED check.
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion

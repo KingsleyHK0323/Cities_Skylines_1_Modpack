@@ -14,6 +14,10 @@ namespace ScopedFakeResearch {
  internal sealed class FakeInvocation {
   internal readonly FakeScope Scope;
   internal bool Eligible = true, ReenterOnce, DirectReenterOnce, ForeignReenterOnce, NestedResult, ThrowFilter, BlockGate;
+  internal bool WorkerBeforeOnce, WorkerAfterOnce, WorkerCompleted, WorkerSawOwnerWaiting, WorkerNestedResult, WorkerPostDecision;
+  internal int WorkerStage, WorkerObservedStage, WorkerOwnerId, WorkerId;
+  internal Exception WorkerError;
+  internal FakeInvocation WorkerArgument;
   internal FakeInvocation ForeignReentry;
   internal ManualResetEvent GateEntered, GateRelease;
   internal Exception GateException;
@@ -25,6 +29,7 @@ namespace ScopedFakeResearch {
   private static volatile bool workerUndrained;
   private static bool simulateUndrained;
   private static int nullGateCalls;
+  private static Action fakeExitHook;
 
   [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
   internal static bool Gate(FakeInvocation invocation, bool nativeResult) {
@@ -48,6 +53,10 @@ namespace ScopedFakeResearch {
      invocation.ForeignReenterOnce = false;
      invocation.NestedResult = Target(invocation.ForeignReentry, false);
     }
+    if (invocation.WorkerBeforeOnce) {
+     invocation.WorkerBeforeOnce = false;
+     RunDirectWorker(invocation, 1);
+    }
     if (!invocation.Eligible) return false;
    }
    return nativeResult;
@@ -56,6 +65,47 @@ namespace ScopedFakeResearch {
   [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
   internal static bool Target(FakeInvocation invocation, bool nativeResult) {
    return Gate(invocation, nativeResult);
+  }
+
+  private static void RunDirectWorker(FakeInvocation invocation, int stage) {
+   Thread ownerThread = Thread.CurrentThread;
+   invocation.WorkerOwnerId = ownerThread.ManagedThreadId;
+   Interlocked.Exchange(ref invocation.WorkerStage, stage);
+   Thread worker = new Thread(delegate() {
+    try {
+     invocation.WorkerId = Thread.CurrentThread.ManagedThreadId;
+     DateTime deadline = DateTime.UtcNow.AddSeconds(3);
+     while ((ownerThread.ThreadState & ThreadState.WaitSleepJoin) == 0) {
+      if (DateTime.UtcNow >= deadline) throw new InvalidOperationException("Owner was not observed waiting.");
+      Thread.Sleep(1);
+     }
+     invocation.WorkerSawOwnerWaiting = true;
+     invocation.WorkerObservedStage = Interlocked.CompareExchange(ref invocation.WorkerStage, 0, 0);
+     invocation.WorkerNestedResult = Target(invocation.WorkerArgument, false);
+     invocation.WorkerCompleted = true;
+    } catch (Exception exception) { invocation.WorkerError = exception; }
+   });
+   worker.IsBackground = true;
+   workerUndrained = true;
+   worker.Start();
+   if (!worker.Join(5000)) throw new InvalidOperationException("Direct fake worker did not drain.");
+   workerUndrained = false;
+   Interlocked.Exchange(ref invocation.WorkerStage, 0);
+   if (invocation.WorkerError != null) throw new InvalidOperationException("Direct fake worker failed.", invocation.WorkerError);
+  }
+
+  private static void AfterTargetPostfix(FakeInvocation invocation, bool __result) {
+   if (invocation != null && invocation.WorkerAfterOnce) {
+    invocation.WorkerAfterOnce = false;
+    invocation.WorkerPostDecision = __result;
+    RunDirectWorker(invocation, 2);
+   }
+  }
+
+  private static Exception AfterTargetFinalizer(Exception __exception) {
+   Action exit = fakeExitHook;
+   if (exit != null) exit();
+   return __exception;
   }
 
   private static MethodInfo Method(string name) {
@@ -151,6 +201,71 @@ namespace ScopedFakeResearch {
    Require(rejected, "partial producer failure produces no output");
   }
 
+  private static bool CrossThreadCase(string name, int kind, bool afterDecision, bool nativeValue) {
+   FakeInvocation outer = Attempt(true);
+   FakeInvocation other = kind == 1 ? Attempt(true) : null;
+   outer.WorkerArgument = kind == 0 ? null : (kind == 1 ? other : outer);
+   if (afterDecision) outer.WorkerAfterOnce = true; else outer.WorkerBeforeOnce = true;
+   int nullBefore = Interlocked.CompareExchange(ref nullGateCalls, 0, 0);
+   bool result = outer.Scope.Execute(outer, nativeValue);
+   int state = outer.Scope.State, overrides = outer.Scope.Overrides, outerCalls = outer.GateCalls;
+   int nullCalls = Interlocked.CompareExchange(ref nullGateCalls, 0, 0) - nullBefore;
+   int otherCalls = other == null ? 0 : other.GateCalls;
+   bool retry = outer.Scope.Execute(outer, false);
+   Console.WriteLine("CROSS_THREAD_CASE " + name + " outer=" + result + " nested=" + outer.WorkerNestedResult +
+     " state=" + state + " overrides=" + overrides + " retry=" + retry + " outerCalls=" + outerCalls +
+     " otherCalls=" + otherCalls + " nullCalls=" + nullCalls + " stage=" + outer.WorkerObservedStage +
+     " sawWait=" + outer.WorkerSawOwnerWaiting + " completed=" + outer.WorkerCompleted +
+     " ownerId=" + outer.WorkerOwnerId + " workerId=" + outer.WorkerId + " undrained=" + workerUndrained +
+     " postDecision=" + outer.WorkerPostDecision);
+   bool counters = kind == 0 ? outerCalls == 1 && nullCalls == 1 :
+     (kind == 1 ? outerCalls == 1 && otherCalls == 1 : outerCalls == 2);
+   Require(outer.WorkerCompleted && outer.WorkerSawOwnerWaiting && !workerUndrained &&
+     outer.WorkerOwnerId != outer.WorkerId && outer.WorkerObservedStage == (afterDecision ? 2 : 1) &&
+     !outer.WorkerNestedResult && counters && (other == null || other.Scope.State == FakeScope.Armed),
+     "cross-thread fixture entered and drained: " + name);
+   if (afterDecision) Require(outer.WorkerPostDecision, "postfix saw original decision before worker: " + name);
+   if (afterDecision)
+    return result && state == FakeScope.Stopped && overrides == (nativeValue ? 0 : 1) && !retry;
+   return result == nativeValue && state == FakeScope.Stopped && overrides == 0 && !retry;
+  }
+
+  private static bool ArmWhileOtherTargetActive() {
+   FakeInvocation blocking = new FakeInvocation(null);
+   blocking.BlockGate = true;
+   blocking.GateEntered = new ManualResetEvent(false);
+   blocking.GateRelease = new ManualResetEvent(false);
+   bool workerResult = true;
+   Exception workerError = null;
+   Thread worker = new Thread(delegate() {
+    try { workerResult = Target(blocking, false); }
+    catch (Exception exception) { workerError = exception; }
+   });
+   worker.IsBackground = true;
+   workerUndrained = true;
+   worker.Start();
+   FakeInvocation attempted = Attempt(true);
+   bool result = true;
+   int state = -1, overrides = -1;
+   try {
+    if (!blocking.GateEntered.WaitOne(3000)) throw new InvalidOperationException("Active fake worker did not enter gate.");
+    result = attempted.Scope.Execute(attempted, false);
+    state = attempted.Scope.State;
+    overrides = attempted.Scope.Overrides;
+   } finally {
+    blocking.GateRelease.Set();
+    if (!worker.Join(5000)) throw new InvalidOperationException("Active fake worker did not drain.");
+    workerUndrained = false;
+   }
+   if (workerError != null) throw new InvalidOperationException("Active fake worker failed.", workerError);
+   bool retry = attempted.Scope.Execute(attempted, false);
+   Console.WriteLine("ARM_WHILE_ACTIVE outer=" + result + " state=" + state + " overrides=" + overrides +
+     " retry=" + retry + " workerResult=" + workerResult + " workerGateCalls=" + blocking.GateCalls +
+     " workerUndrained=" + workerUndrained);
+   Require(!workerUndrained && !workerResult && blocking.GateCalls == 1, "unframed fake target was active and drained");
+   return !result && state == FakeScope.Stopped && overrides == 0 && !retry;
+  }
+
   private static void CheckScopedBehavior() {
    FakeInvocation denied = Attempt(false);
    Require(!denied.Scope.Execute(denied, false) && denied.Scope.Overrides == 0,
@@ -239,6 +354,13 @@ namespace ScopedFakeResearch {
    Require(!nullArgOuter && !nullArgument.NestedResult && nullArgState == FakeScope.Stopped && nullArgOverrides == 0 &&
      !nullArgRetry && nullArgOuterCalls == 1 && nullCallsDuring == 1, "null-argument direct reentry stops outer without retry");
 
+   string[] caseNames = { "before-null", "before-other", "before-same", "after-null", "after-other", "after-same", "after-true-null" };
+   bool[] caseResults = new bool[caseNames.Length];
+   for (int i = 0; i < caseNames.Length; i++) caseResults[i] = CrossThreadCase(caseNames[i], i == 6 ? 0 : i % 3, i >= 3, i == 6);
+   bool armWhileActive = ArmWhileOtherTargetActive();
+   for (int i = 0; i < caseNames.Length; i++) Require(caseResults[i], "cross-thread decision boundary: " + caseNames[i]);
+   Require(armWhileActive, "active unframed target prevents scope arming");
+
    bool guardMatched;
    IList<CodeInstruction> guarded = ScopedFakeTranspiler.Rewrite(ReferenceInput(), out guardMatched);
    MethodInfo entry = typeof(ScopedFakeTranspiler).GetMethod("EnterTarget", BindingFlags.Static | BindingFlags.NonPublic);
@@ -285,8 +407,10 @@ namespace ScopedFakeResearch {
   }
 
   private static int RunHarmony() {
-   MethodInfo target = Method("Target"), transpiler = typeof(ScopedFakeTranspiler).GetMethod(
+   MethodInfo target = Method("Target"), postfix = Method("AfterTargetPostfix"), finalizer = Method("AfterTargetFinalizer"), transpiler = typeof(ScopedFakeTranspiler).GetMethod(
     "Transpiler", BindingFlags.Static | BindingFlags.NonPublic);
+   MethodInfo exit = typeof(ScopedFakeTranspiler).GetMethod("ExitTarget", BindingFlags.Static | BindingFlags.NonPublic);
+   fakeExitHook = exit == null ? null : (Action)Delegate.CreateDelegate(typeof(Action), exit);
    string owner = "OpenAI-Codex_review_model.ScopedFake." + Guid.NewGuid().ToString("N");
    Console.WriteLine("FAKE_OWNER=" + owner);
    Console.WriteLine("FAKE_TARGET=" + target.DeclaringType.FullName + "." + target.Name);
@@ -301,7 +425,7 @@ namespace ScopedFakeResearch {
     if (prior != null) foreach (string value in prior.Owners)
      throw new InvalidOperationException("Unexpected pre-existing fake patch owner: " + value);
     attempted = true;
-    MethodInfo replacement = harmony.Patch(target, null, null, new HarmonyMethod(transpiler), null);
+    MethodInfo replacement = harmony.Patch(target, null, new HarmonyMethod(postfix), new HarmonyMethod(transpiler), new HarmonyMethod(finalizer));
     if (replacement == null || !HasOwner(target, owner)) {
      unknown = true;
      throw new InvalidOperationException("Patch result or fake owner is unknown.");
@@ -321,6 +445,10 @@ namespace ScopedFakeResearch {
      try {
       Console.WriteLine("FAKE_UNPATCH_ATTEMPT=1");
       harmony.Unpatch(target, transpiler);
+      Console.WriteLine("FAKE_POSTFIX_UNPATCH_ATTEMPT=1");
+      harmony.Unpatch(target, postfix);
+      Console.WriteLine("FAKE_FINALIZER_UNPATCH_ATTEMPT=1");
+      harmony.Unpatch(target, finalizer);
       if (HasOwner(target, owner)) throw new InvalidOperationException("Fake owner remains after unpatch.");
       FakeInvocation post = Attempt(true);
       if (post.Scope.Execute(post, false) || post.Scope.Decisions != 0)

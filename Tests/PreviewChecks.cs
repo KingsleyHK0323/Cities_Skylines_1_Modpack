@@ -410,6 +410,24 @@ class PreviewChecks {
   public int? PendingIndex;
   public long? PendingAttempt;
   public Initial25DecisionKind? NestedStatus;
+  public Initial25DecisionKind? LastProposalKind;
+  public int FakeWriterCalls, FakeWriterX, FakeWriterZ, CallbackExecutions;
+  public bool? FakeWriterRequireMoney;
+  public bool ThrowFromFakeWriter, FakeWriterQueuedBeforeException;
+  public int FakeWriterThrowCount;
+  public readonly InvalidOperationException FakeWriterFailure = new InvalidOperationException("controlled fake writer failure");
+  public Exception FakeHandledWriterFailure;
+  public Initial25DecisionKind? FakeWriterFailureStatus;
+  public Action LastDeliveredAction;
+  public void UnlockArea(int x, int z, bool requireMoney) {
+   FakeWriterCalls++;
+   FakeWriterX = x; FakeWriterZ = z; FakeWriterRequireMoney = requireMoney;
+   if (ThrowFromFakeWriter) {
+    FakeWriterQueuedBeforeException = Queue();
+    FakeWriterThrowCount++;
+    throw FakeWriterFailure;
+   }
+  }
   public readonly bool?[] Grid = PreviewChecks.Grid(false);
   readonly Initial25NoDebitRun run = new Initial25NoDebitRun();
   readonly object boundProvider;
@@ -433,10 +451,14 @@ class PreviewChecks {
   public bool Queue() {
    if (Stopped || queued != null) return false;
    long queuedGeneration = Generation; object queuedProvider = Provider;
+   int delivered = 0;
    queued = delegate {
+    Interlocked.Increment(ref CallbackExecutions);
+    if (Interlocked.Exchange(ref delivered, 1) != 0) return;
     if (!CurrentContext() ||
         Generation != queuedGeneration || !object.ReferenceEquals(Provider, queuedProvider)) { Stopped = true; return; }
     Initial25NoDebitDecision decision = run.Propose(Snapshot(), 5, 5, Count(), Generation, Generation, Revision, Revision, NewGame);
+    LastProposalKind = decision.Kind;
     if (decision.Kind == Initial25DecisionKind.Halted) { Stopped = true; return; }
     if (decision.Kind != Initial25DecisionKind.Candidate) return;
     if (SimulateReentry) NestedStatus = run.Propose(Snapshot(), 5, 5, Count(), Generation, Generation, Revision, Revision, NewGame).Kind;
@@ -446,10 +468,15 @@ class PreviewChecks {
      run.FailPending(decision.AttemptId); Stopped = true; return;
     }
     Requests++; LastRequireMoney = decision.RequireMoney; PendingIndex = index; PendingAttempt = decision.AttemptId;
+    try { UnlockArea(index % 5, index / 5, decision.RequireMoney.Value); } catch (Exception exception) {
+     FakeHandledWriterFailure = exception;
+     Stopped = true;
+     FakeWriterFailureStatus = run.FailPending(decision.AttemptId).Kind;
+    }
    };
    return true;
   }
-  public void Deliver() { Action action = queued; queued = null; if (action != null) action(); }
+  public void Deliver() { Action action = queued; if (action != null) LastDeliveredAction = action; queued = null; if (action != null) action(); }
   public Initial25DecisionKind Observe() {
    if (!CurrentContext()) { Stopped = true; return run.FailPending(PendingAttempt).Kind; }
    Initial25NoDebitDecision result = run.Observe(Snapshot(), 5, 5, Count(), Generation, Generation, Revision, Revision, NewGame);
@@ -510,6 +537,255 @@ class PreviewChecks {
   Verify(fake.Fail() == Initial25DecisionKind.Halted && !fake.Queue() && fake.Requests == 1, "reported fake failure stops retries");
   Console.WriteLine("Passed " + (candidateChecks - priorChecks) + " synthetic dispatch assertions; no IAreas adapter or game writes tested.");
  }
+  // OpenAI-Codex_build_review
+  // Single-controller fake only; no game scheduler, provider, or funds are accessed.
+  // OpenAI-Codex_build_review
+  // Recorder and callback replay checks are confined to the single-controller fake.
+  static FieldInfo FakePublicField(string name) {
+   return typeof(FakeStartupHarness).GetField(name, BindingFlags.Instance | BindingFlags.Public);
+  }
+  static bool FakeRecorderAvailable() {
+   Type type = typeof(FakeStartupHarness);
+   return FakePublicField("FakeWriterCalls") != null && FakePublicField("FakeWriterX") != null &&
+     FakePublicField("FakeWriterZ") != null && FakePublicField("FakeWriterRequireMoney") != null &&
+     FakePublicField("CallbackExecutions") != null && FakePublicField("LastDeliveredAction") != null &&
+     type.GetMethod("UnlockArea", BindingFlags.Instance | BindingFlags.Public, null,
+       new Type[] { typeof(int), typeof(int), typeof(bool) }, null) != null;
+  }
+  static int FakeInt(FakeStartupHarness fake, string name) {
+   FieldInfo field = FakePublicField(name);
+   return field == null ? -1 : (int)field.GetValue(fake);
+  }
+  static Action FakeLastDelivered(FakeStartupHarness fake) {
+   FieldInfo field = FakePublicField("LastDeliveredAction");
+   return field == null ? null : (Action)field.GetValue(fake);
+  }
+  static Action FakeQueued(FakeStartupHarness fake) {
+   FieldInfo field = typeof(FakeStartupHarness).GetField("queued", BindingFlags.Instance | BindingFlags.NonPublic);
+   return field == null ? null : (Action)field.GetValue(fake);
+  }
+  static bool FakeWriteRecordMatches(FakeStartupHarness fake, int tile, int expectedCount) {
+   object money = FakePublicField("FakeWriterRequireMoney").GetValue(fake);
+   return FakeInt(fake, "FakeWriterCalls") == expectedCount &&
+     FakeInt(fake, "FakeWriterX") == tile % 5 && FakeInt(fake, "FakeWriterZ") == tile / 5 &&
+     money is bool && (bool)money == false;
+  }
+  static bool CheckFakeWriterAndReplay() {
+   bool passed = true;
+   bool recorder = FakeRecorderAvailable();
+   if (!recorder) {
+    Console.Error.WriteLine("FAIL fake writer and callback recorder unavailable");
+    passed = false;
+   }
+   var fake = new FakeStartupHarness();
+   Verify(fake.Queue(), "fake replay fixture queues the original action");
+   Action captured = FakeQueued(fake);
+   Verify(captured != null, "fake replay fixture captures the queued action");
+   fake.Deliver();
+   Verify(fake.Requests == 1 && fake.PendingIndex.HasValue, "fake replay fixture has one pending request");
+   int tile = fake.PendingIndex.Value;
+   if (recorder && (!Object.ReferenceEquals(FakeLastDelivered(fake), captured) ||
+       !FakeWriteRecordMatches(fake, tile, 1))) {
+    Console.Error.WriteLine("FAIL delivered fake action and writer arguments were not recorded");
+    passed = false;
+   }
+   int priorCallbacks = FakeInt(fake, "CallbackExecutions");
+   captured();
+   if (priorCallbacks >= 0 && FakeInt(fake, "CallbackExecutions") != priorCallbacks + 1) {
+    Console.Error.WriteLine("FAIL pending replay did not execute the saved callback");
+    passed = false;
+   }
+   if (priorCallbacks < 0) Console.WriteLine("RED_PENDING_REPLAY_STATUS=" + fake.LastProposalKind);
+   if (fake.Requests != 1 || (recorder && FakeInt(fake, "FakeWriterCalls") != 1)) {
+    Console.Error.WriteLine("FAIL pending replay issued another fake request");
+    passed = false;
+   }
+   fake.Grid[tile] = true;
+   fake.Revision++;
+   Verify(fake.Observe() == Initial25DecisionKind.Confirmed, "fake replay fixture confirms its first tile");
+   priorCallbacks = FakeInt(fake, "CallbackExecutions");
+   captured();
+   if (priorCallbacks >= 0 && FakeInt(fake, "CallbackExecutions") != priorCallbacks + 1) {
+    Console.Error.WriteLine("FAIL confirmed replay did not execute the saved callback");
+    passed = false;
+   }
+   if (fake.Requests != 1 || (recorder && FakeInt(fake, "FakeWriterCalls") != 1)) {
+    Console.Error.WriteLine("FAIL replay after confirmation issued another fake request: " + fake.Requests);
+    passed = false;
+   }
+   if (passed) Console.WriteLine("PASS actual saved fake callback replay and writer record");
+   return passed;
+  }
+
+  // OpenAI-Codex_build_review
+  // A recorded fake call that throws leaves an unknown fake outcome; no rollback is inferred.
+  static bool CheckFakeWriterExceptions() {
+   bool passed = true;
+   int priorChecks = candidateChecks;
+   int[] failureSteps = new int[] { 1, 23, 24 };
+   foreach (int failAt in failureSteps) {
+    var fake = new FakeStartupHarness();
+    for (int step = 1; step < failAt; step++) {
+     Verify(fake.Queue(), "earlier fake step can be queued");
+     fake.Deliver();
+     Verify(fake.LastProposalKind == Initial25DecisionKind.Candidate && fake.PendingIndex.HasValue &&
+       fake.PendingAttempt.HasValue && FakeWriteRecordMatches(fake, fake.PendingIndex.Value, step),
+       "earlier fake step invokes its no-debit writer");
+     fake.Grid[fake.PendingIndex.Value] = true;
+     fake.Revision++;
+     Verify(fake.Observe() == Initial25DecisionKind.Confirmed, "earlier fake step explicitly confirmed");
+    }
+    fake.ThrowFromFakeWriter = true;
+    Verify(fake.Queue(), "throwing fake writer callback can be queued");
+    Action failingAction = FakeQueued(fake);
+    Verify(failingAction != null, "throwing callback is retained before delivery");
+    int callbacksBefore = fake.CallbackExecutions;
+    Exception escaped = null;
+    try { fake.Deliver(); } catch (Exception exception) { escaped = exception; }
+    bool expectedEscaped = Object.ReferenceEquals(escaped, fake.FakeWriterFailure);
+    bool expectedHandled = Object.ReferenceEquals(fake.FakeHandledWriterFailure, fake.FakeWriterFailure);
+    if ((escaped != null && !expectedEscaped) || expectedEscaped == expectedHandled ||
+        fake.FakeWriterThrowCount != 1 || fake.FakeWriterCalls != failAt ||
+        !fake.PendingIndex.HasValue || !fake.PendingAttempt.HasValue ||
+        !FakeWriteRecordMatches(fake, fake.PendingIndex.Value, failAt) ||
+        fake.CallbackExecutions != callbacksBefore + 1 || !fake.FakeWriterQueuedBeforeException) {
+     Console.Error.WriteLine("UNEXPECTED fake writer exception fixture at step " + failAt);
+     return false;
+    }
+    Console.WriteLine("CONTROLLED_FAKE_WRITER_THROW step=" + failAt + " calls=" + fake.FakeWriterCalls +
+      " throws=" + fake.FakeWriterThrowCount + " exactException=True queuedBeforeThrow=True escaped=" +
+      expectedEscaped + " handled=" + expectedHandled);
+    if (expectedEscaped) {
+     Console.Error.WriteLine("FAIL controlled fake writer exception escaped at step " + failAt);
+     passed = false;
+    }
+    Verify(fake.Stopped && fake.FakeWriterFailureStatus == Initial25DecisionKind.Halted,
+      "fake writer exception halts matching pending before queued delivery");
+    Action queuedDuringFailure = FakeQueued(fake);
+    Verify(queuedDuringFailure != null && !Object.ReferenceEquals(queuedDuringFailure, failingAction),
+      "a distinct fake callback was queued before the exception");
+    int callsBeforeLateCallbacks = fake.FakeWriterCalls;
+    int callbacksBeforeLateCallbacks = fake.CallbackExecutions;
+    fake.Deliver();
+    Verify(Object.ReferenceEquals(FakeLastDelivered(fake), queuedDuringFailure) &&
+      fake.CallbackExecutions == callbacksBeforeLateCallbacks + 1 &&
+      fake.FakeWriterCalls == callsBeforeLateCallbacks, "already queued fake callback runs without another writer call");
+    queuedDuringFailure();
+    failingAction();
+    Verify(fake.CallbackExecutions == callbacksBeforeLateCallbacks + 3 &&
+      fake.FakeWriterCalls == callsBeforeLateCallbacks, "both saved fake callbacks really replay without another writer call");
+    Initial25DecisionKind observed = fake.Observe();
+    if (!fake.Stopped || fake.FakeWriterFailureStatus != Initial25DecisionKind.Halted ||
+        observed != Initial25DecisionKind.Halted) {
+     Console.Error.WriteLine("FAIL fake writer exception did not halt matching pending at step " + failAt);
+     passed = false;
+    }
+    if (fake.Queue()) {
+     Console.Error.WriteLine("FAIL fake retry allowed after writer exception at step " + failAt);
+     passed = false;
+    }
+   }
+   if (passed) Console.WriteLine("Passed " + (candidateChecks - priorChecks) +
+     " controlled fake writer exception assertions; no real rollback tested.");
+   return passed;
+  }
+
+  static bool CheckSequentialFakeDispatch() {
+   FieldInfo statusField = typeof(FakeStartupHarness).GetField("LastProposalKind", BindingFlags.Instance | BindingFlags.Public);
+   if (statusField == null) {
+    Console.Error.WriteLine("FAIL fake harness proposal status is not observable");
+    return false;
+   }
+   int priorChecks = candidateChecks;
+   Func<FakeStartupHarness, Initial25DecisionKind> lastStatus = delegate(FakeStartupHarness value) {
+    object boxed = statusField.GetValue(value);
+    Verify(boxed != null, "fake proposal status was recorded");
+    return (Initial25DecisionKind)boxed;
+   };
+   var fake = new FakeStartupHarness();
+   long previousAttempt = 0;
+   for (int step = 1; step <= 24; step++) {
+    Verify(fake.Queue(), "one synthetic action can be queued");
+    fake.Deliver();
+    Verify(lastStatus(fake) == Initial25DecisionKind.Candidate && fake.Requests == step &&
+      fake.LastRequireMoney == false && fake.PendingIndex.HasValue && fake.PendingAttempt.HasValue,
+      "every fake request is one identified no-debit candidate");
+    int tile = fake.PendingIndex.Value;
+    if (FakeRecorderAvailable()) Verify(FakeWriteRecordMatches(fake, tile, step), "actual fake writer received expected coordinate and false");
+    Verify(fake.PendingAttempt.Value > previousAttempt && fake.Grid[tile] == false,
+      "fake candidates are distinct locked tiles with increasing attempt IDs");
+    previousAttempt = fake.PendingAttempt.Value;
+    Verify(fake.Queue(), "pending fake status can be queued");
+    fake.Deliver();
+    fake.Deliver();
+    Verify(lastStatus(fake) == Initial25DecisionKind.Waiting && fake.Requests == step &&
+      fake.Observe() == Initial25DecisionKind.Waiting,
+      "duplicate and pending deliveries do not issue or confirm another request");
+    fake.Grid[tile] = true;
+    fake.Revision++;
+    Verify(fake.Observe() == Initial25DecisionKind.Confirmed && fake.Requests == step,
+      "only an explicit newer fake observation confirms the tile");
+   }
+   for (int i = 0; i < fake.Grid.Length; i++)
+    Verify(fake.Grid[i] == true, "all 25 fake areas are observed unlocked");
+   Verify(fake.Queue(), "completion can be queried");
+   fake.Deliver();
+   Verify(lastStatus(fake) == Initial25DecisionKind.Complete && fake.Requests == 24,
+     "completion produces no twenty-fifth fake request");
+
+   for (int failAt = 1; failAt <= 24; failAt++) {
+    fake = new FakeStartupHarness();
+    for (int step = 1; step <= failAt; step++) {
+     Verify(fake.Queue(), "failure scenario can queue one fake request");
+     fake.Deliver();
+     Verify(lastStatus(fake) == Initial25DecisionKind.Candidate && fake.Requests == step &&
+       fake.LastRequireMoney == false && fake.PendingIndex.HasValue && fake.PendingAttempt.HasValue,
+       "failure scenario has an identified no-debit pending attempt");
+     int tile = fake.PendingIndex.Value;
+     if (FakeRecorderAvailable()) Verify(FakeWriteRecordMatches(fake, tile, step), "actual fake writer received expected coordinate and false");
+     Verify(fake.Grid[tile] == false, "failure scenario targets a locked fake tile");
+     if (step == failAt) {
+      Action oldDeliveredCallback = FakeLastDelivered(fake);
+      int callbacksBeforeFailure = FakeInt(fake, "CallbackExecutions");
+      int writesBeforeFailure = FakeInt(fake, "FakeWriterCalls");
+      Verify(fake.Queue(), "pending fake callback is queued before failure");
+      Action pendingFailureCallback = FakeQueued(fake);
+      Verify(pendingFailureCallback != null, "pending callback is retained before failure");
+      if (FakeRecorderAvailable()) Verify(oldDeliveredCallback != null && writesBeforeFailure == step,
+        "previous fake action and writer record are available");
+      Verify(fake.Fail() == Initial25DecisionKind.Halted && fake.Stopped,
+        "identified fake failure halts its run");
+      Verify(!fake.Queue(), "halted fake run rejects retries");
+      fake.Deliver();
+      if (FakeRecorderAvailable()) Verify(Object.ReferenceEquals(FakeLastDelivered(fake), pendingFailureCallback) &&
+        FakeInt(fake, "CallbackExecutions") == callbacksBeforeFailure + 1 &&
+        FakeInt(fake, "FakeWriterCalls") == writesBeforeFailure,
+        "post-failure delivery executed without a fake writer call");
+      pendingFailureCallback();
+      if (FakeRecorderAvailable()) Verify(FakeInt(fake, "CallbackExecutions") == callbacksBeforeFailure + 2 &&
+        FakeInt(fake, "FakeWriterCalls") == writesBeforeFailure,
+        "replayed post-failure callback executed without a fake writer call");
+      if (oldDeliveredCallback != null) oldDeliveredCallback();
+      if (FakeRecorderAvailable()) Verify(FakeInt(fake, "CallbackExecutions") == callbacksBeforeFailure + 3 &&
+        FakeInt(fake, "FakeWriterCalls") == writesBeforeFailure,
+        "replayed earlier callback executed without restoring fake dispatch");
+      fake.Grid[tile] = true;
+      fake.Revision++;
+      Verify(fake.Observe() == Initial25DecisionKind.Halted && !fake.Queue() && fake.Requests == failAt,
+        "late fake observation cannot restart or add a request");
+     } else {
+      fake.Grid[tile] = true;
+      fake.Revision++;
+      Verify(fake.Observe() == Initial25DecisionKind.Confirmed,
+        "earlier fake steps require explicit confirmation");
+     }
+    }
+   }
+   Console.WriteLine("Passed " + (candidateChecks - priorChecks) +
+     " sequential fake dispatch assertions; no game or real funds tested.");
+   return true;
+  }
+
  static void CheckNoDebitStartup() {
   int priorChecks = candidateChecks;
   var city = Grid(false); city[12] = true;
@@ -616,5 +892,8 @@ class PreviewChecks {
   CheckSingleRun();
   CheckMilestoneScope();
   CheckSyntheticDispatch();
+   if (!CheckFakeWriterAndReplay()) Environment.ExitCode = 1;
+   if (!CheckFakeWriterExceptions()) Environment.ExitCode = 1;
+   if (!CheckSequentialFakeDispatch()) { Environment.ExitCode = 1; return; }
  }
 }
