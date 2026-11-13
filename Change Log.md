@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased — 2026-11-14 relative event trace study
+
+- Add an isolated, default-disabled, one-shot event recorder with bounded in-memory records and session-local pseudonymous thread tags; it is not wired into the game or an existing diagnostic host.
+- Add focused synthetic callback checks for ordering, stop, capacity, contention, reentrancy and snapshot boundaries; simulated internal admission states do not prove actual game scheduling.
+- Treat recorded order as this recorder's observation order only; it does not establish native write order, real frame pairing, CPU parallelism or save consistency. Signature: OpenAI-Codex.
+
 ## Unreleased — 2026-11-13 transactional fake-clock candidate
 
 - Add a disabled, isolated transactional calendar candidate and focused fake-host checks for one eligible frame, supplied 1x elapsed ticks, display monotonicity, owner fencing and coherent fake snapshots.
