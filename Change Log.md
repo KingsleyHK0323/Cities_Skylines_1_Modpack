@@ -120,3 +120,11 @@ Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
 - Keep the experiment out of the main game source list; no actual scheduler, area write, game runtime or release archive is validated.
 
 Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion
+
+## 2026-11-14 — explicit module name channel
+
+- Select the formal module name only for an explicitly marked stable channel with the existing FULLMAP_RELEASE marker; preserve the preview name and original description for unmarked and development builds.
+- Reject conflicting channel symbols or a stable marker without FULLMAP_RELEASE, and add synthetic name and callback checks using an ICities substitute.
+- Document both project and direct-compiler flag paths without changing a workflow or claiming game, installation, DevTool or release verification.
+
+Signature: OpenAI-Codex_Full_Map_Unlock_And_Expansion

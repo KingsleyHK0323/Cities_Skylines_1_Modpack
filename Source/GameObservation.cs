@@ -1,10 +1,20 @@
 // OpenAI-Codex_Full_Map_Unlock_And_Expansion
 // OpenAI-Codex_release_isolation
+#if FULLMAP_CHANNEL_STABLE && FULLMAP_CHANNEL_DEVELOPMENT
+#error FULLMAP_CHANNEL_STABLE and FULLMAP_CHANNEL_DEVELOPMENT are mutually exclusive.
+#endif
+#if FULLMAP_CHANNEL_STABLE && !FULLMAP_RELEASE
+#error FULLMAP_CHANNEL_STABLE requires FULLMAP_RELEASE.
+#endif
 using ICities;
 
 namespace FullMapUnlockAndExpansion {
  public sealed class Mod : IUserMod {
+#if FULLMAP_CHANNEL_STABLE
+  public string Name { get { return "Full Map Unlock And Expansion"; } }
+#else
   public string Name { get { return "Full Map Unlock And Expansion [Development Preview]"; } }
+#endif
   public string Description { get { return "Read-only area callback observation. Does not unlock or purchase land."; } }
  }
  // Values describe this callback position, not the final result after other extensions.
